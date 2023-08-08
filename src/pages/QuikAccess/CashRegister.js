@@ -6,6 +6,7 @@ import TripPage from "../../components/TripPage"
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material"
 import Select from "react-select"
 import context from "../../context/context"
+import TransactionsStatement from "../../components/prints/TransactionsStatement"
 
 export default function CashRegister() {
 	const [itemsData, setItemsData] = useState([])
@@ -20,17 +21,51 @@ export default function CashRegister() {
 	const [warehousePopup, setWarehousePopup] = useState(false)
 	const componentRef = useRef(null)
 	const [counterPopup, setCounterPopup] = useState(false)
+	const statementRef = useRef(null)
+	const { setCashRegisterPopup, setNotification } = useContext(context)
+	const [statementData, setStatementData] = useState({})
 
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
 	}, [])
-	const { setCashRegisterPopup, setNotification } = useContext(context)
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
-		removeAfterPrint: true,
+		removeAfterPrint: true
 	})
+
+	const statementContent = useCallback(() => {
+		console.log(statementRef.current)
+		if (statementData) return statementRef.current
+		else return <></>
+	}, [statementData])
+
+	const printStatement = useReactToPrint({
+		content: statementContent,
+		documentTitle: "Statement",
+		removeAfterPrint: true
+	})
+
+	const getStatement = async cash_register => {
+		try {
+			const response = await axios.get(`cashRegistrations/statement/${cash_register?.register_uuid}`)
+			if (!response?.data?.result?.length) return
+			setStatementData({
+				cash_register: {
+					register_uuid: cash_register?.register_uuid,
+					created_at: cash_register?.created_at
+				},
+				data: {
+					transactions: response.data.result,
+					grand_total: response.data.result.reduce((sum, i) => sum + (+i.amount || 0), 0)
+				}
+			})
+			printStatement()
+		} catch (error) {
+			console.error(error)
+		}
+	}
 
 	function formatAMPM(date) {
 		var hours = date.getHours()
@@ -48,14 +83,12 @@ export default function CashRegister() {
 			url: "/users/GetUserList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("users", response)
 		if (response.data.success)
-			setUsers(
-				response.data.result.filter(a => a.status).sort((a, b) => a.user_title?.localeCompare(b.user_title))
-			)
+			setUsers(response.data.result.filter(a => a.status).sort((a, b) => a.user_title?.localeCompare(b.user_title)))
 	}
 	const getTripData = async () => {
 		const response = await axios({
@@ -63,8 +96,8 @@ export default function CashRegister() {
 			url: "/cashRegistrations/GetAllActiveCashRegistrations",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setItemsData(response.data.result)
@@ -77,7 +110,7 @@ export default function CashRegister() {
 			.map(b => ({
 				...b,
 
-				user_title: users.find(c => b.created_by === c.user_uuid)?.user_title,
+				user_title: users.find(c => b.created_by === c.user_uuid)?.user_title
 			}))
 			.filter(a => a.user_title?.toLowerCase().includes(itemFilter.toLowerCase()))
 	}, [itemFilter, itemsData, users])
@@ -87,8 +120,8 @@ export default function CashRegister() {
 			url: "/trips/GetTripSummaryDetails/" + statementTrip_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log(response)
@@ -140,26 +173,18 @@ export default function CashRegister() {
 								<table className="f6 w-100 center" cellSpacing="0">
 									<thead className="lh-copy">
 										<tr className="white">
-											<th
-												className="pa3 bb b--black-20 "
-												style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
+											<th className="pa3 bb b--black-20 " style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
 												Created At
 											</th>
 
-											<th
-												className="pa3 bb b--black-20 "
-												style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
+											<th className="pa3 bb b--black-20 " style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
 												Users
 											</th>
-											<th
-												className="pa3 bb b--black-20 "
-												style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
+											<th className="pa3 bb b--black-20 " style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
 												Balance
 											</th>
 
-											<th
-												className="pa3 bb b--black-20 "
-												style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
+											<th className="pa3 bb b--black-20 " style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
 												Action
 											</th>
 										</tr>
@@ -172,22 +197,17 @@ export default function CashRegister() {
 													key={index}
 													style={{
 														borderBottom: "2px solid rgb(189, 189, 189)",
-														height: "50px",
-													}}>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
+														height: "50px"
+													}}
+												>
+													<td className="ph3 bb b--black-20 tc bg-white" style={{ textAlign: "center" }}>
 														{new Date(item.created_at).toDateString()}
 													</td>
 
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
+													<td className="ph3 bb b--black-20 tc bg-white" style={{ textAlign: "center" }}>
 														{item?.user_title || ""}
 													</td>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
+													<td className="ph3 bb b--black-20 tc bg-white" style={{ textAlign: "center" }}>
 														{item?.balance || ""}
 													</td>
 
@@ -195,19 +215,18 @@ export default function CashRegister() {
 														className="ph3 bb b--black-20 tc bg-white"
 														style={{
 															textAlign: "center",
-															position: "relative",
-														}}>
+															position: "relative"
+														}}
+													>
 														<div
 															id="customer-dropdown-trigger"
 															className={"active"}
 															style={{
-																transform: item.dropdown
-																	? "rotate(0deg)"
-																	: "rotate(180deg)",
+																transform: item.dropdown ? "rotate(0deg)" : "rotate(180deg)",
 																width: "30px",
 																height: "30px",
 																backgroundColor: "#000",
-																color: "#fff",
+																color: "#fff"
 															}}
 															onClick={e => {
 																setItemsData(prev =>
@@ -217,7 +236,8 @@ export default function CashRegister() {
 																			: { ...a, dropdown: false }
 																	)
 																)
-															}}>
+															}}
+														>
 															<ArrowDropDown />
 														</div>
 														{item.dropdown ? (
@@ -230,65 +250,58 @@ export default function CashRegister() {
 																	left: "-200px",
 																	zIndex: "200",
 																	width: "200px",
-																	height: "100px",
-																	justifyContent: "space-between",
+																	height: "135px",
+																	justifyContent: "space-between"
 																}}
 																onMouseLeave={() =>
 																	setItemsData(prev =>
-																		prev.map(a =>
-																			a.trip_uuid === item.trip_uuid
-																				? { ...a, dropdown: false }
-																				: a
-																		)
+																		prev.map(a => (a.trip_uuid === item.trip_uuid ? { ...a, dropdown: false } : a))
 																	)
-																}>
+																}
+															>
 																<button
 																	className="theme-btn"
 																	style={{
 																		display: "inline",
-																		cursor: item?.orderLength
-																			? "not-allowed"
-																			: "pointer",
-																		width: "100%",
+																		cursor: item?.orderLength ? "not-allowed" : "pointer",
+																		width: "100%"
 																	}}
 																	type="button"
 																	onClick={() => {
 																		setPopupForm({ ...item, status: 0 })
 																	}}
-																	disabled={item?.orderLength}>
+																	disabled={item?.orderLength}
+																>
 																	Complete
 																</button>
 																<button
 																	className="theme-btn"
 																	style={{
 																		display: "inline",
-																		cursor: item?.orderLength
-																			? "not-allowed"
-																			: "pointer",
-																		width: "100%",
+																		cursor: item?.orderLength ? "not-allowed" : "pointer",
+																		width: "100%"
 																	}}
 																	type="button"
 																	onClick={() => {
 																		setPopupForm({ ...item, expense: true })
 																	}}
-																	disabled={item?.orderLength}>
+																	disabled={item?.orderLength}
+																>
 																	Expense
 																</button>
 
-																{/* <button
-                                  className="theme-btn"
-                                  style={{
-                                    display: "inline",
-                                    cursor: "pointer",
-                                    width: "100%",
-                                  }}
-                                  type="button"
-                                  onClick={() => {
-                                    setStatementTrip_uuid(item.trip_uuid);
-                                  }}
-                                >
-                                  Statement
-                                </button> */}
+																<button
+																	className="theme-btn"
+																	style={{
+																		display: "inline",
+																		cursor: "pointer",
+																		width: "100%"
+																	}}
+																	type="button"
+																	onClick={() => getStatement(item)}
+																>
+																	Statement
+																</button>
 															</div>
 														) : (
 															""
@@ -305,14 +318,16 @@ export default function CashRegister() {
 						onClick={() => {
 							setCashRegisterPopup(false)
 						}}
-						className="closeButton">
+						className="closeButton"
+					>
 						x
 					</button>
 
 					<div
 						onClick={() => {
 							setCashRegisterPopup(false)
-						}}>
+						}}
+					>
 						<button className="savebtn">Done</button>
 					</div>
 				</div>
@@ -327,12 +342,10 @@ export default function CashRegister() {
 						style={{
 							width: "21cm",
 							height: "29.7cm",
-
 							textAlign: "center",
-
-							// padding: "100px",
-							pageBreakInside: "auto",
-						}}>
+							pageBreakInside: "auto"
+						}}
+					>
 						<TripPage
 							trip_title={statementTrip?.trip_title || ""}
 							users={statementTrip?.users.map(a => users.find(b => b.user_uuid === a)) || []}
@@ -367,6 +380,11 @@ export default function CashRegister() {
 			) : (
 				""
 			)}
+			<div style={{ display: "none" }}>
+				<div ref={statementRef}>
+					<TransactionsStatement {...statementData} />
+				</div>
+			</div>
 		</>
 	)
 }
@@ -390,8 +408,9 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -408,9 +427,7 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 													style={{
 														marginBottom: "5px",
 														textAlign: "center",
-														backgroundColor: data?.filter(a => a === occ.user_uuid).length
-															? "#caf0f8"
-															: "#fff",
+														backgroundColor: data?.filter(a => a === occ.user_uuid).length ? "#caf0f8" : "#fff"
 													}}
 													onClick={e => {
 														e.stopPropagation()
@@ -419,7 +436,8 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 																? prev.filter(a => a !== occ.user_uuid)
 																: [...prev, occ?.user_uuid]
 														)
-													}}>
+													}}
+												>
 													{occ.user_title}
 												</div>
 											))}
@@ -450,8 +468,8 @@ function WarehousePopup({ onSave, tripData }) {
 			url: "/warehouse/GetWarehouseList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
@@ -467,8 +485,8 @@ function WarehousePopup({ onSave, tripData }) {
 			url: "/trips/putTrip",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -483,8 +501,9 @@ function WarehousePopup({ onSave, tripData }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -499,21 +518,19 @@ function WarehousePopup({ onSave, tripData }) {
 											<Select
 												options={warehouse.map(a => ({
 													value: a.warehouse_uuid,
-													label: a.warehouse_title,
+													label: a.warehouse_title
 												}))}
 												onChange={doc =>
 													setdata(prev => ({
 														...prev,
-														warehouse_uuid: doc.value,
+														warehouse_uuid: doc.value
 													}))
 												}
 												value={
 													data?.warehouse_uuid
 														? {
 																value: data?.counter_uuid,
-																label: warehouse?.find(
-																	j => j.warehouse_uuid === data.warehouse_uuid
-																)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data.warehouse_uuid)?.warehouse_title
 														  }
 														: ""
 												}
@@ -554,8 +571,8 @@ function CounterTable({ trip_uuid, onSave }) {
 			signal: controller.signal,
 			data: ["counter_uuid", "counter_title", "trip_uuid", "route_uuid"],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setCounter(
@@ -571,8 +588,8 @@ function CounterTable({ trip_uuid, onSave }) {
 			url: "/routes/GetRouteList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setRoutesData(response.data.result)
 	}
@@ -591,8 +608,8 @@ function CounterTable({ trip_uuid, onSave }) {
 			url: "/counters/putCounter",
 			data: counter.filter(a => a.edit),
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -631,15 +648,17 @@ function CounterTable({ trip_uuid, onSave }) {
 				style={{
 					height: "max-content",
 					width: "fit-content",
-					maxHeight: "90vh",
-				}}>
+					maxHeight: "90vh"
+				}}
+			>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -668,15 +687,17 @@ function CounterTable({ trip_uuid, onSave }) {
 										style={{
 											overflowY: "scroll",
 											height: "45vh",
-											minWidth: "600px",
-										}}>
+											minWidth: "600px"
+										}}
+									>
 										<table
 											className="user-table"
 											style={{
 												maxWidth: "500px",
 												height: "fit-content",
-												overflowX: "scroll",
-											}}>
+												overflowX: "scroll"
+											}}
+										>
 											<thead>
 												<tr>
 													<th>S.N</th>
@@ -696,39 +717,29 @@ function CounterTable({ trip_uuid, onSave }) {
 																		setCounter(prev => {
 																			let counter_trip_uuid =
 																				filterCounter?.filter(
-																					b =>
-																						a.route_uuid === b.route_uuid &&
-																						trip_uuid === b.trip_uuid
-																				)?.length ===
-																				filterCounter?.filter(
-																					b => a.route_uuid === b.route_uuid
-																				)?.length
+																					b => a.route_uuid === b.route_uuid && trip_uuid === b.trip_uuid
+																				)?.length === filterCounter?.filter(b => a.route_uuid === b.route_uuid)?.length
 																					? ""
 																					: trip_uuid
 																			return prev.map(count =>
 																				count.route_uuid === a.route_uuid
 																					? {
 																							...count,
-																							trip_uuid:
-																								counter_trip_uuid,
-																							edit: true,
+																							trip_uuid: counter_trip_uuid,
+																							edit: true
 																					  }
 																					: count
 																			)
 																		})
 																	}}
-																	style={{ marginLeft: "10px" }}>
+																	style={{ marginLeft: "10px" }}
+																>
 																	<input
 																		type="checkbox"
 																		checked={
 																			filterCounter?.filter(
-																				b =>
-																					a.route_uuid === b.route_uuid &&
-																					trip_uuid === b.trip_uuid
-																			)?.length ===
-																			filterCounter?.filter(
-																				b => a.route_uuid === b.route_uuid
-																			)?.length
+																				b => a.route_uuid === b.route_uuid && trip_uuid === b.trip_uuid
+																			)?.length === filterCounter?.filter(b => a.route_uuid === b.route_uuid)?.length
 																		}
 																		style={{ transform: "scale(1.3)" }}
 																	/>
@@ -737,64 +748,43 @@ function CounterTable({ trip_uuid, onSave }) {
 															<td
 																onClick={() =>
 																	setRoutesData(prev =>
-																		prev.map(b =>
-																			b.route_uuid === a.route_uuid
-																				? { ...b, expand: !b.expand }
-																				: b
-																		)
+																		prev.map(b => (b.route_uuid === a.route_uuid ? { ...b, expand: !b.expand } : b))
 																	)
 																}
 																style={{
 																	// fontSize: "20px",
 																	// width: "20px",
-																	transition: "all ease 1s",
-																}}>
-																{filterCounter?.filter(
-																	c =>
-																		a.route_uuid === c.route_uuid &&
-																		c.trip_uuid === trip_uuid
-																).length +
+																	transition: "all ease 1s"
+																}}
+															>
+																{filterCounter?.filter(c => a.route_uuid === c.route_uuid && c.trip_uuid === trip_uuid)
+																	.length +
 																	"/" +
-																	filterCounter?.filter(
-																		c => a.route_uuid === c.route_uuid
-																	).length}
+																	filterCounter?.filter(c => a.route_uuid === c.route_uuid).length}
 																{a.expand ? (
-																	<ArrowDropUp
-																		style={{ fontSize: "20px", width: "20px" }}
-																	/>
+																	<ArrowDropUp style={{ fontSize: "20px", width: "20px" }} />
 																) : (
-																	<ArrowDropDown
-																		style={{ fontSize: "20px", width: "20px" }}
-																	/>
+																	<ArrowDropDown style={{ fontSize: "20px", width: "20px" }} />
 																)}
 															</td>
 														</tr>
 														{a.expand
 															? filterCounter
 																	?.filter(b => a.route_uuid === b.route_uuid)
-																	?.sort((a, b) =>
-																		a.counter_title?.localeCompare(b.counter_title)
-																	)
+																	?.sort((a, b) => a.counter_title?.localeCompare(b.counter_title))
 																	?.map((item, i, array) => {
 																		return (
-																			<tr
-																				key={Math.random()}
-																				style={{ height: "30px" }}>
+																			<tr key={Math.random()} style={{ height: "30px" }}>
 																				<td
 																					onClick={e => {
 																						e.stopPropagation()
 																						setCounter(prev =>
 																							prev.map(a =>
-																								a.counter_uuid ===
-																								item.counter_uuid
+																								a.counter_uuid === item.counter_uuid
 																									? {
 																											...a,
-																											trip_uuid:
-																												a.trip_uuid ===
-																												trip_uuid
-																													? ""
-																													: trip_uuid,
-																											edit: true,
+																											trip_uuid: a.trip_uuid === trip_uuid ? "" : trip_uuid,
+																											edit: true
 																									  }
 																									: a
 																							)
@@ -802,23 +792,20 @@ function CounterTable({ trip_uuid, onSave }) {
 																					}}
 																					className="flex"
 																					style={{
-																						justifyContent: "space-between",
-																					}}>
+																						justifyContent: "space-between"
+																					}}
+																				>
 																					<input
 																						type="checkbox"
-																						checked={
-																							item.trip_uuid === trip_uuid
-																						}
+																						checked={item.trip_uuid === trip_uuid}
 																						style={{
-																							transform: "scale(1.3)",
+																							transform: "scale(1.3)"
 																						}}
 																					/>
 																					{i + 1}
 																				</td>
 
-																				<td colSpan={2}>
-																					{item.counter_title || ""}
-																				</td>
+																				<td colSpan={2}>{item.counter_title || ""}</td>
 																			</tr>
 																		)
 																	})
@@ -911,7 +898,7 @@ function NewRegisterForm({
 	onSave,
 	popupInfo,
 
-	setNotification,
+	setNotification
 }) {
 	const [data, setData] = useState({ amt: 0, title: "" })
 
@@ -926,8 +913,8 @@ function NewRegisterForm({
 				url: "/cashRegistrations/PutExpenseCashRegister",
 				data: obj,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -939,8 +926,8 @@ function NewRegisterForm({
 				url: "/cashRegistrations/PutCashRegister",
 				data: obj,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -951,8 +938,8 @@ function NewRegisterForm({
 				url: "/cashRegistrations/PostCashRegister",
 				data: obj,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -971,15 +958,13 @@ function NewRegisterForm({
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
-								<h1>
-									{popupInfo.expense ? "Expense" : popupInfo.register_uuid ? "Complete" : "Add"}{" "}
-									Register
-								</h1>
+								<h1>{popupInfo.expense ? "Expense" : popupInfo.register_uuid ? "Complete" : "Add"} Register</h1>
 							</div>
 
 							{popupInfo.expense ? (

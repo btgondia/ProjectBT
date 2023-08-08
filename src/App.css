@@ -372,14 +372,14 @@ svg.table-icon {
 	font-size: 1.75rem;
 }
 
-.location-confirmation-popup {
+.mobile_popup {
 	max-width: 80vw;
 	width: 400px;
 	gap: 30px;
 	text-align: center;
 }
 
-.location-confirmation-popup button.update {
+.mobile_popup button.update {
 	background: var(--main);
 	border: none;
 	width: 50%;
@@ -390,6 +390,33 @@ svg.table-icon {
 	font-size: 0.9rem;
 	font-weight: 550;
 	font-family: sans-serif;
+	position: relative;
+}
+
+.mobile_popup button.update.red {
+	background: red;
+}
+
+#location-actions-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+#location-actions-wrapper > * {
+	width: 88%;
+	margin: auto;
+}
+
+#google-maps-btn {
+	width: 100%;
+}
+
+#google-maps-btn svg {
+	right: 10px;
+	position: absolute;
+	font-size: 1.3rem;
+	bottom: 8px;
 }
 
 .order-print-layout {
@@ -405,4 +432,39 @@ svg.table-icon {
 	left: 0;
 	z-index: 9999999999;
 	background: #ffff;
+}
+
+.loader {
+	width: 48px;
+	height: 48px;
+	border: 5px solid #000;
+	border-bottom-color: transparent;
+	border-radius: 50%;
+	display: inline-block;
+	box-sizing: border-box;
+	animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.performance-summary-table * {
+	cursor: auto !important;
+}
+
+.performance-summary-table td {
+	border-left: 1px solid darkgray;
+}
+
+.performance-summary-table div {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
 }

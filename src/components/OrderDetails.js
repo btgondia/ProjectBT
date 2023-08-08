@@ -27,7 +27,6 @@ const priorityOptions = [
 	{ value: 0, label: "Normal" },
 	{ value: 1, label: "High" }
 ]
-
 export function OrderDetails({
 	orderJson,
 	order_uuid,
@@ -42,8 +41,15 @@ export function OrderDetails({
 	warehouseData = [],
 	reminder = null
 }) {
-	const { setNotification, promptState, getSpecialPrice, saveSpecialPrice, spcPricePrompt, sendPaymentReminders } =
-		useContext(context)
+	const {
+		setNotification,
+		promptState,
+		setPromptState,
+		getSpecialPrice,
+		saveSpecialPrice,
+		spcPricePrompt,
+		sendPaymentReminders
+	} = useContext(context)
 	const [counters, setCounters] = useState([])
 	const [waiting, setWaiting] = useState(false)
 	const [caption, setCaption] = useState("")
@@ -82,7 +88,6 @@ export function OrderDetails({
 	const [warehouse, setWarehouse] = useState([])
 
 	useEffect(CONTROL_AUTO_REFRESH, [])
-
 	const getOrder = async order_uuid => {
 		const response = await axios({
 			method: "get",
@@ -92,7 +97,18 @@ export function OrderDetails({
 				"Content-Type": "application/json"
 			}
 		})
-		if (response.data.success) setOrder(response.data.result)
+		if (response.data.success) {
+			console.log({ response: response.data.result })
+			setOrder(response.data.result)
+			const reason = response?.data?.result?.status?.find(s => +s.stage === 5)?.cancellation_reason
+			if (reason)
+				setPromptState({
+					active: true,
+					heading: "Cancellation Reason",
+					message: reason,
+					actions: [{ label: "Close", classname: "confirm", action: () => setPromptState(null) }]
+				})
+		}
 	}
 	useEffect(() => {
 		if (order?.receipt_number) {
@@ -2224,14 +2240,13 @@ export function OrderDetails({
 				orders={[printData]}
 				reminderDate={reminderDate}
 				users={users}
-				items={items}
+				items={itemsData}
 				paymentModes={paymentModes}
 				counters={counter}
 			/>
 		</>
 	)
 }
-
 const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePopup, HoldOrder }) => {
 	const [disable, setDisabled] = useState(true)
 	const [reason, setReason] = useState("")
@@ -2334,7 +2349,6 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 		</div>
 	)
 }
-
 function CheckingValues({ onSave, popupDetails, users, items }) {
 	function formatAMPM(date) {
 		var hours = date.getHours()
@@ -3536,7 +3550,6 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 		</div>
 	)
 }
-
 const UserSelection = ({ users, selection, setSelection }) => {
 	const [search, setSearch] = useState("")
 	return (

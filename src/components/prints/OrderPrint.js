@@ -120,6 +120,9 @@ const OrderPrint = ({
 									<tr>
 										<td style={{ fontWeight: "600", fontSize: "x-small" }}>GSTIN: 27ABIPR1186M1Z2</td>
 									</tr>
+									<tr>
+										<td style={{ fontWeight: "600", fontSize: "x-small" }}>FSSAI : 20230106104339794</td>
+									</tr>
 								</table>
 							</td>
 							<td colSpan={14}>

@@ -1,9 +1,9 @@
 import React from "react"
-import OrderPrint from "./OrderPrint"
+import OrderPrint from "./prints/OrderPrint"
 
 const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users, items, paymentModes }) => {
 	const getPrintData = order => {
-		const max_count = order?.order_type !== "E" ? 16 : 19
+		const max_count = order?.order_type !== "E" ? 15 : 19
 		const min_count = max_count - 7
 		const sourceArray = order?.item_details
 		const arrayOfArrays = []

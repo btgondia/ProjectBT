@@ -14,7 +14,7 @@ import { useReactToPrint } from "react-to-print"
 import Select from "react-select"
 import { Billing } from "../../Apis/functions"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
-import OrderPrint from "../../components/OrderPrint"
+import OrderPrint from "../../components/prints/OrderPrint"
 import ChangeStage from "../../components/ChangeStage"
 import MessagePopup from "../../components/MessagePopup"
 import TaskPopupMenu from "../../components/TaskPopupMenu"
@@ -876,7 +876,28 @@ const MainAdmin = () => {
 															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
 															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 													)?.length
-											)
+											) {
+												const orders_data = orders
+													?.filter(
+														_i =>
+															!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+															!+_i?.payment_pending
+													)
+													?.filter(
+														b =>
+															counter.filter(
+																c =>
+																	c.counter_uuid === b.counter_uuid &&
+																	(route.route_uuid === c.route_uuid ||
+																		((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+															)?.length
+													)
+													?.filter(
+														a =>
+															!searchItems ||
+															a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
+															a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
+													)
 												return (
 													<div key={Math.random()} className="sectionDiv">
 														<h1>
@@ -899,8 +920,12 @@ const MainAdmin = () => {
 															>
 																{route.route_title}
 															</span>{" "}
-															({route.orderLength}) [ Processing {route?.processingLength}, Checking{" "}
-															{route.checkingLength}, Delivery {route?.deliveryLength} ]
+															<span>({route.orderLength})</span>
+															<span>
+																[ Processing {route?.processingLength}, Checking {route.checkingLength}, Delivery{" "}
+																{route?.deliveryLength} ]
+															</span>
+															<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
 															{selectOrder ? (
 																<input
 																	type="checkbox"
@@ -1021,29 +1046,9 @@ const MainAdmin = () => {
 															}}
 															id="seats_container"
 														>
-															{orders
-																?.filter(
-																	_i =>
-																		!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
-																		!+_i?.payment_pending
-																)
-																?.filter(
-																	b =>
-																		counter.filter(
-																			c =>
-																				c.counter_uuid === b.counter_uuid &&
-																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																		)?.length
-																)
-																?.filter(
-																	a =>
-																		!searchItems ||
-																		a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
-																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
-																)
-																.sort((a, b) => +a.time_1 - +b.time_1)
-																.map(item => {
+															{orders_data
+																?.sort((a, b) => +a.time_1 - +b.time_1)
+																?.map(item => {
 																	return (
 																		<div
 																			className={`
@@ -1125,6 +1130,7 @@ const MainAdmin = () => {
 														</div>
 													</div>
 												)
+											}
 										})}
 									</>
 								) : (
@@ -1315,7 +1321,21 @@ const MainAdmin = () => {
 																?.includes(searchItems.toLocaleLowerCase()) ||
 															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 													)?.length
-											)
+											) {
+												const orders_data = orders
+													?.filter(
+														_i =>
+															!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+															!+_i?.payment_pending
+													)
+													?.filter(a => a.trip_uuid === trip.trip_uuid)
+													?.filter(
+														a =>
+															!searchItems ||
+															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+															a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
+													)
+
 												return (
 													<div key={Math.random()} className="sectionDiv">
 														<h1>
@@ -1325,14 +1345,19 @@ const MainAdmin = () => {
 															>
 																{trip.trip_title}
 															</span>{" "}
-															({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length}) [Processing{" "}
-															{trip?.processingLength}, Checking {trip?.checkingLength}, Delivery {trip?.deliveryLength}
-															]
-															{trip?.users?.[0]
-																? `[${trip?.users
-																		?.map(a => users?.find(b => b.user_uuid === a)?.user_title)
-																		?.join(", ")}]`
-																: ""}
+															<span>({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length})</span>
+															<span>
+																[Processing {trip?.processingLength}, Checking {trip?.checkingLength}, Delivery{" "}
+																{trip?.deliveryLength}]
+															</span>
+															<span>
+																{trip?.users?.[0]
+																	? `[${trip?.users
+																			?.map(a => users?.find(b => b.user_uuid === a)?.user_title)
+																			?.join(", ")}]`
+																	: ""}
+															</span>
+															<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
 															{selectOrder ? (
 																<input
 																	type="checkbox"
@@ -1391,21 +1416,9 @@ const MainAdmin = () => {
 															}}
 															id="seats_container"
 														>
-															{orders
-																?.filter(
-																	_i =>
-																		!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
-																		!+_i?.payment_pending
-																)
-																.filter(a => a.trip_uuid === trip.trip_uuid)
-																.filter(
-																	a =>
-																		!searchItems ||
-																		a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
-																)
-																.sort((a, b) => +a.time_1 - +b.time_1)
-																.map(item => {
+															{orders_data
+																?.sort((a, b) => +a.time_1 - +b.time_1)
+																?.map(item => {
 																	return (
 																		<div
 																			className={`seatSearchTarget ${
@@ -1488,6 +1501,7 @@ const MainAdmin = () => {
 														</div>
 													</div>
 												)
+											}
 										})}
 									</>
 								) : (
@@ -2359,7 +2373,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 										<>
 											<tr
 												style={{
-													pageBreakAfter: "auto",
+													// pageBreakAfter: "auto",
 													width: "100%",
 													height: "8px",
 													fontSize: "12px"
@@ -2378,7 +2392,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 														key={item?.item_uuid || Math.random()}
 														style={{
 															height: "8px",
-															pageBreakAfter: "auto",
+															// pageBreakAfter: "auto",
 															color: "#000",
 															backgroundColor: "#fff",
 															fontSize: "12px"
@@ -2424,43 +2438,13 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 				</div>
 			</div>
 			<div
-				style={{
-					position: "fixed",
-					top: -100,
-					left: -180,
-					zIndex: "-1000"
-				}}
+				style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}
+				// style={{ position: "fixed", top: 0, left: 0, zIndex: 999999999999 }}
 			>
-				<div
-					ref={componentBoxRef}
-					id="item-container"
-					style={{
-						// margin: "45mm 40mm 30mm 60mm",
-						// textAlign: "center",
-						height: "128mm"
-						// padding: "10px"
-					}}
-				>
+				<div ref={componentBoxRef} id="item-container" style={{ height: "128mm" }}>
 					{items?.length ? (
-						<table
-							className="user-table"
-							style={{
-								width: "170mm",
-								// marginTop: "20mm",
-								// marginLeft: "20mm",
-								// marginRight: "20mm",
-								border: "1px solid black",
-								pageBreakInside: "auto",
-								display: "block"
-							}}
-						>
-							<thead
-								style={{
-									width: "100%",
-									color: "#000",
-									backgroundColor: "#fff"
-								}}
-							>
+						<table className="user-table" style={{ width: "170mm", border: "1px solid black", display: "block" }}>
+							<thead style={{ width: "100%", color: "#000", backgroundColor: "#fff" }}>
 								<tr style={{ width: "100%", fontSize: "12px" }}>
 									<th style={{ width: "10mm" }}>Sr.</th>
 									<th colSpan={5} style={{ width: "100mm" }}>
@@ -2480,56 +2464,41 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									.sort((a, b) => a?.category_title?.localeCompare(b?.category_title))
 									.map(a => (
 										<>
-											<tr
-												style={{
-													pageBreakAfter: "always",
-													width: "100%",
-													height: "8px",
-													fontSize: "12px"
-												}}
-											>
+											<tr style={{ width: "100%", height: "8px", fontSize: "12px" }}>
 												<td colSpan={11} style={{ padding: "5px" }}>
 													{a.category_title}
 												</td>
 											</tr>
 
 											{items
-												.filter(b => a.category_uuid === b.category_uuid && b.b)
-
-												.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
+												?.filter(b => a.category_uuid === b.category_uuid && b.b)
+												?.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
 												?.map((item, i) => (
 													<tr
 														key={item?.item_uuid || Math.random()}
 														style={{
 															height: "8px",
-															pageBreakAfter: "always",
 															color: "#000",
 															backgroundColor: "#fff",
 															fontSize: "12px"
 														}}
 														onClick={() => setPopup(item)}
 													>
-														<td style={{ padding: "0" }}>{i + 1}</td>
-														<td colSpan={5} style={{ padding: "0" }}>
+														<td style={{ padding: "5px" }}>{i + 1}</td>
+														<td colSpan={5} style={{ padding: "5px" }}>
 															{item.item_title}
 														</td>
-														<td colSpan={3} style={{ padding: "0" }}>
+														<td colSpan={3} style={{ padding: "5px" }}>
 															{item.mrp}
 														</td>
-														<td colSpan={3} style={{ padding: "0" }}>
+														<td colSpan={3} style={{ padding: "5px" }}>
 															{Math.floor(item?.b || 0)} : {0}
 														</td>
 													</tr>
 												))}
 										</>
 									))}
-								<tr
-									style={{
-										height: "30px",
-										fontWeight: "bold",
-										fontSize: "12px"
-									}}
-								>
+								<tr style={{ height: "30px", fontWeight: "bold", fontSize: "12px" }}>
 									<td style={{ padding: "5px" }}>Total</td>
 									<td colSpan={5} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}></td>

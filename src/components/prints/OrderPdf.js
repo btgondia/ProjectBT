@@ -20,8 +20,8 @@ const OrderPdf = () => {
 			url: "/counters/GetCounterList",
 			data: { counters },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCounters(response.data.result)
 	}
@@ -31,8 +31,8 @@ const OrderPdf = () => {
 			method: "get",
 			url: "/items/getNewItemReminder",
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setReminderDate(response.data.result)
 	}
@@ -43,8 +43,8 @@ const OrderPdf = () => {
 			url: "/items/GetItemList",
 			data: { items },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
@@ -54,8 +54,8 @@ const OrderPdf = () => {
 			method: "get",
 			url: "/counters/GetCounterData",
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCounter(response.data.result)
 	}
@@ -66,8 +66,8 @@ const OrderPdf = () => {
 			url: "/orders/GetOrder/" + params.order_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setorder(response.data.result)
 	}
@@ -77,8 +77,8 @@ const OrderPdf = () => {
 			method: "get",
 			url: "/users/GetUser/" + order.status[0]?.user_uuid,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setUser(response.data.result)
 	}
@@ -88,8 +88,8 @@ const OrderPdf = () => {
 			method: "get",
 			url: "/paymentModes/GetPaymentModesList",
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setPaymentModes(response.data.result)
 	}

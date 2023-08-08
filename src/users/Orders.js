@@ -5,9 +5,11 @@ import { IoArrowBackOutline } from "react-icons/io5"
 import axios from "axios"
 import { Phone } from "@mui/icons-material"
 import { HiLocationMarker } from "react-icons/hi"
-import { IoIosCloseCircle } from "react-icons/io"
+import { MdOutlineOpenInNew } from "react-icons/md"
 
 import { v4 as uuid } from "uuid"
+import Loader from "../components/Loader"
+import Popup from "./Popup"
 const Orders = ({ refreshDb }) => {
 	const [counters, setCounters] = useState([])
 	const [counterFilter, setCounterFilter] = useState("")
@@ -16,6 +18,7 @@ const Orders = ({ refreshDb }) => {
 	const [remarks, setRemarks] = useState(false)
 	const [popupForm, setPopupForm] = useState(false)
 	const [refresh, setRefresh] = useState(false)
+	const [loading, setLoading] = useState(false)
 	const [locationState, setLocationState] = useState()
 
 	const params = useParams()
@@ -56,11 +59,14 @@ const Orders = ({ refreshDb }) => {
 	}
 
 	const locationHandler = () => {
+		if (!navigator.geolocation) return console.log("Geolocation is not supported by this browser.")
+
 		const counter_uuid = locationState?.counter_uuid
+		setLoading(true)
 		setLocationState(i => ({ ...i, active: false }))
 
-		if (navigator.geolocation)
-			navigator.geolocation.getCurrentPosition(async position => {
+		navigator.geolocation.getCurrentPosition(async position => {
+			try {
 				const location_coords = {
 					latitude: position.coords.latitude,
 					longitude: +position.coords.longitude
@@ -81,12 +87,42 @@ const Orders = ({ refreshDb }) => {
 							} else return i
 						})
 					)
-			})
-		else console.log("Geolocation is not supported by this browser.")
+			} catch (error) {
+				console.error(error)
+			} finally {
+				setLoading(false)
+			}
+		})
+	}
+
+	const deleteLocation = async () => {
+		try {
+			const counter_uuid = locationState?.counter_uuid
+			setLoading(true)
+			setLocationState(i => ({ ...i, active: false }))
+			const response = await axios.patch(`/counters/delete_location_coords/${counter_uuid}`)
+			if (response.data.success)
+				setCounters(state =>
+					state.map(i => {
+						if (i.counter_uuid === counter_uuid) {
+							const counter = { ...i, location_coords: null }
+							openDB("BT", +localStorage.getItem("IDBVersion") || 1).then(db =>
+								db.transaction("counter", "readwrite").objectStore("counter").put(counter)
+							)
+							return counter
+						} else return i
+					})
+				)
+		} catch (error) {
+			console.error(error)
+		} finally {
+			setLoading(false)
+		}
 	}
 
 	return (
 		<>
+			<Loader visible={loading} />
 			<div className="item-sales-container orders-report-container" style={{ overflow: "visible", left: "0" }}>
 				<nav className="user_nav nav_styling" style={{ top: "0", maxWidth: "500px" }}>
 					<div className="user_menubar">
@@ -187,8 +223,11 @@ const Orders = ({ refreshDb }) => {
 															<button
 																onClick={e => {
 																	e.stopPropagation()
-																	if (!item?.location_coords)
-																		setLocationState({ active: true, counter_uuid: item.counter_uuid })
+																	setLocationState({
+																		active: true,
+																		location: item?.location_coords,
+																		counter_uuid: item.counter_uuid
+																	})
 																}}
 															>
 																<HiLocationMarker className={`location-marker ${item?.location_coords && "green"}`} />
@@ -293,18 +332,43 @@ const Orders = ({ refreshDb }) => {
 			) : (
 				""
 			)}
-			{locationState?.active && (
-				<div className="overlay">
-					<div className="modal location-confirmation-popup">
-						<h3>You can easily update your counter location with your current location.</h3>
-						<button className="closeButton icon" onClick={() => setLocationState(null)}>
-							<IoIosCloseCircle />
-						</button>
-						<button className="update" onClick={locationHandler}>
-							Update Now
-						</button>
-					</div>
-				</div>
+			{locationState?.active ? (
+				locationState?.location ? (
+					<Popup
+						close={() => setLocationState(null)}
+						Content={() => (
+							<div id="location-actions-wrapper">
+								<a
+									href={`http://maps.google.com/maps?q=loc:${Object.values(locationState?.location)?.join(",")}`}
+									target="_blank"
+									rel="noreferrer"
+								>
+									<button id="google-maps-btn" className="update">
+										Open in Google Maps
+										<MdOutlineOpenInNew />
+									</button>
+								</a>
+								<button className="update red" onClick={deleteLocation}>
+									Delete Location
+								</button>
+							</div>
+						)}
+					/>
+				) : (
+					<Popup
+						close={() => setLocationState(null)}
+						Content={() => (
+							<>
+								<h3>You can easily update your counter location with your current location.</h3>
+								<button className="update" onClick={locationHandler}>
+									Update Now
+								</button>
+							</>
+						)}
+					/>
+				)
+			) : (
+				""
 			)}
 		</>
 	)

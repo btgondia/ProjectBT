@@ -55,13 +55,14 @@ import Campaigns from "./pages/Reports/Campaigns"
 import TestCounter from "./pages/Master/TestCounter"
 import OrderForms from "./pages/Reports/OrderForms"
 import LinkedCounter from "./users/LinkedCounter"
-import OrderPdf from "./components/OrderPdf"
+import OrderPdf from "./components/prints/OrderPdf"
 import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
+import PerformanceSummary from "./pages/Reports/PerformanceSummary"
 
-export let Version = 130
+export let Version = 136
 export const server = "http://13.53.230.104:9000"
 
 function App() {
@@ -276,6 +277,7 @@ function App() {
 							<Route path="/admin/addStock" element={<AddStock />} />
 							<Route path="/admin/adjustStock" element={<AdjustStock />} />
 							<Route path="/admin/userActivity" element={<UserActivity />} />
+							<Route path="/admin/performanceSummary" element={<PerformanceSummary />} />
 							<Route path="/admin/upiTransactionReport" element={<UPITransection />} />
 							<Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
 							<Route path="/admin/RetailerMarginReport" element={<RetailerMarginReport />} />

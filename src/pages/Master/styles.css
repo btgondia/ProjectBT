@@ -26,6 +26,8 @@
 .user-table thead {
 	background: #deffe1;
 	padding: 10px;
+	position: sticky;
+	top: 0;
 }
 
 .user-table thead th {

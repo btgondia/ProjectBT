@@ -6,7 +6,7 @@ import {
 	AssessmentOutlined as ReportsIcon,
 	FlashOn as QuickAccessIcon,
 	SettingsOutlined as SettingsIcon,
-	UpgradeOutlined,
+	UpgradeOutlined
 } from "@mui/icons-material"
 import AssessmentIcon from "@mui/icons-material/Assessment"
 import AddIcon from "@mui/icons-material/Add"
@@ -50,7 +50,7 @@ let titleData = [
 	{ value: "counter", name: "Counters" },
 	{ value: "routes", name: "Routes" },
 	{ value: "items", name: "Items" },
-	{ value: "admin", name: "DASHBOARD - Route" },
+	{ value: "admin", name: "DASHBOARD - Route" }
 ]
 const Sidebar = ({ setCollectionTags }) => {
 	const [loading, setLoading] = useState(false)
@@ -65,8 +65,8 @@ const Sidebar = ({ setCollectionTags }) => {
 			url: "MinLevelUpdate",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response.data.result.user_type)
 		setLoading(false)
@@ -87,20 +87,20 @@ const Sidebar = ({ setCollectionTags }) => {
 					menuList={[
 						{
 							name: "Add Order",
-							link: "/admin/addOrder",
+							link: "/admin/addOrder"
 						},
 						{
 							name: "Stock Transfer",
-							link: "/admin/addStock",
+							link: "/admin/addStock"
 						},
 						{
 							name: "Adjust Stock",
-							link: "/admin/adjustStock",
+							link: "/admin/adjustStock"
 						},
 						{
 							name: "Add Outstanding",
-							link: "/admin/AddOutStanding",
-						},
+							link: "/admin/AddOutStanding"
+						}
 					]}
 				/>
 				<NavLink
@@ -110,19 +110,19 @@ const Sidebar = ({ setCollectionTags }) => {
 					menuList={[
 						{
 							name: "Items",
-							link: "/admin/items",
+							link: "/admin/items"
 						},
 						{
 							name: "Categories",
-							link: "/admin/itemCategories",
+							link: "/admin/itemCategories"
 						},
 						{
 							name: "Counter",
-							link: "/admin/counter",
+							link: "/admin/counter"
 						},
 						{
 							name: "Companies",
-							link: "/admin/companies",
+							link: "/admin/companies"
 						},
 						// {
 						//   name: "Test Counter",
@@ -130,24 +130,24 @@ const Sidebar = ({ setCollectionTags }) => {
 						// },
 						{
 							name: "Routes",
-							link: "/admin/routes",
+							link: "/admin/routes"
 						},
 						{
 							name: "Counter Group",
-							link: "/admin/counterGroup",
+							link: "/admin/counterGroup"
 						},
 						{
 							name: "Item Group",
-							link: "/admin/itemGroup",
+							link: "/admin/itemGroup"
 						},
 						{
 							name: "Users",
-							link: "/admin/adminUsers",
+							link: "/admin/adminUsers"
 						},
 						{
 							name: "Warehouse",
-							link: "/admin/warehouse",
-						},
+							link: "/admin/warehouse"
+						}
 					]}
 				/>
 
@@ -159,24 +159,24 @@ const Sidebar = ({ setCollectionTags }) => {
 					menuList={[
 						{
 							name: "Cash Register",
-							link: "#",
+							link: "#"
 						},
 						{
 							name: "Trips",
-							link: "#",
+							link: "#"
 						},
 						{
 							name: "Signed Bills",
-							link: "/admin/signedBills",
+							link: "/admin/signedBills"
 						},
 						{
 							name: "Tasks",
-							link: "/admin/tasks",
+							link: "/admin/tasks"
 						},
 						{
 							name: "Collection Tags",
-							link: "#",
-						},
+							link: "#"
+						}
 					]}
 				/>
 				<NavLink
@@ -186,72 +186,76 @@ const Sidebar = ({ setCollectionTags }) => {
 					menuList={[
 						{
 							name: "User Activity",
-							link: "/admin/userActivity",
+							link: "/admin/userActivity"
 						},
 						{
 							name: "UPI and Cheque Transaction",
-							link: "/admin/upiTransactionReport",
+							link: "/admin/upiTransactionReport"
 						},
 						{
 							name: "Completed Orders",
-							link: "/admin/completeOrderReport",
+							link: "/admin/completeOrderReport"
 						},
 						{
 							name: "Items Wise",
-							link: "/admin/OrderItemReport",
+							link: "/admin/OrderItemReport"
 						},
 						{
 							name: "Completed Trips",
-							link: "/admin/CompletedTripsReport",
+							link: "/admin/CompletedTripsReport"
 						},
 						{
 							name: "Ledger",
-							link: "/admin/CounterLeger",
+							link: "/admin/CounterLeger"
 						},
 						{
 							name: "Outstandings",
-							link: "/admin/Outstandings",
+							link: "/admin/Outstandings"
+						},
+						{
+							name: "Performance Summary",
+							link: "/admin/performanceSummary"
 						},
 						{
 							name: "Pending Order Entry",
-							link: "/admin/pendingEntry",
+							link: "/admin/pendingEntry"
 						},
 						{
 							name: "Pending Recipts Entry",
-							link: "/admin/pendingReciptsEntry",
+							link: "/admin/pendingReciptsEntry"
 						},
 						{
 							name: "Current Stock",
-							link: "/admin/currentStock",
+							link: "/admin/currentStock"
 						},
 						{
 							name: "Vochers",
-							link: "/admin/stockTransferVochers",
+							link: "/admin/stockTransferVochers"
 						},
 						{
 							name: "Cancel Order",
-							link: "/admin/cancelOrders",
+							link: "/admin/cancelOrders"
 						},
 						{
 							name: "Invoice Number Wise Order",
-							link: "/admin/InvoiceNumberWiseOrder",
+							link: "/admin/InvoiceNumberWiseOrder"
 						},
 						{
 							name: "Party Wise Company Discount",
-							link: "/admin/PartyWiseCompanyDiscount",
+							link: "/admin/PartyWiseCompanyDiscount"
 						},
 						{
 							name: "Retailer Margin Report",
-							link: "/admin/RetailerMarginReport",
+							link: "/admin/RetailerMarginReport"
 						},
 						{
 							name: "Campaigns",
-							link: "/admin/Campaigns",
+							link: "/admin/Campaigns"
 						},
 						{
 							name: "OrderForm",
-							link: "/admin/OrderForm",
-						},
+							link: "/admin/OrderForm"
+						}
 					]}
 				/>
 				<NavLink
@@ -262,36 +266,36 @@ const Sidebar = ({ setCollectionTags }) => {
 					menuList={[
 						{
 							name: "Auto Increase Quantity",
-							link: "/admin/autoIncreaseQty",
+							link: "/admin/autoIncreaseQty"
 						},
 						{
 							name: "Auto Add Item",
-							link: "/admin/autoIncreaseItem",
+							link: "/admin/autoIncreaseItem"
 						},
 						{
 							name: "Order Range Incentive / Discount",
-							link: "/admin/OrderRangeIncentive",
+							link: "/admin/OrderRangeIncentive"
 						},
 						{
 							name: "Delivery Incentive",
-							link: "/admin/DeliveryIncentive",
+							link: "/admin/DeliveryIncentive"
 						},
 						{
 							name: "Order Item Incentive",
-							link: "/admin/ItemIncentive",
+							link: "/admin/ItemIncentive"
 						},
 						{
 							name: "Salesman Item Suggestion",
-							link: "/admin/SalesmanItemSuggestion",
+							link: "/admin/SalesmanItemSuggestion"
 						},
 						{
 							name: "Calculate Lines",
-							link: "#",
+							link: "#"
 						},
 						{
 							name: "WhatsApp Notifications",
-							link: "/admin/WhatsAppNotifications",
-						},
+							link: "/admin/WhatsAppNotifications"
+						}
 					]}
 				/>
 				{/* <div

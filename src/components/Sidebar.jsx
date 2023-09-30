@@ -44,7 +44,7 @@ let titleData = [
 	{ value: "addOrder", name: "New Order" },
 	{ value: "addStock", name: "New Stock Tranfer" },
 	{ value: "adjustStock", name: "Adjust Stock" },
-	{ value: "OrderItemReport", name: "Order Item Report" },
+	{ value: "ItemsReport", name: "Items Report" },
 	{ value: "userActivity", name: "User Activities" },
 	{ value: "tasks", name: "Taskss" },
 	{ value: "counter", name: "Counters" },
@@ -197,8 +197,12 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/completeOrderReport"
 						},
 						{
-							name: "Items Wise",
-							link: "/admin/OrderItemReport"
+							name: "Counter Charges",
+							link: "/admin/counterCharges"
+						},
+						{
+							name: "Items Report",
+							link: "/admin/ItemsReport"
 						},
 						{
 							name: "Completed Trips",
@@ -207,6 +211,10 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "Ledger",
 							link: "/admin/CounterLeger"
+						},
+						{
+							name: "Counter Report",
+							link: "/admin/counterReport"
 						},
 						{
 							name: "Outstandings",

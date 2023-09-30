@@ -5,13 +5,15 @@ const OrderPrint = ({
 	counter = [],
 	counters = [],
 	order = { item_details: [] },
+	allOrderItems,
 	date = "",
 	user = {},
 	itemData = [],
 	item_details = [],
 	reminderDate,
 	footer = false,
-	paymentModes = []
+	paymentModes = [],
+	charges = []
 }) => {
 	const isEstimate = order?.order_type === "E"
 	const [gstValues, setGstVAlues] = useState([])
@@ -19,9 +21,7 @@ const OrderPrint = ({
 	let deliveryMessage = useMemo(
 		() =>
 			paymentModes?.filter(
-				a =>
-					counters?.find(a => order?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
-						?.length
+				a => counters?.find(a => order?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)?.length
 			),
 		[counters, order?.counter_uuid, paymentModes]
 	)
@@ -34,8 +34,7 @@ const OrderPrint = ({
 
 		for (let a of gst_value) {
 			let data = order.item_details.filter(b => +b.gst_percentage === a)
-			let amt =
-				data.length > 1 ? data.map(b => +b?.item_total).reduce((a, b) => +a + b) : data.length ? +data[0].item_total : 0
+			let amt = data.length > 1 ? data.map(b => +b?.item_total).reduce((a, b) => +a + b) : data.length ? +data[0].item_total : 0
 			let value = +amt - (+amt * 100) / (100 + a)
 
 			if (value)
@@ -61,6 +60,12 @@ const OrderPrint = ({
 		let time = new Date().getTime()
 		return time - item?.created_at < reminderDate * 86400000
 	}
+
+	const deductions = [
+		["Replacement", order?.replacement],
+		["Adjustment", order?.adjustment],
+		["Shortage", order?.shortage]
+	]
 
 	return (
 		<div
@@ -171,11 +176,7 @@ const OrderPrint = ({
 						<td colSpan={28}>
 							<div>
 								<p style={{ fontWeight: "600", fontSize: "small" }}>M/S {counter?.counter_title || ""}</p>
-								{counter?.address ? (
-									<p style={{ fontWeight: "600", fontSize: "small" }}>{counter?.address || ""}</p>
-								) : (
-									""
-								)}
+								{counter?.address ? <p style={{ fontWeight: "600", fontSize: "small" }}>{counter?.address || ""}</p> : ""}
 
 								{counter?.mobile?.length ? (
 									<p style={{ fontWeight: "600", fontSize: "small" }}>
@@ -488,13 +489,13 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{order?.item_details?.length > 1
-									? order?.item_details?.map(a => +a.b || 0).reduce((a, b) => a + b)
-									: order?.item_details[0]?.b || 0}
+								{allOrderItems?.length > 1
+									? allOrderItems?.map(a => +a.b || 0).reduce((a, b) => a + b)
+									: allOrderItems[0]?.b || 0}
 								:
-								{order?.item_details?.length > 1
-									? order?.item_details?.map(a => +a.p || 0).reduce((a, b) => a + b)
-									: order?.item_details[0]?.p || 0}
+								{allOrderItems?.length > 1
+									? allOrderItems?.map(a => +a.p || 0).reduce((a, b) => a + b)
+									: allOrderItems[0]?.p || 0}
 							</th>
 							<th
 								style={{
@@ -504,9 +505,9 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{order?.item_details?.length > 1
-									? order?.item_details?.map(a => +a.free || 0).reduce((a, b) => a + b)
-									: order?.item_details[0]?.free || 0}
+								{allOrderItems?.length > 1
+									? allOrderItems?.map(a => +a.free || 0).reduce((a, b) => a + b)
+									: allOrderItems[0]?.free || 0}
 							</th>
 							<td
 								style={{
@@ -583,9 +584,9 @@ const OrderPrint = ({
 								colSpan={2}
 							>
 								{(
-									(order?.item_details?.length > 1
-										? order?.item_details?.map(a => +a.item_total || 0).reduce((a, b) => a + b)
-										: +order?.item_details[0]?.item_total) || 0
+									(allOrderItems?.length > 1
+										? allOrderItems?.map(a => +a.item_total || 0).reduce((a, b) => a + b)
+										: +allOrderItems[0]?.item_total) || 0
 								).toFixed(2)}
 							</th>
 						</tr>
@@ -681,6 +682,34 @@ const OrderPrint = ({
 														</tr>
 												  ))
 												: ""}
+											{charges?.map(_charge => (
+												<tr>
+													<td
+														style={{
+															fontWeight: "600",
+															fontSize: "xx-small",
+															textAlign: "right"
+														}}
+													>
+														{_charge.narration} : +{_charge.amt}
+													</td>
+												</tr>
+											))}
+											{deductions
+												?.filter(i => +i[1])
+												?.map(i => (
+													<tr>
+														<td
+															style={{
+																fontWeight: "600",
+																fontSize: "xx-small",
+																textAlign: "right"
+															}}
+														>
+															{i[0]} : -{i[1]}
+														</td>
+													</tr>
+												))}
 											<tr>
 												<td
 													style={{

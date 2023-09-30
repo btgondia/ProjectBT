@@ -46,6 +46,8 @@ const SelectedCounterOrder = () => {
 		let counter = counters.find(a => order.counter_uuid === a.counter_uuid)
 		let time = new Date()
 		Billing({
+			order_uuid: order?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			counter,
 			items: order.items,
 			others: {
@@ -254,8 +256,7 @@ const SelectedCounterOrder = () => {
 			user_uuid: localStorage.getItem("user_uuid"),
 			role: "Order",
 			narration:
-				counter.counter_title +
-				(sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
+				counter.counter_title + (sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
 			timestamp: time.getTime(),
 			...others
 		}
@@ -288,10 +289,7 @@ const SelectedCounterOrder = () => {
 				style={cartPage ? { backgroundColor: "#000", maxWidth: "500px" } : { maxWidth: "500px" }}
 			>
 				<div className="user_menubar">
-					<IoArrowBackOutline
-						className="user_Back_icon"
-						onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
-					/>
+					<IoArrowBackOutline className="user_Back_icon" onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))} />
 				</div>
 				{cartPage ? (
 					<>
@@ -346,11 +344,7 @@ const SelectedCounterOrder = () => {
 						</div>
 
 						<div>
-							<select
-								className="searchInput selectInput"
-								value={filterCompany}
-								onChange={e => setFilterCompany(e.target.value)}
-							>
+							<select className="searchInput selectInput" value={filterCompany} onChange={e => setFilterCompany(e.target.value)}>
 								{companies?.map(a => (
 									<option value={a.company_uuid}>{a.company_title}</option>
 								))}
@@ -371,13 +365,12 @@ const SelectedCounterOrder = () => {
 										?.sort((a, b) => a.sort_order - b.sort_order)
 										?.map(
 											category =>
-												items
-													.filter(a => a.category_uuid === category.category_uuid)
-													?.filter(
-														a =>
-															!filterItemTitle ||
-															a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
-													)?.length > 0 && (
+												items?.filter(
+													a =>
+														(!filterItemTitle ||
+															a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())) &&
+														a.category_uuid === category.category_uuid
+												)?.length > 0 && (
 													<div
 														id={!cartPage ? category?.category_uuid : ""}
 														key={category?.category_uuid}
@@ -385,16 +378,14 @@ const SelectedCounterOrder = () => {
 														className="categoryItemMap"
 													>
 														<h1 className="categoryHeadline">{category?.category_title}</h1>
-
 														{items
 															?.filter(
 																a =>
-																	!filterItemTitle ||
-																	a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
+																	(!filterItemTitle ||
+																		a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())) &&
+																	a.category_uuid === category.category_uuid
 															)
 															?.sort((a, b) => a.sort_order - b.sort_order)
-
-															.filter(a => a.category_uuid === category.category_uuid)
 															?.map(item => {
 																return (
 																	<div
@@ -411,9 +402,7 @@ const SelectedCounterOrder = () => {
 																										...a,
 																										b:
 																											+(a.b || 0) +
-																											parseInt(
-																												((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
-																											),
+																											parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
 																										p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																								  }
@@ -448,7 +437,6 @@ const SelectedCounterOrder = () => {
 																	>
 																		<div className="menuItemDetails">
 																			<h1 className="item-name">{item?.item_title}</h1>
-
 																			<div
 																				className="item-mode flex"
 																				style={{
@@ -562,8 +550,7 @@ const SelectedCounterOrder = () => {
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) +
-																								parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
 																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																						}))
@@ -623,6 +610,7 @@ const SelectedCounterOrder = () => {
 						</div>
 						{confirmItemsPopup ? (
 							<div
+								id="items-popup"
 								style={{
 									backgroundColor: "rgba(128, 128, 128,0.8)",
 									zIndex: 9999999,
@@ -637,7 +625,7 @@ const SelectedCounterOrder = () => {
 								<button
 									onClick={() => setConfirmItemPopup(false)}
 									className="closeButton"
-									style={{ top: "10vh", left: "40%", zIndex: "999999" }}
+									style={{ top: "10vh", left: "50%", translate: "-50%", zIndex: "999999" }}
 								>
 									x
 								</button>
@@ -719,8 +707,7 @@ const SelectedCounterOrder = () => {
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) +
-																								parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
 																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																						}))
@@ -802,8 +789,7 @@ const SelectedCounterOrder = () => {
 										padding: "3px",
 										opacity: enable ? 1 : 0.5,
 										position: "fixed",
-										zIndex: "9999999",
-										bottom: "1rem"
+										zIndex: "9999999"
 									}}
 									disabled={!enable}
 								>
@@ -819,7 +805,7 @@ const SelectedCounterOrder = () => {
 			<div
 				className="allcategoryList"
 				style={{
-					bottom: itemsCategory?.length > 0 ? "0.5rem" : "1rem"
+					bottom: itemsCategory?.length > 0 ? "0" : "1rem"
 				}}
 			>
 				<div className={`menulist`} style={{ maxWidth: "500px" }}>
@@ -886,7 +872,7 @@ const SelectedCounterOrder = () => {
 							<button
 								type="button"
 								className="cartBtn"
-								style={{ padding: "3px", position: "relative", marginTop: "20px" }}
+								style={{ padding: "3px", position: "relative", width: "100%" }}
 								onClick={async () => {
 									setLoading(true)
 									const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
@@ -912,6 +898,8 @@ const SelectedCounterOrder = () => {
 									setTimeout(async () => {
 										let time = new Date()
 										Billing({
+											order_uuid: order?.order_uuid,
+											invoice_number: `${order?.order_type}${order?.invoice_number}`,
 											counter,
 											items: data.items,
 											others: {
@@ -946,7 +934,7 @@ const SelectedCounterOrder = () => {
 								setCartPage(true)
 							}}
 							className="cartBtn"
-							style={{ padding: "3px", position: "relative", marginTop: "20px" }}
+							style={{ padding: "3px", position: "relative", width: "100%" }}
 						>
 							Cart
 						</button>

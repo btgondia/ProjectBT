@@ -135,7 +135,7 @@ function Table({ data = {}, total }) {
 			<tbody className="tbody">
 				{sortData(Object.keys(data))?.map(key => (
 					<tr key={key} style={{ height: "30px" }}>
-						<td colSpan={2}>{data[key]?.user_title}</td>
+						<td colSpan={2}>{data[key]?.user_title || <small style={{ opacity: ".45", fontWeight: "600" }}>N/A</small>}</td>
 						{columns?.map(i => (
 							<td>
 								<div>
@@ -154,7 +154,8 @@ function Table({ data = {}, total }) {
 						position: "sticky",
 						bottom: 0,
 						background: "#ffffff",
-						boxShadow: "0px 0px 25px -15px black"
+						boxShadow: "0px 0px 25px -15px black",
+						width: "calc(100vw - 100px)"
 					}}
 				>
 					<td colSpan={2}>

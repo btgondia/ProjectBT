@@ -8,6 +8,7 @@ const State = props => {
 	const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false)
 	const [notification, setNotification] = useState(null)
 	const [loading, setLoading] = useState(null)
+	const [pageLoading, setPageLoading] = useState(null)
 	const CalculateLines = async (days, type) => {
 		setLoading(true)
 		const response = await axios({
@@ -15,8 +16,8 @@ const State = props => {
 			url: "/counters/CalculateLines",
 			data: { days, type },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setLoading(false)
@@ -37,7 +38,7 @@ const State = props => {
 			counters,
 			item,
 			counter_uuid,
-			counter: counters?.find(i => i.counter_uuid === counter_uuid),
+			counter: counters?.find(i => i.counter_uuid === counter_uuid)
 		})
 		return data
 	}
@@ -49,7 +50,7 @@ const State = props => {
 				method: "patch",
 				url: "/counters/item_special_price/" + counter_uuid,
 				data: [{ item_uuid: item.item_uuid, price: price || item.p_price }],
-				headers: { "Content-Type": "application/json" },
+				headers: { "Content-Type": "application/json" }
 			})
 			if (!response.data.success) return
 			setCounters(list => list.map(i => (i.counter_uuid === counter_uuid ? response.data.counter : i)))
@@ -66,7 +67,7 @@ const State = props => {
 				method: "patch",
 				url: "/counters/delete_special_price",
 				data: { item_uuid: item.item_uuid, counter_uuid: counter_uuid },
-				headers: { "Content-Type": "application/json" },
+				headers: { "Content-Type": "application/json" }
 			})
 			if (!response.data.success) return
 			setCounters(list => list.map(i => (i.counter_uuid === counter_uuid ? response.data.counter : i)))
@@ -82,8 +83,8 @@ const State = props => {
 			message: "Item special price will be deleted. Do you wish to continue?",
 			actions: [
 				{ label: "Cancel", classname: "cancel", action: () => setPromptState(null) },
-				{ label: "Confirm", classname: "confirm", action: () => deleteSpecialPrice(...params) },
-			],
+				{ label: "Confirm", classname: "confirm", action: () => deleteSpecialPrice(...params) }
+			]
 		})
 	}
 
@@ -92,18 +93,18 @@ const State = props => {
 		if (!counter_ids?.length) return
 		const response = await axios.post("/whatsapp_notifications/send_payment_reminders", {
 			notification_uuid: PAYMENT_REMINDER_NOTIFICATION,
-			counter_ids,
+			counter_ids
 		})
 
 		if (response?.data?.success)
 			setNotification({
 				success: true,
-				message: "Messages sent successfully",
+				message: "Messages sent successfully"
 			})
 		else
 			setNotification({
 				success: false,
-				message: "Failed to send messages",
+				message: "Failed to send messages"
 			})
 		setTimeout(() => setNotification(null), 3000)
 	}
@@ -129,10 +130,12 @@ const State = props => {
 				saveSpecialPrice,
 				deleteSpecialPrice,
 				spcPricePrompt,
-
+				pageLoading,
+				setPageLoading,
 				PAYMENT_REMINDER_NOTIFICATION,
-				sendPaymentReminders,
-			}}>
+				sendPaymentReminders
+			}}
+		>
 			{props.children}
 		</Context.Provider>
 	)

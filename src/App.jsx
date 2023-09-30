@@ -21,7 +21,7 @@ import AddOrder from "./pages/AddOrder/AddOrder"
 import UserActivity from "./pages/Reports/UserActivity"
 import UPITransection from "./pages/Reports/UPITransection"
 import CompleteOrder from "./pages/Reports/CompleteOrder"
-import ItemDetails from "./pages/Reports/ItemDetails"
+import ItemDetails from "./pages/Reports/ItemReport"
 import CompletedTrips from "./pages/Reports/CompletedTrips"
 import { useContext, useEffect, useState } from "react"
 import { updateIndexedDb } from "./Apis/functions"
@@ -61,23 +61,25 @@ import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
+import CounterCharges from "./pages/Reports/CounterCharges"
+import Loader from "./components/Loader"
+import CounterReport from "./pages/Reports/CounterReport"
 
-export let Version = 136
+export let Version = 152
 export const server = "http://13.53.230.104:9000"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
 	const context = useContext(Context)
-
 	const {
 		calculationPopup = "",
+		pageLoading,
 		loading,
 		notification,
 		setNotification,
 		isItemAvilableOpen,
 		cashRegisterPopup
 	} = context
-
 	axios.defaults.baseURL = server
 
 	const getUserType = async controller => {
@@ -256,6 +258,7 @@ function App() {
 							<Route path="/admin/InvoiceNumberWiseOrder" element={<InvoiceNumberWiseOrder />} />
 							<Route path="/admin/itemCategories" element={<ItemCategories />} />
 							<Route path="/admin/counterGroup" element={<CounterGroup />} />
+							<Route path="/admin/counterCharges" element={<CounterCharges />} />
 							<Route path="/admin/itemGroup" element={<ItemGroup />} />
 							<Route path="/admin/Campaigns" element={<Campaigns />} />
 							<Route path="/admin/counter" element={<Counter />} />
@@ -278,11 +281,12 @@ function App() {
 							<Route path="/admin/adjustStock" element={<AdjustStock />} />
 							<Route path="/admin/userActivity" element={<UserActivity />} />
 							<Route path="/admin/performanceSummary" element={<PerformanceSummary />} />
+							<Route path="/admin/counterReport" element={<CounterReport />} />
 							<Route path="/admin/upiTransactionReport" element={<UPITransection />} />
 							<Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
 							<Route path="/admin/RetailerMarginReport" element={<RetailerMarginReport />} />
 							<Route path="/admin/cancelOrders" element={<CancelOrders />} />
-							<Route path="/admin/OrderItemReport" element={<ItemDetails />} />
+							<Route path="/admin/ItemsReport" element={<ItemDetails />} />
 							<Route path="/admin/CompletedTripsReport" element={<CompletedTrips />} />
 							<Route path="/admin/CounterLeger" element={<CounterLeger />} />
 							<Route path="/admin/Outstandings" element={<Outstanding />} />
@@ -341,6 +345,7 @@ function App() {
 			)}
 			{isItemAvilableOpen && <ItemAvilibility />}
 			{cashRegisterPopup && <CashRegister />}
+			<Loader visible={pageLoading} />
 			{/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
         <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
       </div>} */}

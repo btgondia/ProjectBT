@@ -16,6 +16,9 @@ body {
 
 :root {
 	--mainColor: #4ac959;
+	--form-theme-light: #f1f1f6;
+	--form-theme-heavy: #e2e0eb;
+	--form-theme-dark: #9e9ca8;
 }
 
 ::-webkit-scrollbar {

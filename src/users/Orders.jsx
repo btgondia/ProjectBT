@@ -177,84 +177,87 @@ const Orders = ({ refreshDb }) => {
 							style={{
 								overflowY: "scroll",
 								height: params.route_uuid ? "90vh" : "80vh",
-								marginTop: params.route_uuid ? "10px" : "10px"
+								marginTop: params.route_uuid ? "10px" : "10px",
+								width: "100%"
 							}}
 						>
-							<table className="table" style={{ width: "100vw", maxWidth: "500px" }}>
-								<tbody style={{ width: "100%" }}>
-									{counters
-										?.filter(a => a.counter_title)
-										.sort((a, b) => +a.sort_order - b.sort_order)
-										?.filter(
-											a =>
-												(!counterFilter ||
-													a.counter_title.toLocaleLowerCase().includes(counterFilter.toLocaleLowerCase())) &&
-												(window.location.pathname.includes("route") ? params.route_uuid === a.route_uuid : true)
-										)
-										?.map((item, index) => {
-											return (
-												<tr
-													key={item.counter_uuid}
-													className="counterSearch"
-													style={{ color: item.status === 2 ? "red" : "#000" }}
-													onClick={e => {
-														if (item.status === 2) {
-															setRemarks(item.remarks)
-														} else {
-															e.stopPropagation()
-															postActivity(
-																item,
-																routes.find(a => a?.route_uuid === item?.route_uuid)
-															)
-															sessionStorage.setItem(
-																"route_title",
-																routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title
-															)
-															Navigate("/users/orders/" + item.counter_uuid)
-														}
-													}}
-												>
-													<td style={{ width: "50%" }}>{item.counter_title}</td>
-													<td style={{ width: "50%" }}>
-														{routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title}
-													</td>
-													<td>
-														<div className="user-counter-actions">
-															<button
+							{/* <table className="table" style={{ width: "100vw", maxWidth: "500px" }}>
+								<tbody style={{ width: "100%" }}> */}
+							<div>
+								{counters
+									?.filter(a => a.counter_title)
+									.sort((a, b) => +a.sort_order - b.sort_order)
+									?.filter(
+										a =>
+											(!counterFilter || a.counter_title.toLocaleLowerCase().includes(counterFilter.toLocaleLowerCase())) &&
+											(window.location.pathname.includes("route") ? params.route_uuid === a.route_uuid : true)
+									)
+									?.map((item, index) => {
+										return (
+											<div
+												key={item.counter_uuid}
+												className="counterSearch"
+												// style={{ color: item.status === 2 ? "red" : "#000" }}
+												onClick={e => {
+													if (item.status === 2) {
+														setRemarks(item.remarks)
+													} else {
+														e.stopPropagation()
+														postActivity(
+															item,
+															routes.find(a => a?.route_uuid === item?.route_uuid)
+														)
+														sessionStorage.setItem(
+															"route_title",
+															routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title
+														)
+														Navigate("/users/orders/" + item.counter_uuid)
+													}
+												}}
+											>
+												<div>
+													<div style={{ width: "60%" }}>{item.counter_title}</div>
+													<div style={{ width: "40%" }}>{routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title}</div>
+													<div className="user-counter-actions">
+														<button
+															onClick={e => {
+																e.stopPropagation()
+																setLocationState({
+																	active: true,
+																	location: item?.location_coords,
+																	counter_uuid: item.counter_uuid
+																})
+															}}
+														>
+															<HiLocationMarker className={`location-marker ${item?.location_coords && "green"}`} />
+														</button>
+														{item?.mobile.length ? (
+															<Phone
 																onClick={e => {
 																	e.stopPropagation()
-																	setLocationState({
-																		active: true,
-																		location: item?.location_coords,
-																		counter_uuid: item.counter_uuid
-																	})
+																	if (item.mobile.length === 1) {
+																		window.location.assign("tel:" + item?.mobile[0]?.mobile)
+																	} else {
+																		setPhonePopup(item.mobile)
+																	}
 																}}
-															>
-																<HiLocationMarker className={`location-marker ${item?.location_coords && "green"}`} />
-															</button>
-															{item?.mobile.length ? (
-																<Phone
-																	onClick={e => {
-																		e.stopPropagation()
-																		if (item.mobile.length === 1) {
-																			window.location.assign("tel:" + item?.mobile[0]?.mobile)
-																		} else {
-																			setPhonePopup(item.mobile)
-																		}
-																	}}
-																	className="user_Back_icon"
-																	style={{ color: "#4ac959" }}
-																/>
-															) : (
-																""
-															)}
-														</div>
-													</td>
-												</tr>
-											)
-										})}
-								</tbody>
-							</table>
+																className="user_Back_icon"
+																style={{ color: "#4ac959" }}
+															/>
+														) : (
+															""
+														)}
+													</div>
+												</div>
+												<div>
+													<small>{item?.address}</small>
+												</div>
+											</div>
+										)
+									})}
+							</div>
+							{/* </tbody>
+							</table> */}
 						</div>
 					) : (
 						<div
@@ -415,9 +418,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 		setdata({
 			payment_modes: paymentModes
 				?.filter(
-					a =>
-						a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+					a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 				)
 				.map(a => a.mode_uuid),
 			credit_allowed: "N",

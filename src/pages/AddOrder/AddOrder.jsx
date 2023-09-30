@@ -19,12 +19,12 @@ import Prompt from "../../components/Prompt"
 const options = {
 	priorityOptions: [
 		{ value: 0, label: "Normal" },
-		{ value: 1, label: "High" },
+		{ value: 1, label: "High" }
 	],
 	orderTypeOptions: [
 		{ value: "I", label: "Invoice" },
-		{ value: "E", label: "Estimate" },
-	],
+		{ value: "E", label: "Estimate" }
+	]
 }
 
 const CovertedQty = (qty, conversion) => {
@@ -41,7 +41,7 @@ let getInititalValues = () => ({
 	order_type: "I",
 	time_1: 24 * 60 * 60 * 1000,
 	time_2: (24 + 48) * 60 * 60 * 1000,
-	warehouse_uuid: localStorage.getItem("warehouse") ? JSON.parse(localStorage.getItem("warehouse")) || "" : "",
+	warehouse_uuid: localStorage.getItem("warehouse") ? JSON.parse(localStorage.getItem("warehouse")) || "" : ""
 })
 
 export default function AddOrder() {
@@ -69,8 +69,8 @@ export default function AddOrder() {
 			url: "/warehouse/GetWarehouseList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result.filter(a => a.warehouse_title))
 	}
@@ -81,8 +81,8 @@ export default function AddOrder() {
 			url: "users/GetUser/" + localStorage.getItem("user_uuid"),
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setUser_warehouse(response.data.result.warehouse)
 	}
@@ -94,8 +94,8 @@ export default function AddOrder() {
 			url: "/autoBill/autoBillItem",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) data = response.data.result
 		const response1 = await axios({
@@ -103,8 +103,8 @@ export default function AddOrder() {
 			url: "/autoBill/autoBillQty",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response1.data.success)
 			data = data.length
@@ -123,8 +123,8 @@ export default function AddOrder() {
 			url: "/items/GetItemStockList/" + order.warehouse_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
@@ -135,8 +135,8 @@ export default function AddOrder() {
 			url: "/counters/GetCounterList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCounters(response.data.result)
 	}
@@ -159,8 +159,8 @@ export default function AddOrder() {
 			item_details: prev.item_details.map(a => ({
 				...a,
 				b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
-				p: a.p ? +a.p % +a.conversion : 0,
-			})),
+				p: a.p ? +a.p % +a.conversion : 0
+			}))
 		}))
 	}, [qty_details])
 
@@ -172,40 +172,43 @@ export default function AddOrder() {
 				.filter(a => a.item_uuid)
 				.map(a => ({
 					...a,
-					item_price: a.p_price || a.item_price,
-				})),
+					item_price: a.p_price || a.item_price
+				}))
 		}
 		if (type.autoAdd) {
 			let autoAdd = await AutoAdd({
 				counter,
 				item_details: data.item_details,
 				dbItems: itemsData,
-				autobills: autoBills.filter(a => a.status),
+				autobills: autoBills.filter(a => a.status)
 			})
 			data = { ...data, ...autoAdd, item_details: autoAdd.item_details }
 		}
 		let time = new Date()
 		let autoBilling = await Billing({
+			creating_new: 1,
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			replacement: data.replacement,
 			adjustment: data.adjustment,
 			shortage: data.shortage,
 			counter,
 			items: data.item_details.map(a => ({
 				...a,
-				item_price: a.p_price || a.item_price,
+				item_price: a.p_price || a.item_price
 			})),
 			others: {
 				stage: 1,
 				user_uuid: localStorage.getItem("user_uuid"),
 				time: time.getTime(),
 
-				type: "NEW",
+				type: "NEW"
 			},
 			add_discounts: true,
 			edit_prices: edit_prices.map(a => ({
 				...a,
-				item_price: a.p_price,
-			})),
+				item_price: a.p_price
+			}))
 		})
 
 		data = {
@@ -218,7 +221,7 @@ export default function AddOrder() {
 				unit_price: a.item_total / (+(+a.conversion * a.b) + a.p + a.free) || a.item_price || a.price,
 				gst_percentage: a.item_gst,
 				status: 0,
-				price: a.price || a.item_price || 0,
+				price: a.price || a.item_price || 0
 			})),
 			status:
 				type.stage === 1
@@ -226,63 +229,63 @@ export default function AddOrder() {
 							{
 								stage: 1,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
-							},
+								user_uuid: data.others.user_uuid
+							}
 					  ]
 					: type.stage === 2
 					? [
 							{
 								stage: 1,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
+								user_uuid: data.others.user_uuid
 							},
 							{
 								stage: 2,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
-							},
+								user_uuid: data.others.user_uuid
+							}
 					  ]
 					: type.stage === 3
 					? [
 							{
 								stage: 1,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
+								user_uuid: data.others.user_uuid
 							},
 							{
 								stage: 2,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
+								user_uuid: data.others.user_uuid
 							},
 							{
 								stage: 3,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
-							},
+								user_uuid: data.others.user_uuid
+							}
 					  ]
 					: [
 							{
 								stage: 1,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
+								user_uuid: data.others.user_uuid
 							},
 							{
 								stage: 2,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
+								user_uuid: data.others.user_uuid
 							},
 							{
 								stage: 3,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
+								user_uuid: data.others.user_uuid
 							},
 							{
 								stage: 4,
 								time: data.others.time,
-								user_uuid: data.others.user_uuid,
-							},
+								user_uuid: data.others.user_uuid
+							}
 					  ],
-			...(type.obj || {}),
+			...(type.obj || {})
 		}
 
 		data.time_1 = data.time_1 + Date.now()
@@ -294,8 +297,8 @@ export default function AddOrder() {
 			url: "/orders/postOrder",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response)
 		if (response.data.success) {
@@ -310,16 +313,17 @@ export default function AddOrder() {
 		if (!order.item_details.filter(a => a.item_uuid).length) return
 		else if (order?.item_details?.some(i => i.billing_type !== order?.order_type))
 			return setPromptState({
-				message: `${getType(order?.order_type, false)} items are not allowed in ${getType(
-					order?.order_type
-				)} order type.`,
-				actions: [{ label: "Ok", classname: "text-btns", action: () => setPromptState(null) }],
+				message: `${getType(order?.order_type, false)} items are not allowed in ${getType(order?.order_type)} order type.`,
+				actions: [{ label: "Ok", classname: "text-btns", action: () => setPromptState(null) }]
 			})
 
 		setPopup(true)
 		let counter = counters.find(a => order.counter_uuid === a.counter_uuid)
 		let time = new Date()
 		let autoBilling = await Billing({
+			creating_new: 1,
+			order_uuid: order?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			replacement: order.replacement,
 			adjustment: order.adjustment,
 			shortage: order.shortage,
@@ -330,20 +334,20 @@ export default function AddOrder() {
 				user_uuid: localStorage.getItem("user_uuid"),
 				time: time.getTime(),
 
-				type: "NEW",
+				type: "NEW"
 			},
 			add_discounts: true,
 			edit_prices: edit_prices.map(a => ({
 				...a,
-				item_price: a.p_price,
+				item_price: a.p_price
 			})),
-			...type,
+			...type
 		})
 		setOrder(prev => ({
 			...prev,
 			...autoBilling,
 			...type,
-			item_details: autoBilling.items,
+			item_details: autoBilling.items
 		}))
 	}
 
@@ -372,9 +376,9 @@ export default function AddOrder() {
 								uuid: nextElemId,
 								b: 0,
 								p: 0,
-								sr: prev.item_details.length + 1,
-							},
-						],
+								sr: prev.item_details.length + 1
+							}
+						]
 					})),
 				250
 			)
@@ -400,10 +404,10 @@ export default function AddOrder() {
 						? {
 								...a,
 								p_price: e.target.value,
-								b_price: (e.target.value * item.conversion || 0).toFixed(2),
+								b_price: (e.target.value * item.conversion || 0).toFixed(2)
 						  }
 						: a
-				),
+				)
 			}
 		})
 		setEditPrices(prev =>
@@ -413,7 +417,7 @@ export default function AddOrder() {
 							? {
 									...a,
 									p_price: e.target.value,
-									b_price: (e.target.value * item.conversion || 0).toFixed(2),
+									b_price: (e.target.value * item.conversion || 0).toFixed(2)
 							  }
 							: a
 				  )
@@ -423,15 +427,15 @@ export default function AddOrder() {
 						{
 							...item,
 							p_price: e.target.value,
-							b_price: (e.target.value * item.conversion || 0).toFixed(2),
-						},
+							b_price: (e.target.value * item.conversion || 0).toFixed(2)
+						}
 				  ]
 				: [
 						{
 							...item,
 							p_price: e.target.value,
-							b_price: (e.target.value * item.conversion || 0).toFixed(2),
-						},
+							b_price: (e.target.value * item.conversion || 0).toFixed(2)
+						}
 				  ]
 		)
 	}
@@ -456,15 +460,11 @@ export default function AddOrder() {
 										ref={ref => (reactInputsRef.current["0"] = ref)}
 										options={counters
 											?.filter(
-												a =>
-													!counterFilter ||
-													a.counter_title
-														?.toLocaleLowerCase()
-														?.includes(counterFilter.toLocaleLowerCase())
+												a => !counterFilter || a.counter_title?.toLocaleLowerCase()?.includes(counterFilter.toLocaleLowerCase())
 											)
 											.map(a => ({
 												value: a.counter_uuid,
-												label: a.counter_title + " , " + a.route_title,
+												label: a.counter_title + " , " + a.route_title
 											}))}
 										onChange={doc => {
 											setOrder(prev => ({ ...prev, counter_uuid: doc?.value }))
@@ -473,9 +473,7 @@ export default function AddOrder() {
 											order?.counter_uuid
 												? {
 														value: order?.counter_uuid,
-														label: counters?.find(
-															j => j.counter_uuid === order.counter_uuid
-														)?.counter_title,
+														label: counters?.find(j => j.counter_uuid === order.counter_uuid)?.counter_title
 												  }
 												: ""
 										}
@@ -493,9 +491,10 @@ export default function AddOrder() {
 										style={{
 											width: "max-content",
 											position: "fixed",
-											right: "100px",
+											right: "100px"
 										}}
-										onClick={() => setHoldPopup("Summary")}>
+										onClick={() => setHoldPopup("Summary")}
+									>
 										Free
 									</button>
 								) : (
@@ -511,28 +510,24 @@ export default function AddOrder() {
 											...warehouse
 												.filter(
 													a =>
-														!user_warehouse.length ||
-														+user_warehouse[0] === 1 ||
-														user_warehouse.find(b => b === a.warehouse_uuid)
+														!user_warehouse.length || +user_warehouse[0] === 1 || user_warehouse.find(b => b === a.warehouse_uuid)
 												)
 												.map(a => ({
 													value: a.warehouse_uuid,
-													label: a.warehouse_title,
-												})),
+													label: a.warehouse_title
+												}))
 										]}
 										onChange={doc =>
 											setOrder(prev => ({
 												...prev,
-												warehouse_uuid: doc.value,
+												warehouse_uuid: doc.value
 											}))
 										}
 										value={
 											order?.warehouse_uuid
 												? {
 														value: order?.warehouse_uuid,
-														label: warehouse?.find(
-															j => j.warehouse_uuid === order.warehouse_uuid
-														)?.warehouse_title,
+														label: warehouse?.find(j => j.warehouse_uuid === order.warehouse_uuid)?.warehouse_title
 												  }
 												: { value: 0, label: "None" }
 										}
@@ -590,54 +585,39 @@ export default function AddOrder() {
 									<tbody className="lh-copy">
 										{order?.item_details?.map((item, i) => (
 											<tr key={item.uuid} item-billing-type={item?.billing_type}>
-												<td
-													className="ph2 pv1 tl bb b--black-20 bg-white"
-													style={{ width: "300px" }}>
+												<td className="ph2 pv1 tl bb b--black-20 bg-white" style={{ width: "300px" }}>
 													<div
 														className="inputGroup"
 														id={`selectContainer-${item.uuid}`}
 														index={listItemIndexCount++}
-														style={{ width: "300px" }}>
+														style={{ width: "300px" }}
+													>
 														<Select
 															ref={ref => (reactInputsRef.current[item.uuid] = ref)}
 															id={"item_uuid" + item.uuid}
 															className="order-item-select"
 															options={itemsData
 																.filter(
-																	a =>
-																		!order?.item_details.filter(
-																			b => a.item_uuid === b.item_uuid
-																		).length && a.status !== 0
+																	a => !order?.item_details.filter(b => a.item_uuid === b.item_uuid).length && a.status !== 0
 																)
-																.sort((a, b) =>
-																	a?.item_title?.localeCompare(b.item_title)
-																)
+																.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
 																.map((a, j) => ({
 																	value: a.item_uuid,
 																	label:
 																		a.item_title +
 																		"______" +
 																		a.mrp +
-																		(a.qty > 0
-																			? " _______[" +
-																			  CovertedQty(a.qty || 0, a.conversion) +
-																			  "]"
-																			: ""),
+																		(a.qty > 0 ? " _______[" + CovertedQty(a.qty || 0, a.conversion) + "]" : ""),
 																	key: a.item_uuid,
-																	qty: a.qty,
+																	qty: a.qty
 																}))}
 															styles={{
 																option: (a, b) => {
 																	return {
 																		...a,
-																		color:
-																			b.data.qty === 0
-																				? ""
-																				: b.data.qty > 0
-																				? "#4ac959"
-																				: "red",
+																		color: b.data.qty === 0 ? "" : b.data.qty > 0 ? "#4ac959" : "red"
 																	}
-																},
+																}
 															}}
 															onChange={e => {
 																// setTimeout(
@@ -648,25 +628,17 @@ export default function AddOrder() {
 																	...prev,
 																	item_details: prev.item_details.map(a => {
 																		if (a.uuid === item.uuid) {
-																			let item = itemsData.find(
-																				b => b.item_uuid === e.value
-																			)
+																			let item = itemsData.find(b => b.item_uuid === e.value)
 																			const p_price =
-																				+getSpecialPrice(
-																					counters,
-																					item,
-																					order?.counter_uuid
-																				)?.price || item.item_price
+																				+getSpecialPrice(counters, item, order?.counter_uuid)?.price || item.item_price
 																			return {
 																				...a,
 																				...item,
 																				p_price,
-																				b_price: Math.floor(
-																					p_price * item.conversion || 0
-																				),
+																				b_price: Math.floor(p_price * item.conversion || 0)
 																			}
 																		} else return a
-																	}),
+																	})
 																}))
 																jumpToNextIndex(`selectContainer-${item.uuid}`)
 															}}
@@ -680,31 +652,19 @@ export default function AddOrder() {
 																			a.item_title +
 																			"______" +
 																			a.mrp +
-																			(a.qty > 0
-																				? "[" +
-																				  CovertedQty(
-																						a.qty || 0,
-																						a.conversion
-																				  ) +
-																				  "]"
-																				: ""),
-																		key: a.item_uuid,
+																			(a.qty > 0 ? "[" + CovertedQty(a.qty || 0, a.conversion) + "]" : ""),
+																		key: a.item_uuid
 																	}))[0]
 															}
 															openMenuOnFocus={true}
-															autoFocus={
-																focusedInputId === `selectContainer-${item.uuid}` ||
-																(i === 0 && focusedInputId === 0)
-															}
+															autoFocus={focusedInputId === `selectContainer-${item.uuid}` || (i === 0 && focusedInputId === 0)}
 															menuPosition="fixed"
 															menuPlacement="auto"
 															placeholder="Item"
 														/>
 													</div>
 												</td>
-												<td
-													className="ph2 pv1 tc bb b--black-20 bg-white"
-													style={{ textAlign: "center" }}>
+												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 													<input
 														id={"q" + item.uuid}
 														style={{ width: "100px" }}
@@ -719,23 +679,17 @@ export default function AddOrder() {
 																return {
 																	...prev,
 																	item_details: prev.item_details.map(a =>
-																		a.uuid === item.uuid
-																			? { ...a, b: e.target.value }
-																			: a
-																	),
+																		a.uuid === item.uuid ? { ...a, b: e.target.value } : a
+																	)
 																}
 															})
 														}}
 														onFocus={e => e.target.select()}
-														onKeyDown={e =>
-															e.key === "Enter" ? jumpToNextIndex("q" + item.uuid) : ""
-														}
+														onKeyDown={e => (e.key === "Enter" ? jumpToNextIndex("q" + item.uuid) : "")}
 														disabled={!item.item_uuid}
 													/>
 												</td>
-												<td
-													className="ph2 pv1 tc bb b--black-20 bg-white"
-													style={{ textAlign: "center" }}>
+												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 													<input
 														id={"p" + item.uuid}
 														style={{ width: "100px" }}
@@ -750,23 +704,17 @@ export default function AddOrder() {
 																return {
 																	...prev,
 																	item_details: prev.item_details.map(a =>
-																		a.uuid === item.uuid
-																			? { ...a, p: e.target.value }
-																			: a
-																	),
+																		a.uuid === item.uuid ? { ...a, p: e.target.value } : a
+																	)
 																}
 															})
 														}}
 														onFocus={e => e.target.select()}
-														onKeyDown={e =>
-															e.key === "Enter" ? jumpToNextIndex("p" + item.uuid) : ""
-														}
+														onKeyDown={e => (e.key === "Enter" ? jumpToNextIndex("p" + item.uuid) : "")}
 														disabled={!item.item_uuid}
 													/>
 												</td>
-												<td
-													className="ph2 pv1 tc bb b--black-20 bg-white"
-													style={{ textAlign: "center" }}>
+												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 													Rs:
 													<input
 														id="Quantity"
@@ -779,9 +727,7 @@ export default function AddOrder() {
 														onChange={e => onItemPriceChange(e, item)}
 													/>
 												</td>
-												<td
-													className="ph2 pv1 tc bb b--black-20 bg-white"
-													style={{ textAlign: "center" }}>
+												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 													Rs:
 													<input
 														id="Quantity"
@@ -799,13 +745,10 @@ export default function AddOrder() {
 																			? {
 																					...a,
 																					b_price: e.target.value,
-																					p_price: (
-																						e.target.value /
-																							item.conversion || 0
-																					).toFixed(2),
+																					p_price: (e.target.value / item.conversion || 0).toFixed(2)
 																			  }
 																			: a
-																	),
+																	)
 																}
 															})
 															setEditPrices(prev =>
@@ -815,10 +758,7 @@ export default function AddOrder() {
 																				? {
 																						...a,
 																						b_price: e.target.value,
-																						p_price: (
-																							e.target.value /
-																								item.conversion || 0
-																						).toFixed(2),
+																						p_price: (e.target.value / item.conversion || 0).toFixed(2)
 																				  }
 																				: a
 																	  )
@@ -828,22 +768,16 @@ export default function AddOrder() {
 																			{
 																				...item,
 																				b_price: e.target.value,
-																				p_price: (
-																					e.target.value / item.conversion ||
-																					0
-																				).toFixed(2),
-																			},
+																				p_price: (e.target.value / item.conversion || 0).toFixed(2)
+																			}
 																	  ]
 																	: [
 																			{
 																				...item,
 
 																				b_price: e.target.value,
-																				p_price: (
-																					e.target.value / item.conversion ||
-																					0
-																				).toFixed(2),
-																			},
+																				p_price: (e.target.value / item.conversion || 0).toFixed(2)
+																			}
 																	  ]
 															)
 														}}
@@ -851,44 +785,27 @@ export default function AddOrder() {
 												</td>
 												<td className="ph2 pv1 tc bb b--black-20 bg-white">
 													{+item?.item_price !== +item?.p_price &&
-														(+getSpecialPrice(counters, item, order?.counter_uuid)
-															?.price === +item?.p_price ? (
+														(+getSpecialPrice(counters, item, order?.counter_uuid)?.price === +item?.p_price ? (
 															<IoCheckmarkDoneOutline
 																className="table-icon checkmark"
-																onClick={() =>
-																	spcPricePrompt(
-																		item,
-																		order?.counter_uuid,
-																		setCounters
-																	)
-																}
+																onClick={() => spcPricePrompt(item, order?.counter_uuid, setCounters)}
 															/>
 														) : (
 															<FaSave
 																className="table-icon"
 																title="Save current price as special item price"
-																onClick={() =>
-																	saveSpecialPrice(
-																		item,
-																		order?.counter_uuid,
-																		setCounters
-																	)
-																}
+																onClick={() => saveSpecialPrice(item, order?.counter_uuid, setCounters)}
 															/>
 														))}
 												</td>
-												<td
-													className="ph2 pv1 tc bb b--black-20 bg-white"
-													style={{ textAlign: "center" }}>
+												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 													<DeleteOutlineIcon
 														style={{ color: "red" }}
 														className="table-icon"
 														onClick={() => {
 															setOrder({
 																...order,
-																item_details: order.item_details.filter(
-																	a => a.uuid !== item.uuid
-																),
+																item_details: order.item_details.filter(a => a.uuid !== item.uuid)
 															})
 															//console.log(item);
 														}}
@@ -901,16 +818,11 @@ export default function AddOrder() {
 												onClick={() =>
 													setOrder(prev => ({
 														...prev,
-														item_details: [
-															...prev.item_details,
-															{ uuid: uuid(), b: 0, p: 0 },
-														],
+														item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0 }]
 													}))
-												}>
-												<AddIcon
-													sx={{ fontSize: 40 }}
-													style={{ color: "#4AC959", cursor: "pointer" }}
-												/>
+												}
+											>
+												<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
 											</td>
 										</tr>
 									</tbody>
@@ -930,14 +842,15 @@ export default function AddOrder() {
 										position: "fixed",
 										bottom: "10px",
 										right: "0",
-										cursor: "default",
+										cursor: "default"
 									}}
 									type="button"
 									onClick={() => {
 										// if (!order.item_details.filter((a) => a.item_uuid).length)
 										//   return;
 										// setPopup(true);
-									}}>
+									}}
+								>
 									Total: {order?.order_grandtotal || 0}
 								</button>
 							) : (
@@ -1001,8 +914,9 @@ function NewUserForm({ onSubmit, onClose }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form
 							className="form"
@@ -1010,7 +924,8 @@ function NewUserForm({ onSubmit, onClose }) {
 								e.preventDefault()
 								onSubmit(data)
 								onClose()
-							}}>
+							}}
+						>
 							<div className="formGroup">
 								<div className="row">
 									<h3> Auto Add</h3>
@@ -1072,7 +987,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 			replacement: data?.actual || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
-			adjustment_remarks: data?.adjustment_remarks || "",
+			adjustment_remarks: data?.adjustment_remarks || ""
 		})
 	}, [data])
 	const GetPaymentModes = async () => {
@@ -1081,8 +996,8 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setPaymentModes(response.data.result)
 	}
@@ -1095,7 +1010,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 			time: time.getTime(),
 			invoice_number: order.invoice_number,
 			trip_uuid: order.trip_uuid,
-			counter_uuid: order.counter_uuid,
+			counter_uuid: order.counter_uuid
 		})
 		GetPaymentModes()
 	}, [])
@@ -1107,29 +1022,30 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
-							: 1,
+							: 1
 				}))
 			)
 	}, [PaymentModes])
 	const submitHandler = async () => {
 		setError("")
 		let billingData = await Billing({
+			creating_new: 1,
+			order_uuid: order?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			replacement: order.replacement,
 			shortage: order.shortage,
 			adjustment: order.adjustment,
 			counter: counters.find(a => a.counter_uuid === order.counter_uuid),
-
 			items: order.item_details.map(a => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
 					...itemData,
 					...a,
-					price: itemData?.price || 0,
+					price: itemData?.price || 0
 				}
-			}),
+			})
 		})
 		let Tempdata = {
 			...order,
@@ -1138,7 +1054,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 			replacement: data?.actual || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
-			adjustment_remarks: data?.adjustment_remarks || "",
+			adjustment_remarks: data?.adjustment_remarks || ""
 		}
 		let modeTotal = modes.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
 		//console.log(
@@ -1157,7 +1073,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 
 		let obj = {
 			user_uuid: localStorage.getItem("user_uuid"),
-			modes: modes.map(a => (a.mode_title === "Cash" ? { ...a, coin: 0 } : a)),
+			modes: modes.map(a => (a.mode_title === "Cash" ? { ...a, coin: 0 } : a))
 		}
 
 		postOrderData({ ...obj, OutStanding: outstanding.amount })
@@ -1176,16 +1092,14 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -1200,7 +1114,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: e.target.value,
+																			amt: e.target.value
 																	  }
 																	: a
 															)
@@ -1228,14 +1142,14 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 																width: "90px",
 																backgroundColor: "light",
 																fontSize: "12px",
-																color: "#fff",
+																color: "#fff"
 														  }
 														: { width: "80px" }
 												}
 												onChange={e =>
 													setOutstanding(prev => ({
 														...prev,
-														amount: e.target.value,
+														amount: e.target.value
 													}))
 												}
 												maxLength={42}
@@ -1249,7 +1163,8 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 											type="button"
 											className="submit"
 											style={{ color: "#fff", backgroundColor: "#7990dd" }}
-											onClick={() => setPopup(true)}>
+											onClick={() => setPopup(true)}
+										>
 											Deductions
 										</button>
 									</div>
@@ -1257,11 +1172,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button
-										type="button"
-										style={{ backgroundColor: "red" }}
-										className="submit"
-										onClick={onSave}>
+									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>

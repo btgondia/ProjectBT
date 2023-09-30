@@ -87,12 +87,9 @@ const Warehouse = () => {
 		</>
 	)
 }
-
 function Table({ itemsDetails, setPopupForm }) {
 	const [items, setItems] = useState("sort_order")
 	const [order, setOrder] = useState("")
-
-	console.log(items)
 	return (
 		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>

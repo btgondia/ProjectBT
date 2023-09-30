@@ -37,21 +37,21 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 					: +data.stage === 3
 					? [
 							{ stage: 2, time: time.getTime(), user_uuid },
-							{ stage: 3, time: time.getTime(), user_uuid },
+							{ stage: 3, time: time.getTime(), user_uuid }
 					  ]
 					: +data.stage === 4
 					? [
 							{ stage: 2, time: time.getTime(), user_uuid },
 							{ stage: 3, time: time.getTime(), user_uuid },
 							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid },
+							{ stage: 4, time: time.getTime(), user_uuid }
 					  ]
 					: [
 							{ stage: 2, time: time.getTime(), user_uuid },
 							{ stage: 3, time: time.getTime(), user_uuid },
 							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
 							{ stage: 4, time: time.getTime(), user_uuid },
-							{ stage: 5, time: time.getTime(), user_uuid },
+							{ stage: 5, time: time.getTime(), user_uuid }
 					  ]
 				: stage === 2
 				? +data.stage === 3
@@ -60,31 +60,31 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 					? [
 							{ stage: 3, time: time.getTime(), user_uuid },
 							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid },
+							{ stage: 4, time: time.getTime(), user_uuid }
 					  ]
 					: [
 							{ stage: 3, time: time.getTime(), user_uuid },
 							{ stage: 4, time: time.getTime(), user_uuid },
 							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 5, time: time.getTime(), user_uuid },
+							{ stage: 5, time: time.getTime(), user_uuid }
 					  ]
 				: stage === 3
 				? +data.stage === 4
 					? [
 							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid },
+							{ stage: 4, time: time.getTime(), user_uuid }
 					  ]
 					: [
 							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
 							{ stage: 4, time: time.getTime(), user_uuid },
-							{ stage: 5, time: time.getTime(), user_uuid },
+							{ stage: 5, time: time.getTime(), user_uuid }
 					  ]
 				: [{ stage: 5, time: time.getTime(), user_uuid }]
 
 		selectedData = selectedData?.map(a => ({
 			...a,
 			status: +data.stage === 0 ? a.status : [...a.status, ...status],
-			hold: +data.stage === 0 ? "Y" : a.hold || "N",
+			hold: +data.stage === 0 ? "Y" : a.hold || "N"
 		}))
 
 		console.log(selectedData)
@@ -109,11 +109,13 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 					item_details: obj.item_details.map(a => ({
 						...a,
 						b: 0,
-						p: 0,
-					})),
+						p: 0
+					}))
 				}
 
 				let billingData = await Billing({
+					order_uuid: obj?.order_uuid,
+					invoice_number: `${obj?.order_type}${obj?.invoice_number}`,
 					replacement: obj.replacement,
 					adjustment: obj.adjustment,
 					shortage: obj.shortage,
@@ -123,20 +125,18 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 						let itemData = items.find(b => a.item_uuid === b.item_uuid)
 						return {
 							...itemData,
-							...a,
+							...a
 						}
-					}),
+					})
 				})
 
-				const status = obj?.status?.map(_i =>
-					+_i?.stage === 5 ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] } : _i
-				)
+				const status = obj?.status?.map(_i => (+_i?.stage === 5 ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] } : _i))
 
 				orderData.push({
 					...obj,
 					...billingData,
 					item_details: billingData.items,
-					status,
+					status
 				})
 			}
 
@@ -145,8 +145,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 				url: "/orders/putOrders",
 				data: orderData,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onClose()
@@ -159,8 +159,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 			url: "/orders/putOrders",
 			data: selectedData,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onClose()
@@ -198,8 +198,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 			url: "/orders/putOrders",
 			data: [{ ...orderData, warehouse_uuid }],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setSelectedWarehouseOrders(prev => {
@@ -223,8 +223,9 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 						style={{
 							height: "fit-content",
 							padding: "20px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form
 								className="form"
@@ -235,69 +236,76 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 									} else if (data.stage === 5) {
 										setCancelPopup(true)
 									} else onSubmit()
-								}}>
+								}}
+							>
 								<div className="formGroup">
 									<div className="row">
 										<h3>Stage</h3>
 										<div
 											style={{
-												textDecoration: stage >= 1 ? "line-through" : "",
+												textDecoration: stage >= 1 ? "line-through" : ""
 											}}
 											onClick={() => {
 												if (stage >= 1) return
 												setData({ ...data, stage: 1 })
-											}}>
+											}}
+										>
 											<input type="radio" checked={data.stage === 1} />
 											Processing
 										</div>
 										<div
 											style={{
-												textDecoration: stage >= 2 ? "line-through" : "",
+												textDecoration: stage >= 2 ? "line-through" : ""
 											}}
 											onClick={() => {
 												if (stage >= 2) return
 												setData({ ...data, stage: 2 })
-											}}>
+											}}
+										>
 											<input type="radio" checked={data.stage === 2} />
 											Checking
 										</div>
 										<div
 											style={{
-												textDecoration: stage >= 3 ? "line-through" : "",
+												textDecoration: stage >= 3 ? "line-through" : ""
 											}}
 											onClick={() => {
 												if (stage >= 3) return
 												setData({ ...data, stage: 3 })
-											}}>
+											}}
+										>
 											<input type="radio" checked={data.stage === 3} />
 											Delivery
 										</div>
 										<div
 											style={{
-												textDecoration: stage >= 4 ? "line-through" : "",
+												textDecoration: stage >= 4 ? "line-through" : ""
 											}}
 											onClick={() => {
 												if (stage >= 4) return
 												setData({ ...data, stage: 4 })
-											}}>
+											}}
+										>
 											<input type="radio" checked={data.stage === 4} />
 											Complete
 										</div>
 										<div
 											onClick={() => {
 												setData({ ...data, stage: 0 })
-											}}>
+											}}
+										>
 											<input type="radio" checked={data.stage === 0} />
 											Hold
 										</div>
 										<div
 											style={{
-												textDecoration: stage >= 5 ? "line-through" : "",
+												textDecoration: stage >= 5 ? "line-through" : ""
 											}}
 											onClick={() => {
 												if (stage >= 5) return
 												setData({ ...data, stage: 5 })
-											}}>
+											}}
+										>
 											<input type="radio" checked={data.stage === 5} />
 											Cancel
 										</div>
@@ -328,7 +336,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -380,9 +389,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 	}, [])
 	let reminder = useMemo(() => {
 		return new Date(
-			time2.setDate(
-				time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0)
-			)
+			time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0))
 		).getTime()
 	}, [counters, order.counter_uuid])
 	let type = useMemo(() => {
@@ -394,8 +401,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			url: "/paymentModes/GetPaymentModesList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setPaymentModes(response.data.result)
 	}
@@ -411,7 +418,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			trip_uuid: order.trip_uuid,
 			counter_uuid: order.counter_uuid,
 			reminder,
-			type,
+			type
 		})
 		GetPaymentModes(controller)
 		return () => {
@@ -426,16 +433,17 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
-							: 1,
+							: 1
 				}))
 			)
 	}, [PaymentModes])
 	const updateBillingAmount = async selectedOrder => {
 		console.log(selectedOrder)
 		let billingData = await Billing({
+			order_uuid: selectedOrder?.order_uuid,
+			invoice_number: `${selectedOrder?.order_type}${selectedOrder?.invoice_number}`,
 			replacement: selectedOrder.replacement,
 			shortage: selectedOrder.shortage,
 			adjustment: selectedOrder.adjustment,
@@ -445,15 +453,15 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
 					...itemData,
-					...a,
+					...a
 				}
-			}),
+			})
 		})
 		setOrder(prev => ({
 			...prev,
 			...selectedOrder,
 			...billingData,
-			item_details: billingData.items,
+			item_details: billingData.items
 		}))
 	}
 
@@ -463,33 +471,17 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 		}
 		setWaiting(true)
 		setError("")
-		if (outstanding.amount && !outstanding.remarks) {
-			setError("Remarks is mandatory")
-			setWaiting(false)
-			return
-		}
+		// if (outstanding.amount && !outstanding.remarks) {
+		// 	setError("Remarks is mandatory")
+		// 	setWaiting(false)
+		// 	return
+		// }
 		if (modes.find(a => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && a.amt && !a.remarks)) {
 			setError("Cheque number is mandatory")
 			setWaiting(false)
 			return
 		}
-		// let billingData = await Billing({
-		//   replacement: data.actual,
-		//   replacement_mrp: data.mrp,
-		//   counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-		//   items: order.item_details.map((a) => {
-		//     let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-		//     return {
-		//       ...itemData,
-		//       ...a,
-		//     };
-		//   }),
-		// });
-		// let Tempdata = {
-		//   ...order,
-		//   ...billingData,
-		//   item_details: billingData.items,
-		// };
+
 		let modeTotal = modes.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
 
 		if (+order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))) {
@@ -510,7 +502,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			counter_uuid: order.counter_uuid,
 			trip_uuid: order.trip_uuid,
 			invoice_number: order.invoice_number,
-			modes: modes?.map(a => (a.mode_title === "Cash" ? { ...a, coin: 0 } : a)),
+			modes: modes?.map(a => (a.mode_title === "Cash" ? { ...a, coin: 0 } : a))
 		}
 		let response
 		if (modeTotal) {
@@ -519,8 +511,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 				url: "/receipts/postReceipt",
 				data: obj,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 		}
 		if (outstanding?.amount)
@@ -529,8 +521,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 				url: "/Outstanding/postOutstanding",
 				data: outstanding,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 		if (response.data.success) {
 			if (count + 1 === orders?.length) {
@@ -552,7 +544,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			replacement: data?.actual || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
-			adjustment_remarks: data?.adjustment_remarks || "",
+			adjustment_remarks: data?.adjustment_remarks || ""
 		})
 	}, [data])
 	const getTripData = async trip_uuid => {
@@ -561,8 +553,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			url: "/trips/GetTripData",
 			data: { params: ["users"], trips: [trip_uuid].filter(a => a) },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log("dilivereduser", response.data.result[0]?.users[0])
@@ -590,8 +582,9 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "100%",
-						}}>
+							width: "100%"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
@@ -613,7 +606,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: order.order_grandtotal || 0,
+																			amt: order.order_grandtotal || 0
 																	  }
 																	: a
 															)
@@ -626,7 +619,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: e.target.value,
+																			amt: e.target.value
 																	  }
 																	: a
 															)
@@ -649,7 +642,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 														style={{
 															width: "100%",
 															backgroundColor: "light",
-															fontSize: "12px",
+															fontSize: "12px"
 														}}
 														onChange={e =>
 															setModes(prev =>
@@ -678,14 +671,14 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 													e.stopPropagation()
 													setOutstanding(prev => ({
 														...prev,
-														amount: order.order_grandtotal || 0,
+														amount: order.order_grandtotal || 0
 													}))
 												}}
 												style={{ width: "80px" }}
 												onChange={e =>
 													setOutstanding(prev => ({
 														...prev,
-														amount: e.target.value,
+														amount: e.target.value
 													}))
 												}
 												// disabled={order.credit_allowed !== "Y"}
@@ -707,12 +700,12 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 													style={{
 														width: "100%",
 														backgroundColor: "light",
-														fontSize: "12px",
+														fontSize: "12px"
 													}}
 													onChange={e =>
 														setOutstanding(prev => ({
 															...prev,
-															remarks: e.target.value,
+															remarks: e.target.value
 														}))
 													}
 													maxLength={42}
@@ -729,7 +722,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 											type="button"
 											className="submit"
 											style={{ color: "#fff", backgroundColor: "#7990dd" }}
-											onClick={() => setPopup(true)}>
+											onClick={() => setPopup(true)}
+										>
 											Deductions
 										</button>
 									</div>
@@ -741,10 +735,11 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 												style={{
 													width: "100%",
 													backgroundColor: "light",
-													fontSize: "12px",
+													fontSize: "12px"
 												}}
 												value={diliveredUser}
-												onChange={e => setDiliveredUser(e.target.value)}>
+												onChange={e => setDiliveredUser(e.target.value)}
+											>
 												<option value="">None</option>
 												{users
 													.filter(a => a.status)
@@ -782,7 +777,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -896,8 +892,8 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 			url: "/warehouse/GetWarehouseList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
@@ -926,8 +922,9 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 						height: "fit-content",
 						padding: "20p0",
 						marginBottom: "10px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -947,15 +944,15 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 													{ value: 0, label: "None" },
 													...warehouse.map(a => ({
 														value: a.warehouse_uuid,
-														label: a.warehouse_title,
-													})),
+														label: a.warehouse_title
+													}))
 												]}
 												onChange={doc => setdata(doc.value)}
 												value={
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -994,18 +991,22 @@ function CancellationReasons({ close, orders, submit }) {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					paddingTop: "50px",
+					paddingTop: "50px"
 				}}
 				onSubmit={e => {
 					e.preventDefault()
 					submit({ reasons })
-				}}>
+				}}
+			>
 				<h3>Selected orders will be cancelled</h3>
+				<h4 style={{ marginTop: "10px", textAlign: "left" }}>Cancellation Reason{orders?.[1] ? "s" : ""} -</h4>
 
 				<div id="cancellation-reasons-wrapper">
 					{orders?.map(i => (
 						<div key={i?.order_uuid}>
-							<label>Cancellation reason for order - {i?.invoice_number}</label>
+							<label>
+								{i?.counter_title} - <b>{i?.invoice_number}</b>
+							</label>
 							<textarea
 								type="text"
 								className="cancellation-reason"

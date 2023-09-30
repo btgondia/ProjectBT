@@ -12,13 +12,13 @@ const Card = ({
 	selectedCounter,
 	setSelectOrder,
 	order,
-	getOrders = () => {},
+	getOrders = () => {}
 }) => {
 	const PutOrder = async (deleteOrder = false) => {
 		let data = {
 			...order,
 			counter_order: 0,
-			accept_notification: deleteOrder ? "0" : "1",
+			accept_notification: deleteOrder ? "0" : "1"
 		}
 		if (deleteOrder) {
 			let time = new Date()
@@ -32,13 +32,11 @@ const Card = ({
 					{
 						stage: 5,
 						user_uuid: localStorage.getItem("user_uuid"),
-						time: time.getTime(),
-					},
+						time: time.getTime()
+					}
 				],
-				fulfillment: order.fulfillment?.length
-					? [...order.fulfillment, ...order.item_details]
-					: order.item_details,
-				item_details: order.item_details?.map(a => ({ ...a, b: 0, p: 0 })),
+				fulfillment: order.fulfillment?.length ? [...order.fulfillment, ...order.item_details] : order.item_details,
+				item_details: order.item_details?.map(a => ({ ...a, b: 0, p: 0 }))
 			}
 		}
 
@@ -47,8 +45,8 @@ const Card = ({
 			url: "/orders/putOrders",
 			data: [data],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			getOrders()
@@ -78,6 +76,18 @@ const Card = ({
 		return strTime
 	}
 
+	// const calculateAge = elapsed => {
+	// 	const units = ["Day", "Hour", "Minute", "Second"]
+	// 	const divisors = [86400000, 3600000, 60000, 1000]
+	// 	for (let i = 0; i < divisors.length; i++) {
+	// 		let value = Math.floor(elapsed / divisors[i])
+	// 		if (value >= 1) {
+	// 			return `${value} ${units[i]}${value !== 1 ? "s" : ""}`
+	// 		}
+	// 	}
+	// 	return "Just now"
+	// }
+
 	const curr = Date.now()
 	const daysCount = +((curr - dateTime) / (24 * 60 * 60 * 1000)).toFixed(0)
 	if (!order.time_1) order.time_1 = dateTime + 24 * 60 * 60 * 1000
@@ -101,13 +111,15 @@ const Card = ({
 					e.preventDefault()
 					e.stopPropagation()
 					setSelectOrder(true)
-				}}>
+				}}
+			>
 				<button
 					className={`card-focus 
 						${rounded ? "rounded" : ""} 
 						${selectedOrder ? "selected-seat" : selectedCounter ? "blinking-seat" : ""}
 					`}
-					style={{ margin: "5px" }}>
+					style={{ margin: "5px" }}
+				>
 					<div
 						className={`card 
 							${rounded ? "rounded" : ""}
@@ -115,9 +127,9 @@ const Card = ({
 						`}
 						style={{
 							gap: "2px",
-							backgroundColor:
-								order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff",
-						}}>
+							backgroundColor: order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff"
+						}}
+					>
 						<p
 							className="title2"
 							style={{
@@ -125,8 +137,9 @@ const Card = ({
 								whiteSpace: "nowrap",
 								overflow: "hidden",
 								textOverflow: "ellipsis",
-								maxWidth: "15ch",
-							}}>
+								maxWidth: "15ch"
+							}}
+						>
 							{title1 ? title1 : title2}
 						</p>
 						<p
@@ -137,11 +150,13 @@ const Card = ({
 								whiteSpace: "nowrap",
 								overflow: "hidden",
 								textOverflow: "ellipsis",
-								maxWidth: "15ch",
-							}}>
+								maxWidth: "15ch"
+							}}
+						>
 							{title1 ? title2 : ""}
 						</p>
 						<p className="title2">{daysCount} Days</p>
+						{/* <p className="title2">{calculateAge(curr - dateTime)}</p> */}
 						{order.counter_order ? (
 							<div className="flex" style={{ justifyContent: "space-between", width: "100px" }}>
 								<button
@@ -149,7 +164,8 @@ const Card = ({
 									onClick={e => {
 										e.stopPropagation()
 										PutOrder(true)
-									}}>
+									}}
+								>
 									Reject
 								</button>
 								<button
@@ -157,7 +173,8 @@ const Card = ({
 									onClick={e => {
 										e.stopPropagation()
 										PutOrder(false)
-									}}>
+									}}
+								>
 									Accept
 								</button>
 							</div>
@@ -171,16 +188,12 @@ const Card = ({
 							{formatAMPM(new Date(dateTime)) || ""}
 						</div>
 						<div style={{ fontSize: "10px" }}>{getQty()}</div>
-						<div
-							className="card-color-sheet"
-							id="sheet1"
-							style={{ height: `calc(${cardColor1Height}% + 2px)` }}
-						/>
+						<div className="card-color-sheet" id="sheet1" style={{ height: `calc(${cardColor1Height}% + 2px)` }} />
 						<div
 							className="card-color-sheet"
 							id="sheet2"
 							style={{
-								height: cardColor1Height >= 100 ? `calc(${cardColor2Height}% + 2px)` : 0,
+								height: cardColor1Height >= 100 ? `calc(${cardColor2Height}% + 2px)` : 0
 							}}
 						/>
 					</div>

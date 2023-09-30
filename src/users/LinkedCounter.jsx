@@ -67,6 +67,8 @@ const LinkedCounter = () => {
 		// let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
 		let time = new Date()
 		Billing({
+			order_uuid: order?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			counter,
 			items: order.items,
 			others: {
@@ -74,9 +76,9 @@ const LinkedCounter = () => {
 				user_uuid: localStorage.getItem("user_uuid"),
 				time: time.getTime(),
 
-				type: "NEW",
+				type: "NEW"
 			},
-			add_discounts: true,
+			add_discounts: true
 		}).then(data => {
 			setTotal(data.order_grandtotal)
 		})
@@ -92,16 +94,12 @@ const LinkedCounter = () => {
 			url: "/counters/GetCounterByLink",
 			data: {
 				short_link: params.short_link,
-				campaign_short_link: params.campaign_short_link?.includes("cam-")
-					? params?.campaign_short_link?.replace("cam-", "")
-					: "",
-				form_short_link: params.campaign_short_link?.includes("form-")
-					? params?.campaign_short_link?.replace("form-", "")
-					: "",
+				campaign_short_link: params.campaign_short_link?.includes("cam-") ? params?.campaign_short_link?.replace("cam-", "") : "",
+				form_short_link: params.campaign_short_link?.includes("form-") ? params?.campaign_short_link?.replace("form-", "") : ""
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.message) setNotification(response.data)
 		setTimeout(() => setNotification(""), 5000)
@@ -109,7 +107,7 @@ const LinkedCounter = () => {
 		if (response.data.success) {
 			if (!response.data.result.order_status) {
 				setNotification({
-					message: "इस रूट के आर्डर अभी स्वीकार नहीं किये जा रहे है",
+					message: "इस रूट के आर्डर अभी स्वीकार नहीं किये जा रहे है"
 				})
 				setTimeout(() => setNotification(""), 5000)
 			}
@@ -128,8 +126,8 @@ const LinkedCounter = () => {
 			url: "/users/GetUser/" + localStorage.getItem("user_uuid"),
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("users", response)
 		if (response.data.success) setUserData(response.data.result)
@@ -152,12 +150,12 @@ const LinkedCounter = () => {
 			data: [
 				{
 					counter_uuid: params.counter_uuid,
-					food_license,
-				},
+					food_license
+				}
 			],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setFoodLicencePopup(false)
@@ -180,17 +178,12 @@ const LinkedCounter = () => {
 			(!cartPage ? items : order.items)
 				?.map(a => ({
 					...a,
-					item_price:
-						counter.item_special_price?.find(b => b.item_uuid === a.item_uuid)?.price || a.item_price,
+					item_price: counter.item_special_price?.find(b => b.item_uuid === a.item_uuid)?.price || a.item_price,
 					b: 0,
 					p: 0,
-					status: 0,
+					status: 0
 				}))
-				.filter(
-					a =>
-						!filterItemTitle ||
-						a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
-				),
+				.filter(a => !filterItemTitle || a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())),
 		[cartPage, counter.item_special_price, filterItemTitle, items, order.items]
 	)
 	let filteredCategory = useMemo(
@@ -205,6 +198,8 @@ const LinkedCounter = () => {
 	const postOrder = async (orderData = order) => {
 		let time = new Date()
 		let data = await Billing({
+			order_uuid: orderData?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			counter,
 			items: orderData.items,
 			others: {
@@ -212,9 +207,9 @@ const LinkedCounter = () => {
 				user_uuid: localStorage.getItem("user_uuid"),
 				time: time.getTime(),
 
-				type: "NEW",
+				type: "NEW"
 			},
-			add_discounts: true,
+			add_discounts: true
 		})
 		data = {
 			...orderData,
@@ -229,19 +224,17 @@ const LinkedCounter = () => {
 				unit_price: a.price,
 				gst_percentage: a.item_gst,
 				status: 0,
-				price: a.price || a.item_price,
+				price: a.price || a.item_price
 			})),
 			status: [
 				{
 					stage: orderData?.others?.stage || 1,
 					time: orderData?.others?.time || new Date().getTime(),
-					user_uuid: orderData?.others?.user_uuid || orderData?.counter_uuid,
-				},
+					user_uuid: orderData?.others?.user_uuid || orderData?.counter_uuid
+				}
 			],
 			counter_order: 1,
-			campaign_short_link: params.campaign_short_link?.includes("cam-")
-				? params?.campaign_short_link?.replace("cam-", "")
-				: "",
+			campaign_short_link: params.campaign_short_link?.includes("cam-") ? params?.campaign_short_link?.replace("cam-", "") : ""
 		}
 		console.log(data)
 		const response = await axios({
@@ -249,8 +242,8 @@ const LinkedCounter = () => {
 			url: "/orders/postOrder",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setInvioceNumber(response.data.result.invoice_number)
@@ -316,15 +309,12 @@ const LinkedCounter = () => {
 	//   }, [order]);
 	return (
 		<>
-			{number ? (
-				<MobileNumberPopup counter={counter} getCounter={getCounter} onSave={() => setNumber(false)} />
-			) : (
-				""
-			)}
+			{number ? <MobileNumberPopup counter={counter} getCounter={getCounter} onSave={() => setNumber(false)} /> : ""}
 
 			<nav
 				className="user_nav nav_styling"
-				style={cartPage ? { backgroundColor: "#000", maxWidth: "500px" } : { maxWidth: "500px" }}>
+				style={cartPage ? { backgroundColor: "#000", maxWidth: "500px" } : { maxWidth: "500px" }}
+			>
 				{cartPage ? (
 					<div className="user_menubar">
 						<IoArrowBackOutline className="user_Back_icon" onClick={() => setCartPage(false)} />
@@ -341,9 +331,7 @@ const LinkedCounter = () => {
 						/>
 					</div>
 				)}
-				<div style={{ width: "100%", textAlign: "center", fontWeight: "900" }}>
-					{counter?.counter_title || ""}
-				</div>
+				<div style={{ width: "100%", textAlign: "center", fontWeight: "900" }}>{counter?.counter_title || ""}</div>
 				{/* {cartPage ? (
             <>
               <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
@@ -414,15 +402,17 @@ const LinkedCounter = () => {
 									id={!cartPage ? comapany?.company_uuid : ""}
 									key={comapany?.company_uuid}
 									name={comapany?.company_uuid}
-									className="categoryItemMap">
+									className="categoryItemMap"
+								>
 									<h1
 										className="categoryHeadline"
 										style={{
 											textAlign: "center",
 											fontSize: "40px",
 											textDecoration: "underline",
-											color: "#5BC0F8",
-										}}>
+											color: "#5BC0F8"
+										}}
+									>
 										{comapany?.company_title}
 									</h1>
 									{filteredCategory
@@ -433,16 +423,14 @@ const LinkedCounter = () => {
 												id={!cartPage ? category?.category_uuid : ""}
 												key={category?.category_uuid}
 												name={category?.category_uuid}
-												className="categoryItemMap">
+												className="categoryItemMap"
+											>
 												<h2 className="categoryHeadline small">{category?.category_title}</h2>
 
 												{filterItems
 													?.filter(
 														a =>
-															!filterItemTitle ||
-															a.item_title
-																?.toLocaleLowerCase()
-																.includes(filterItemTitle.toLocaleLowerCase())
+															!filterItemTitle || a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
 													)
 													?.sort((a, b) => a.sort_order - b.sort_order)
 
@@ -457,28 +445,16 @@ const LinkedCounter = () => {
 																	if (orderStatus)
 																		setOrder(prev => ({
 																			...prev,
-																			items: prev?.items?.filter(
-																				a => a.item_uuid === item.item_uuid
-																			)?.length
+																			items: prev?.items?.filter(a => a.item_uuid === item.item_uuid)?.length
 																				? prev?.items?.map(a =>
 																						a.item_uuid === item.item_uuid
 																							? {
 																									...a,
 																									b:
 																										+(a.b || 0) +
-																										parseInt(
-																											((a?.p ||
-																												0) +
-																												(+item?.one_pack ||
-																													1)) /
-																												+item.conversion
-																										),
+																										parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
-																									p:
-																										((a?.p || 0) +
-																											(+item?.one_pack ||
-																												1)) %
-																										+item.conversion,
+																									p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																							  }
 																							: a
 																				  )
@@ -486,73 +462,46 @@ const LinkedCounter = () => {
 																				? [
 																						...prev.items,
 																						...filterItems
-																							?.filter(
-																								a =>
-																									a.item_uuid ===
-																									item.item_uuid
-																							)
+																							?.filter(a => a.item_uuid === item.item_uuid)
 																							.map(a => ({
 																								...a,
 																								b:
 																									+(a.b || 0) +
-																									parseInt(
-																										((a?.p || 0) +
-																											(+item?.one_pack ||
-																												1)) /
-																											+item.conversion
-																									),
+																									parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
-																								p:
-																									((a?.p || 0) +
-																										(+item?.one_pack ||
-																											1)) %
-																									+item.conversion,
-																							})),
+																								p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
+																							}))
 																				  ]
 																				: filterItems
-																						?.filter(
-																							a =>
-																								a.item_uuid ===
-																								item.item_uuid
-																						)
+																						?.filter(a => a.item_uuid === item.item_uuid)
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) +
-																								parseInt(
-																									((a?.p || 0) +
-																										(+item?.one_pack ||
-																											1)) /
-																										+item.conversion
-																								),
+																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
-																							p:
-																								((a?.p || 0) +
-																									(+item?.one_pack ||
-																										1)) %
-																								+item.conversion,
-																						})),
+																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
+																						}))
 																		}))
-																}}>
+																}}
+															>
 																<div className="menuItemDetails">
 																	<h1 className="item-name">{item?.item_title}</h1>
 
 																	<div
 																		className="item-mode flex"
 																		style={{
-																			justifyContent: "space-between",
-																		}}>
-																		<h3
-																			className={`item-price`}
-																			style={{ cursor: "pointer" }}>
+																			justifyContent: "space-between"
+																		}}
+																	>
+																		<h3 className={`item-price`} style={{ cursor: "pointer" }}>
 																			{+item?.item_discount ? (
 																				<>
 																					<span
 																						style={{
 																							color: "red",
-																							textDecoration:
-																								"line-through",
-																						}}>
+																							textDecoration: "line-through"
+																						}}
+																					>
 																						Price: {item?.item_price}
 																					</span>
 																					<br />
@@ -562,8 +511,9 @@ const LinkedCounter = () => {
 																							paddingLeft: "10px",
 																							marginLeft: "10px",
 																							fontWeight: "500",
-																							borderLeft: "2px solid red",
-																						}}>
+																							borderLeft: "2px solid red"
+																						}}
+																					>
 																						{item?.item_discount} % OFF
 																					</span>
 																				</>
@@ -571,9 +521,7 @@ const LinkedCounter = () => {
 																				<>Price: {item?.item_price}</>
 																			)}
 																		</h3>
-																		<h3 className={`item-price`}>
-																			MRP: {item?.mrp || ""}
-																		</h3>
+																		<h3 className={`item-price`}>MRP: {item?.mrp || ""}</h3>
 																	</div>
 																</div>
 																<div className="menuleft">
@@ -583,24 +531,16 @@ const LinkedCounter = () => {
 																			onClick={e => {
 																				e.stopPropagation()
 																				setImgPopup(item?.item_uuid + ".png")
-																			}}>
-																			<img
-																				src={`${server}/${item?.item_uuid}thumbnail.png`}
-																				alt="Food-Item"
-																			/>
+																			}}
+																		>
+																			<img src={`${server}/${item?.item_uuid}thumbnail.png`} alt="Food-Item" />
 																		</div>
 																	) : (
 																		""
 																	)}
 																	<input
-																		value={`${
-																			order?.items?.find(
-																				a => a.item_uuid === item.item_uuid
-																			)?.b || 0
-																		} : ${
-																			order?.items?.find(
-																				a => a.item_uuid === item.item_uuid
-																			)?.p || 0
+																		value={`${order?.items?.find(a => a.item_uuid === item.item_uuid)?.b || 0} : ${
+																			order?.items?.find(a => a.item_uuid === item.item_uuid)?.p || 0
 																		}`}
 																		disabled={!orderStatus}
 																		className="boxPcsInput"
@@ -608,7 +548,7 @@ const LinkedCounter = () => {
 																			!orderStatus
 																				? {
 																						border: "2px solid gray",
-																						boxShadow: "0 2px 8px gray",
+																						boxShadow: "0 2px 8px gray"
 																				  }
 																				: {}
 																		}
@@ -656,12 +596,10 @@ const LinkedCounter = () => {
 									width: "100vw",
 									height: "100vh",
 									maxWidth: "500px",
-									minHeight: "-webkit-fill-available",
-								}}>
-								<button
-									onClick={() => setConfirmItemPopup(false)}
-									className="closeButton"
-									style={{ top: "20vh", left: "40%" }}>
+									minHeight: "-webkit-fill-available"
+								}}
+							>
+								<button onClick={() => setConfirmItemPopup(false)} className="closeButton" style={{ top: "20vh", left: "40%" }}>
 									x
 								</button>
 								<div
@@ -675,28 +613,27 @@ const LinkedCounter = () => {
 										backgroundColor: "#fff",
 										overflow: "scroll",
 										paddingTop: "10px",
-										maxWidth: "500px",
-									}}>
+										maxWidth: "500px"
+									}}
+								>
 									{itemsCategory
 
 										?.sort((a, b) => a.sort_order - b.sort_order)
 										?.map(category =>
-											salesman_suggestion.filter(a => a.category_uuid === category.category_uuid)
-												?.length > 0 ? (
+											salesman_suggestion.filter(a => a.category_uuid === category.category_uuid)?.length > 0 ? (
 												<div
 													id={!cartPage ? category?.category_uuid : ""}
 													key={category?.category_uuid}
 													name={category?.category_uuid}
-													className="categoryItemMap">
+													className="categoryItemMap"
+												>
 													<h1 className="categoryHeadline">{category?.category_title}</h1>
 
 													{salesman_suggestion
 														?.filter(
 															a =>
 																!filterItemTitle ||
-																a.item_title
-																	?.toLocaleLowerCase()
-																	.includes(filterItemTitle.toLocaleLowerCase())
+																a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
 														)
 														?.sort((a, b) => a.sort_order - b.sort_order)
 
@@ -710,28 +647,16 @@ const LinkedCounter = () => {
 																		e.stopPropagation()
 																		setOrder(prev => ({
 																			...prev,
-																			items: prev?.items?.filter(
-																				a => a.item_uuid === item.item_uuid
-																			)?.length
+																			items: prev?.items?.filter(a => a.item_uuid === item.item_uuid)?.length
 																				? prev?.items?.map(a =>
 																						a.item_uuid === item.item_uuid
 																							? {
 																									...a,
 																									b:
 																										+(a.b || 0) +
-																										parseInt(
-																											((a?.p ||
-																												0) +
-																												(+item?.one_pack ||
-																													1)) /
-																												+item.conversion
-																										),
+																										parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
-																									p:
-																										((a?.p || 0) +
-																											(+item?.one_pack ||
-																												1)) %
-																										+item.conversion,
+																									p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																							  }
 																							: a
 																				  )
@@ -739,75 +664,46 @@ const LinkedCounter = () => {
 																				? [
 																						...prev.items,
 																						...filterItems
-																							?.filter(
-																								a =>
-																									a.item_uuid ===
-																									item.item_uuid
-																							)
+																							?.filter(a => a.item_uuid === item.item_uuid)
 																							.map(a => ({
 																								...a,
 																								b:
 																									+(a.b || 0) +
-																									parseInt(
-																										((a?.p || 0) +
-																											(+item?.one_pack ||
-																												1)) /
-																											+item.conversion
-																									),
+																									parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
-																								p:
-																									((a?.p || 0) +
-																										(+item?.one_pack ||
-																											1)) %
-																									+item.conversion,
-																							})),
+																								p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
+																							}))
 																				  ]
 																				: filterItems
-																						?.filter(
-																							a =>
-																								a.item_uuid ===
-																								item.item_uuid
-																						)
+																						?.filter(a => a.item_uuid === item.item_uuid)
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) +
-																								parseInt(
-																									((a?.p || 0) +
-																										(+item?.one_pack ||
-																											1)) /
-																										+item.conversion
-																								),
+																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
-																							p:
-																								((a?.p || 0) +
-																									(+item?.one_pack ||
-																										1)) %
-																								+item.conversion,
-																						})),
+																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
+																						}))
 																		}))
-																	}}>
+																	}}
+																>
 																	<div className="menuItemDetails">
-																		<h1 className="item-name">
-																			{item?.item_title}
-																		</h1>
+																		<h1 className="item-name">{item?.item_title}</h1>
 
 																		<div
 																			className="item-mode flex"
 																			style={{
-																				justifyContent: "space-between",
-																			}}>
-																			<h3
-																				className={`item-price`}
-																				style={{ cursor: "pointer" }}>
+																				justifyContent: "space-between"
+																			}}
+																		>
+																			<h3 className={`item-price`} style={{ cursor: "pointer" }}>
 																				{+item?.item_discount ? (
 																					<>
 																						<span
 																							style={{
 																								color: "red",
-																								textDecoration:
-																									"line-through",
-																							}}>
+																								textDecoration: "line-through"
+																							}}
+																						>
 																							Price: {item?.item_price}
 																						</span>
 																						<br />
@@ -817,9 +713,9 @@ const LinkedCounter = () => {
 																								paddingLeft: "10px",
 																								marginLeft: "10px",
 																								fontWeight: "500",
-																								borderLeft:
-																									"2px solid red",
-																							}}>
+																								borderLeft: "2px solid red"
+																							}}
+																						>
 																							{item?.item_discount} % OFF
 																						</span>
 																					</>
@@ -827,21 +723,13 @@ const LinkedCounter = () => {
 																					<>Price: {item?.item_price}</>
 																				)}
 																			</h3>
-																			<h3 className={`item-price`}>
-																				MRP: {item?.mrp || ""}
-																			</h3>
+																			<h3 className={`item-price`}>MRP: {item?.mrp || ""}</h3>
 																		</div>
 																	</div>
 																	<div className="menuleft">
 																		<input
-																			value={`${
-																				order?.items?.find(
-																					a => a.item_uuid === item.item_uuid
-																				)?.b || 0
-																			} : ${
-																				order?.items?.find(
-																					a => a.item_uuid === item.item_uuid
-																				)?.p || 0
+																			value={`${order?.items?.find(a => a.item_uuid === item.item_uuid)?.b || 0} : ${
+																				order?.items?.find(a => a.item_uuid === item.item_uuid)?.p || 0
 																			}`}
 																			className="boxPcsInput"
 																			onClick={e => {
@@ -869,12 +757,11 @@ const LinkedCounter = () => {
 			<div
 				className="allcategoryList"
 				style={{
-					bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
-				}}>
+					bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem"
+				}}
+			>
 				<div className={`menulist`} style={{ maxWidth: "500px" }}>
-					<div
-						className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
-						style={{ overflow: "scroll" }}>
+					<div className={`${isCategoryOpen ? "showCategory" : ""} categoryList`} style={{ overflow: "scroll" }}>
 						{filteredCategory
 							?.sort((a, b) => a.sort_order - b.sort_order)
 							?.map((category, i) => {
@@ -890,7 +777,7 @@ const LinkedCounter = () => {
 											element.scrollIntoView({
 												behavior: "smooth",
 												block: "end",
-												inline: "nearest",
+												inline: "nearest"
 											})
 											setIsCategoryOpen(!isCategoryOpen)
 											setClickedId(i?.toString())
@@ -899,18 +786,15 @@ const LinkedCounter = () => {
 										duration={1000}
 										to={category?.category_uuid}
 										className={`${clickedId === i?.toString() ? "activeMenuList" : ""} categorybtn`}
-										key={i}>
+										key={i}
+									>
 										<span style={{ width: "50%" }}>{category?.category_title}</span>
 
-										<i
-											className="categoryLength"
-											style={{ color: "var(--main)", fontSize: "15px" }}>
-											{companies.find(a => a.company_uuid === category.company_uuid)
-												?.company_title || ""}
+										<i className="categoryLength" style={{ color: "var(--main)", fontSize: "15px" }}>
+											{companies.find(a => a.company_uuid === category.company_uuid)?.company_title || ""}
 										</i>
 										<span className="categoryLength">
-											{filterItems.filter(a => a.category_uuid === category.category_uuid)
-												?.length || 0}
+											{filterItems.filter(a => a.category_uuid === category.category_uuid)?.length || 0}
 										</span>
 									</ScrollLink>
 								)
@@ -930,20 +814,11 @@ const LinkedCounter = () => {
 			</div>
 
 			{popupForm ? (
-				<NewUserForm
-					onSave={() => setPopupForm(false)}
-					setOrder={setOrder}
-					popupInfo={popupForm}
-					order={order}
-				/>
+				<NewUserForm onSave={() => setPopupForm(false)} setOrder={setOrder} popupInfo={popupForm} order={order} />
 			) : (
 				""
 			)}
-			{discountPopup ? (
-				<DiscountPopup onSave={() => setDiscountPopup(false)} setOrder={setOrder} order={order} />
-			) : (
-				""
-			)}
+			{discountPopup ? <DiscountPopup onSave={() => setDiscountPopup(false)} setOrder={setOrder} order={order} /> : ""}
 			{loading ? (
 				<div className="overlay" style={{ zIndex: 9999999 }}>
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
@@ -955,7 +830,8 @@ const LinkedCounter = () => {
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -1019,7 +895,8 @@ const LinkedCounter = () => {
 							//     });
 							// }, 2000);
 							postOrder()
-						}}>
+						}}
+					>
 						{total ? "Rs: " + total : ""} Submit
 					</button>
 				</>
@@ -1038,9 +915,10 @@ const LinkedCounter = () => {
 						padding: "3px",
 						opacity: enable ? 1 : 0.5,
 						position: "absolute",
-						zIndex: 9999,
+						zIndex: 9999
 					}}
-					disabled={!enable}>
+					disabled={!enable}
+				>
 					Done
 				</button>
 			) : order?.items?.length ? (
@@ -1057,7 +935,8 @@ const LinkedCounter = () => {
 						setCartPage(true)
 					}}
 					className="cartBtn"
-					style={{ padding: "3px", position: "absolute" }}>
+					style={{ padding: "3px", position: "absolute" }}
+				>
 					Cart
 				</button>
 			) : (
@@ -1093,8 +972,9 @@ const LinkedCounter = () => {
 							style={{
 								height: "fit-content",
 								padding: "20px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form" onSubmit={putCounterData}>
 									<div className="formGroup">
@@ -1136,8 +1016,9 @@ const LinkedCounter = () => {
 							style={{
 								height: "fit-content",
 								padding: "20px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<h3>Invoice Number</h3>
 								<h1
@@ -1145,8 +1026,9 @@ const LinkedCounter = () => {
 										width: "100%",
 										textAlign: "center",
 										fontSize: "50px",
-										color: "var(--main)",
-									}}>
+										color: "var(--main)"
+									}}
+								>
 									{invoice_number}
 								</h1>
 								{checkNumberPopup ? <h2>Incentive Estimate Rs {checkNumberPopup}</h2> : ""}
@@ -1170,28 +1052,31 @@ const LinkedCounter = () => {
 							height: "fit-content",
 							width: "max-content",
 							minWidth: "250px",
-							backgroundColor: "transparent",
-						}}>
+							backgroundColor: "transparent"
+						}}
+					>
 						<div
 							className="content"
 							style={{
 								height: "fit-content",
 								padding: "20px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div
 								style={{
 									overflowY: "scroll",
-									width: "100%",
+									width: "100%"
 								}}
-								ref={wrapperRef}>
+								ref={wrapperRef}
+							>
 								<img
 									style={{
 										width: "90vw",
 										height: "90vw",
 										objectFit: "contain",
 										maxWidth: "400px",
-										maxHeight: "400px",
+										maxHeight: "400px"
 									}}
 									src={imgpopup ? server + "/" + imgpopup : noimg}
 									onError={({ currentTarget }) => {
@@ -1229,7 +1114,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 			NonFilterItem.filter(b => b.item_uuid === a.item_uuid).length
 				? {
 						...NonFilterItem.find(b => b.item_uuid === a.item_uuid),
-						free: a.free,
+						free: a.free
 				  }
 				: { ...a, b: 0, p: 0 }
 		)
@@ -1252,16 +1137,18 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					minWidth: "250px",
-				}}>
+					minWidth: "250px"
+				}}
+			>
 				<h1>Free Items</h1>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						{items.length ? (
 							<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
@@ -1269,8 +1156,9 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 									className="user-table"
 									style={{
 										width: "100%",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<thead>
 										<tr>
 											<th colSpan={3}>
@@ -1286,8 +1174,9 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 											<tr
 												key={item?.item_uuid || Math.random()}
 												style={{
-													height: "30px",
-												}}>
+													height: "30px"
+												}}
+											>
 												<td colSpan={3}>{item.item_title}</td>
 												<td colSpan={2}>
 													<input
@@ -1298,15 +1187,11 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 														style={{
 															width: "100px",
 															backgroundColor: "transparent",
-															color: "#000",
+															color: "#000"
 														}}
 														onChange={e =>
 															setItems(prev =>
-																prev.map(a =>
-																	a.item_uuid === item.item_uuid
-																		? { ...a, free: e.target.value }
-																		: a
-																)
+																prev.map(a => (a.item_uuid === item.item_uuid ? { ...a, free: e.target.value } : a))
 															)
 														}
 														onWheel={e => e.preventDefault()}
@@ -1359,7 +1244,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 			return {
 				...data,
 				p_price: data.item_price,
-				b_price: Math.floor(data.item_price * data.conversion || 0),
+				b_price: Math.floor(data.item_price * data.conversion || 0)
 			}
 		})
 	}, [])
@@ -1371,7 +1256,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 						...a,
 						old_price: a.item_price,
 						price_approval: "N",
-						item_price: item.p_price,
+						item_price: item.p_price
 				  }
 				: a
 		)
@@ -1387,24 +1272,27 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					minWidth: "250px",
-				}}>
+					minWidth: "250px"
+				}}
+			>
 				<h1>Free Items</h1>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
 							<table
 								className="user-table"
 								style={{
 									width: "100%",
-									height: "fit-content",
-								}}>
+									height: "fit-content"
+								}}
+							>
 								<thead>
 									<tr>
 										<th colSpan={2}>
@@ -1419,8 +1307,9 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 									<tr
 										key={item?.item_uuid || Math.random()}
 										style={{
-											height: "30px",
-										}}>
+											height: "30px"
+										}}
+									>
 										<td colSpan={2}>
 											<input
 												type="number"
@@ -1430,13 +1319,13 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 												style={{
 													width: "100px",
 													backgroundColor: "transparent",
-													color: "#000",
+													color: "#000"
 												}}
 												onChange={e =>
 													setItem(prev => ({
 														...prev,
 														p_price: e.target.value,
-														b_price: (e.target.value * item.conversion || 0).toFixed(2),
+														b_price: (e.target.value * item.conversion || 0).toFixed(2)
 													}))
 												}
 												onWheel={e => e.preventDefault()}
@@ -1453,13 +1342,13 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 												style={{
 													width: "100px",
 													backgroundColor: "transparent",
-													color: "#000",
+													color: "#000"
 												}}
 												onChange={e =>
 													setItem(prev => ({
 														...prev,
 														b_price: e.target.value,
-														p_price: (e.target.value / item.conversion || 0).toFixed(2),
+														p_price: (e.target.value / item.conversion || 0).toFixed(2)
 													}))
 												}
 												onWheel={e => e.preventDefault()}
@@ -1486,21 +1375,15 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 												style={{
 													width: "100px",
 													backgroundColor: "transparent",
-													color: "#000",
+													color: "#000"
 												}}
 												onChange={e => {
 													setDiscount(e.target.value)
 													let item_price = +item.item_price * +item.conversion
 													setItem(prev => ({
 														...prev,
-														b_price: (
-															item_price -
-															(item_price * e.target.value) / 100
-														)?.toFixed(2),
-														p_price: (
-															+item.item_price -
-															(+item.item_price * e.target.value) / 100
-														)?.toFixed(2),
+														b_price: (item_price - (item_price * e.target.value) / 100)?.toFixed(2),
+														p_price: (+item.item_price - (+item.item_price * e.target.value) / 100)?.toFixed(2)
 													}))
 												}}
 												onWheel={e => e.preventDefault()}
@@ -1541,7 +1424,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 		let data = order.items?.find(a => a.item_uuid === popupInfo.item_uuid)
 		setdata({
 			b: data?.b || 0,
-			p: data?.p || 0,
+			p: data?.p || 0
 		})
 	}, [])
 	const submitHandler = async e => {
@@ -1554,7 +1437,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 							? {
 									...a,
 									b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-									p: +data.p % +popupInfo.conversion,
+									p: +data.p % +popupInfo.conversion
 							  }
 							: a
 				  )
@@ -1564,17 +1447,17 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 						{
 							...popupInfo,
 							b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-							p: +data.p % +popupInfo.conversion,
-						},
+							p: +data.p % +popupInfo.conversion
+						}
 				  ]
 				: [
 						{
 							...popupInfo,
 							b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-							p: +data.p % +popupInfo.conversion,
-						},
+							p: +data.p % +popupInfo.conversion
+						}
 				  ]
-			).filter(a => a.b || a.p || a.free),
+			).filter(a => a.b || a.p || a.free)
 		}))
 		onSave()
 	}
@@ -1587,8 +1470,9 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
@@ -1604,7 +1488,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 											onChange={e =>
 												setdata({
 													...data,
-													b: e.target.value,
+													b: e.target.value
 												})
 											}
 											maxLength={42}
@@ -1623,7 +1507,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 											onChange={e =>
 												setdata({
 													...data,
-													p: e.target.value,
+													p: e.target.value
 												})
 											}
 											autoFocus={true}
@@ -1661,13 +1545,10 @@ function DiscountPopup({ onSave, setOrder, order }) {
 				a.exclude_discount === 0
 					? {
 							...a,
-							charges_discount: [
-								...(a.charges_discount || []),
-								{ title: "Bill Discounting", value: data },
-							],
+							charges_discount: [...(a.charges_discount || []), { title: "Bill Discounting", value: data }]
 					  }
 					: a
-			),
+			)
 		}))
 		onSave()
 	}
@@ -1678,11 +1559,11 @@ function DiscountPopup({ onSave, setOrder, order }) {
 			data: {
 				...order,
 				counter_uuid,
-				user_uuid: localStorage.getItem("user_uuid"),
+				user_uuid: localStorage.getItem("user_uuid")
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
@@ -1697,8 +1578,9 @@ function DiscountPopup({ onSave, setOrder, order }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">

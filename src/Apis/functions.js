@@ -205,10 +205,24 @@ export const Billing = async ({
 	shortage = 0,
 	adjustment = 0,
 	add_discounts,
+	creating_new,
+	order_uuid,
+	invoice_number,
 	edit_prices = []
 }) => {
+	let counterCharges = []
+	let counter_charges = []
+	try {
+		console.log({ creating_new })
+		counterCharges = await axios.post(
+			`/counterCharges/list`,
+			creating_new ? { counter_uuid: counter.counter_uuid } : { invoice_number }
+		)
+		counterCharges = await counterCharges?.data?.result
+	} catch (error) {
+		console.error("Error occurred in fetching counter charges:", error)
+	}
 	let newPriceItems = []
-	console.log("itemsdata", items)
 	for (let item of items) {
 		item = { ...item, item_total: 0 }
 		let edit_price = +edit_prices.find(a => a.item_uuid === item.item_uuid)?.item_price
@@ -218,13 +232,9 @@ export const Billing = async ({
 			? counter?.item_special_price?.find(a => a.item_uuid === item.item_uuid)?.price || 0
 			: 0)
 		let special_discount_percentage =
-			add_discounts || item.edit
-				? counter?.item_special_discount?.find(a => a.item_uuid === item.item_uuid)?.discount || 0
-				: 0
+			add_discounts || item.edit ? counter?.item_special_discount?.find(a => a.item_uuid === item.item_uuid)?.discount || 0 : 0
 		let company_discount_percentage =
-			add_discounts || item.edit
-				? counter?.company_discount?.find(a => a.company_uuid === item.company_uuid)?.discount || 0
-				: 0
+			add_discounts || item.edit ? counter?.company_discount?.find(a => a.company_uuid === item.company_uuid)?.discount || 0 : 0
 
 		item = {
 			...item,
@@ -287,9 +297,7 @@ export const Billing = async ({
 		}
 
 		let item_total =
-			item.status !== 3
-				? ((+item.item_desc_total || +item?.price || +item.item_price || 0) * (+item.qty || 0)).toFixed(2)
-				: 0
+			item.status !== 3 ? ((+item.item_desc_total || +item?.price || +item.item_price || 0) * (+item.qty || 0)).toFixed(2) : 0
 		if (billDiscounts && add_discounts) {
 			charges_discount.push(billDiscounts)
 			item_total = item_total * +((100 - +billDiscounts.value) / 100)
@@ -306,7 +314,6 @@ export const Billing = async ({
 		//console.log("item", item);
 		newPriceItems.push(item)
 	}
-	//console.log("newItemPrice", newPriceItems);
 	let order_grandtotal = Math.round(
 		newPriceItems.length > 1
 			? newPriceItems.map(a => +a.item_total || 0).reduce((a, b) => a + b) - replacement - shortage - adjustment
@@ -314,9 +321,12 @@ export const Billing = async ({
 			? (newPriceItems.map(a => a.item_total)[0] || 0) - replacement - shortage - adjustment
 			: 0
 	)
-	// console.log("itemsdata",newPriceItems)
-	console.log("itemsdata", order_grandtotal)
+	if (counterCharges?.length) {
+		counter_charges = counterCharges.map(i => i.charge_uuid)
+		order_grandtotal += counterCharges.reduce((total, i) => total + i.amt, 0)
+	}
 	return {
+		counter_charges,
 		counter_uuid: counter.counter_uuid,
 		order_grandtotal,
 		items: newPriceItems,

@@ -10,12 +10,9 @@ import Select from "react-select";
 import { useReactToPrint } from "react-to-print";
 let time = new Date();
 const CovertedQty = (qty, conversion) => {
-  let b = qty / +conversion;
-
+  let b = +qty / +conversion;
   b = Math.sign(b) * Math.floor(Math.sign(b) * b);
-
-  let p = Math.floor(qty % +conversion);
-
+  let p = Math.floor(+qty % +conversion);
   return b + ":" + p;
 };
 const initials = {
@@ -587,19 +584,10 @@ export function SuggestionsPopup({
   const [items, setItems] = useState([]);
   const [selectedItems, setSeletedItems] = useState([]);
   const getItemSuggestionsData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/warehouse/GetSuggestionItemsList/" + warehouse.warehouse_uuid,
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      console.log(response.data.result);
-      setItems(response.data.result);
-      setSeletedItems(response.data.result);
-    }
+    const response = await axios.get(`warehouse/suggestions/${warehouse.warehouse_uuid}`)
+		if (response.status !== 200) return
+		setItems(response.data)
+		setSeletedItems(response.data)
   };
   useEffect(() => {
     getItemSuggestionsData();

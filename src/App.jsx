@@ -66,7 +66,7 @@ import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 
 export let Version = 152
-export const server = "http://13.53.230.104:9000"
+export const server = "http://13.233.217.60:9000"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))

@@ -224,14 +224,15 @@ const MainAdmin = () => {
     removeAfterPrint: true,
   });
 
-  const getItemsData = async () => {
+  const getItemsData = async (item_uuid) => {
     const cachedData = localStorage.getItem('itemsData');
     if (cachedData) {
       setItems(JSON.parse(cachedData));
     } else {
       const response = await axios({
-        method: "get",
+        method: "post",
         url: "/items/GetItemList",
+        data:item_uuid,
         headers: {
           "Content-Type": "application/json",
         },
@@ -438,7 +439,7 @@ const MainAdmin = () => {
 
     getDetails(controller);
     getUsers();
-    getItemsData();
+
     getItemCategories();
     getCompanies();
     getItemsDataReminder();
@@ -449,6 +450,10 @@ const MainAdmin = () => {
       controller.abort();
     };
   }, []);
+  useEffect(() => {
+    let item_uuid = ordersData.map((a) => a.item_details.map((b) => b.item_uuid)).flat();   
+    if (item_uuid?.length&&!items.length) getItemsData(item_uuid);
+  }, [ordersData]);
   const orders = useMemo(
     () =>
       ordersData

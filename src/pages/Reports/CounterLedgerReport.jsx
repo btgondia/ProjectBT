@@ -169,7 +169,11 @@ const CounterLegerReport = () => {
   const counterList = useMemo(
     () =>
       [...counter, ...ledgerData].map((a) => ({
-        label: a.counter_title || a.ledger_title,
+        label: a.counter_title
+          ? `${a.counter_title} ,${a.route_title}`
+          : a.ledger_title
+          ? `${a.ledger_title} ,${a.ledger_group_title}`
+          : "",
         value: a.counter_uuid || a.ledger_uuid,
         closing_balance: (
           (a.closing_balance || 0) + +(a.opening_balance_amount || 0)
@@ -657,7 +661,6 @@ function Table({
                     className="flex"
                     // className="submit"
                     style={{
-                      
                       padding: "2px 5px",
                       borderRadius: "10%",
                       backgroundColor: allAmountValue.find(
@@ -765,8 +768,8 @@ function DiliveryPopup({
     if (response.data.success) setCounters(response.data.result);
   };
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
       GetReciptsModes();
@@ -780,13 +783,16 @@ function DiliveryPopup({
       });
       console.log(response.data.result);
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
         GetReciptsModes();
       }
     }
   };
-  
+
   const GetReciptsModes = async () => {
     const response = await axios({
       method: "post",

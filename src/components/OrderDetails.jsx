@@ -1550,6 +1550,18 @@ export function OrderDetails({
                     justifyContent: "space-between",
                   }}
                 >
+                <button
+                    style={{ width: "fit-Content" }}
+                    className="theme-btn"
+                    onClick={(e) => {
+                      e.target.blur();
+                      setCommentPoup((prev) => !prev);
+                    }}
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Comments"
+                  >
+                    <Comment />
+                  </button>
                   {!isCancelled && (
                     <button
                       style={{ width: "fit-Content", backgroundColor: "red" }}
@@ -1736,18 +1748,7 @@ export function OrderDetails({
                   >
                     <LuClipboardEdit />
                   </button>
-                  <button
-                    style={{ width: "fit-Content" }}
-                    className="theme-btn"
-                    onClick={(e) => {
-                      e.target.blur();
-                      setCommentPoup((prev) => !prev);
-                    }}
-                    data-tooltip-id="my-tooltip"
-                    data-tooltip-content="Comments"
-                  >
-                    <Comment />
-                  </button>
+                  
                 </div>
               </div>
 

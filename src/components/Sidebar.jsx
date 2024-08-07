@@ -42,6 +42,7 @@ let titleData = [
   { value: "counterStockReport", name: "Counter Stock Report" },
   { value: "StockAdjustmentReport", name: "Stock Adjustment Summary" },
   { value: "StockValuationReport", name: "Stock Valuation" },
+  { value: "purchaseRate", name: "Purchase Rate" },
   { value: "cashRegisterReport", name: "Cash Registers" },
   { value: "cancelOrders", name: "cancel Order" },
   { value: "CompletedTripsReport", name: "Completed Trips Report" },
@@ -262,7 +263,11 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                   {
                     name:"GST Report",
                     link:"#"
-                  }
+                  },
+                  {
+                    name: "Purchase Rate",
+                    link: "/admin/purchaseRate",
+                  },
                 ]
               : [
                   {
@@ -387,6 +392,16 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                   {
                     name: "Error Checking",
                     link: "#",
+                    submenu: [
+                      {
+                        name: "Closing Balance",
+                        link: "#",
+                      },
+                      {
+                        name: "Debit/Credit",
+                        link: "#",
+                      },
+                    ],
                   },
                 ]
               : [

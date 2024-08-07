@@ -8,7 +8,6 @@ const NavLink = ({
   icon,
   menuList,
   draggable,
-  href,
   setCollectionTags,
   setcalculationPopup,
   options,
@@ -22,9 +21,11 @@ const NavLink = ({
     setBankStatementImport,
     setOpeningBalanceDatePopup,
     getAccountingBalanceDetails,
+    getDebitCreditBalanceDetails,
     setGstReportPopup,
   } = useContext(context);
   const [searchFilter, setSearchFilter] = useState();
+  const [subMenuList, setSubMenuList] = useState();
   const sortList = (_list) => {
     let data = _list.filter(
       (i) =>
@@ -112,10 +113,42 @@ const NavLink = ({
                     } else if (menu.name === "Current Financial Year") {
                       setOpeningBalanceDatePopup(true);
                     } else if (menu.name === "Error Checking") {
-                      getAccountingBalanceDetails();
+                      setSubMenuList(menu.submenu);
                     } else if (menu.name === "GST Report") {
                       setGstReportPopup(true);
                     }
+                  }}
+                >
+                  {<Link to={menu.link}>{menu.name}</Link>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+         {subMenuList && (
+          <div
+            className="menu"
+            style={{
+              display: "block",
+              top:"35px",
+              width:  "200px",
+              minHeight:  "unset",
+              left: "285px"
+            }}
+          >
+            <div>
+              
+              {sortList(subMenuList).map((menu) => (
+                <div
+                  className="item"
+                  key={Math.random()}
+                  onClick={() => {
+                    if(menu.name === "Closing Balance"){
+                      getAccountingBalanceDetails()
+                    }else if(menu.name === "Debit/Credit"){
+                      getDebitCreditBalanceDetails()
+                    }
+                    setSubMenuList(null)
                   }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}

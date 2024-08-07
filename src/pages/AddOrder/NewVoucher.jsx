@@ -382,7 +382,7 @@ export default function NewVoucher() {
                     onClick={(e) => {
                       setOrder((prev) => ({
                         ...prev,
-                        voucher_date: "",
+                        voucher_date: 0,
                       }));
                       if (
                         order.type === "SALE_ORDER" ||

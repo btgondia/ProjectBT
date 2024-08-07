@@ -1041,6 +1041,56 @@ export default function PurchaseInvoice() {
                         />
                       </td>
                     </tr>
+                    <tr
+                      style={{
+                        height: "50px",
+
+                        borderBottom: "2px solid #fff",
+                      }}
+                    >
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <div className="inputGroup">Total</div>
+                      </td>
+
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        {(order?.item_details?.length > 1
+                          ? order?.item_details
+                              ?.map((a) => +a?.b || 0)
+                              .reduce((a, b) => a + b)
+                          : order?.item_details?.length
+                          ? order?.item_details[0]?.b
+                          : 0) || 0}
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        {(order?.item_details?.length > 1
+                          ? order?.item_details
+                              ?.map((a) => +a?.p || 0)
+                              .reduce((a, b) => a + b)
+                          : order?.item_details?.length
+                          ? order?.item_details[0]?.p
+                          : 0) || 0}
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      ></td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      ></td>
+                      <td></td>
+                    </tr>
                   </tbody>
                 ) : (
                   ""

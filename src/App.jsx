@@ -96,10 +96,11 @@ import { Tooltip } from "react-tooltip";
 import "./App.css";
 import "react-loading-bar/dist/index.css";
 import 'react-tooltip/dist/react-tooltip.css'
+import PurchaseRate from "./pages/Reports/PurchaseRate";
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 329;
+export let Version = 330;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -370,6 +371,7 @@ function App() {
             <Route path="/admin/Campaigns" element={<Campaigns />} />
             <Route path="/admin/counter" element={<Counter />} />
             <Route path="/admin/TestCounter" element={<TestCounter />} />
+            <Route path="/admin/purchaseRate" element={<PurchaseRate />} />
             <Route path="/admin/adminUsers" element={<Users />} />
             <Route path="/admin/items" element={<ItemsPage />} />
             <Route path="/admin/ledgers" element={<LedgersPage />} />

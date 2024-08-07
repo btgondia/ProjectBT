@@ -475,9 +475,10 @@ const State = (props) => {
     setTimeout(() => setNotification(null), 3000);
   };
   const getAccountingBalanceDetails = async () => {
+    setLoading(true);
     const response = await axios.get("/ledger/getAccountingBalanceDetails");
     if (response.data.success) {
-      setCheckAccountingBalance(response.data.result);
+      setCheckAccountingBalance({data:response.data.result,type:"accounting"});
       setNotification({
         success: true,
         message: "Accounting Balance Details Fetched Successfully",
@@ -488,6 +489,24 @@ const State = (props) => {
         message: "No Accounting Balance Details Difference Found",
       });
     }
+    setLoading(false);
+  };
+  const getDebitCreditBalanceDetails = async () => {
+    setLoading(true);
+    const response = await axios.get("/ledger/getDebitCreditAccountingBalanceDetails");
+    if (response.data.success) {
+      setCheckAccountingBalance({data:response.data.result,type:"Debit/Credit"});
+      setNotification({
+        success: true,
+        message: "Accounting Balance Details Fetched Successfully",
+      });
+    } else {
+      setNotification({
+        success: true,
+        message: "No Accounting Balance Details Difference Found",
+      });
+    }
+    setLoading(false);
   };
 
   return (
@@ -532,6 +551,7 @@ const State = (props) => {
         setCounterNotesPopup,
         gstReportPopup,
         setGstReportPopup,
+        getDebitCreditBalanceDetails,
       }}
     >
       {props.children}

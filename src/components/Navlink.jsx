@@ -42,7 +42,11 @@ const NavLink = ({
       <div
         className={`nav-link`}
         draggable={draggable}
-        onClick={() => menuList && setMenuVisible(!menuVisible)}
+        onClick={() => {
+          if (menuList) {
+            setMenuVisible(true);
+          }
+        }}
         onMouseLeave={(e) => setMenuVisible(false)}
         id={`item-category-${title?.toLowerCase()}`}
       >
@@ -117,6 +121,9 @@ const NavLink = ({
                     } else if (menu.name === "GST Report") {
                       setGstReportPopup(true);
                     }
+                    if(!menu.submenu){
+                      setMenuVisible(false);
+                    }
                   }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}
@@ -125,30 +132,30 @@ const NavLink = ({
             </div>
           </div>
         )}
-         {subMenuList && (
+        {subMenuList && (
           <div
             className="menu"
             style={{
               display: "block",
-              top:"35px",
-              width:  "200px",
-              minHeight:  "unset",
-              left: "285px"
+              top: "35px",
+              width: "200px",
+              minHeight: "unset",
+              left: "285px",
             }}
           >
             <div>
-              
               {sortList(subMenuList).map((menu) => (
                 <div
                   className="item"
                   key={Math.random()}
                   onClick={() => {
-                    if(menu.name === "Closing Balance"){
-                      getAccountingBalanceDetails()
-                    }else if(menu.name === "Debit/Credit"){
-                      getDebitCreditBalanceDetails()
+                    if (menu.name === "Closing Balance") {
+                      getAccountingBalanceDetails();
+                    } else if (menu.name === "Debit/Credit") {
+                      getDebitCreditBalanceDetails();
                     }
-                    setSubMenuList(null)
+                    setSubMenuList(null);
+                    setMenuVisible(false);
                   }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}

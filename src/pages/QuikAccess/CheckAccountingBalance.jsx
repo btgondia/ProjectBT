@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useMemo } from "react";
 
-const CheckAccountingBalance = ({ onSave, itemsData }) => {
+const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
   const items = useMemo(() => itemsData, [itemsData]);
   const fixAll = async () => {
     const response = await axios({
@@ -28,15 +28,21 @@ const CheckAccountingBalance = ({ onSave, itemsData }) => {
         }}
       >
         <div className="row">
-          <h1>Accounting Balance</h1>
-          <button
-            type="button"
-            onClick={fixAll}
-            className="submit"
-            style={{ width: "300px", marginRight: "100px" }}
-          >
-            Fix All
-          </button>
+          <h1>
+            {type === "accounting" ? "Accounting Balance" : "Debit Credit"}
+          </h1>
+          {type === "accounting" ? (
+            <button
+              type="button"
+              onClick={fixAll}
+              className="submit"
+              style={{ width: "300px", marginRight: "100px" }}
+            >
+              Fix All
+            </button>
+          ) : (
+            ""
+          )}
         </div>
 
         <div
@@ -61,25 +67,44 @@ const CheckAccountingBalance = ({ onSave, itemsData }) => {
                   }}
                 >
                   <thead>
-                    <tr>
-                      <th colSpan={3}>
-                        <div className="t-head-element">Title</div>
-                      </th>
-                      <th colSpan={2}>
-                        <div className="t-head-element">Opening Balance</div>
-                      </th>
-                      <th colSpan={2}>
-                        <div className="t-head-element">Closing Balance</div>
-                      </th>
-                      <th colSpan={2}>
-                        <div className="t-head-element">
-                          Accounting Voucher Balance
-                        </div>
-                      </th>
-                    </tr>
+                    {type === "accounting" ? (
+                      <tr>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Title</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Opening Balance</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Closing Balance</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">
+                            Accounting Voucher Balance
+                          </div>
+                        </th>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Voucher Date</div>
+                        </th>
+                       
+                        <th colSpan={2}>
+                          <div className="t-head-element">Voucher Amt</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Debit</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Credit</div>
+                        </th>
+                      </tr>
+                    )}
                   </thead>
                   <tbody className="tbody">
-                    {items?.map((item, i) => (
+                    {items?.map((item, i) =>type ==="accounting"
+                    ? (
                       <tr
                         key={
                           item?.ledger_uuid ||
@@ -94,6 +119,23 @@ const CheckAccountingBalance = ({ onSave, itemsData }) => {
                         <td colSpan={2}>{item.opening_balance}</td>
                         <td colSpan={2}>{item.closing_balance}</td>
                         <td colSpan={2}>{item.amount}</td>
+                      </tr>
+                    ):(
+                      <tr
+                        key={
+                          item?.ledger_uuid ||
+                          item.counter_uuid ||
+                          Math.random()
+                        }
+                        style={{
+                          height: "30px",
+                        }}
+                      >
+             
+                        <td colSpan={2}>{item.voucher_date}</td>
+                        <td colSpan={2}>{item.amt}</td>
+                        <td colSpan={2}>{item.credit}</td>
+                        <td colSpan={2}>{item.debit}</td>
                       </tr>
                     ))}
                   </tbody>

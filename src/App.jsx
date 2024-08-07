@@ -100,7 +100,7 @@ import PurchaseRate from "./pages/Reports/PurchaseRate";
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 330;
+export let Version = 331;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -590,7 +590,8 @@ function App() {
       {gstReportPopup && <GSTReport />}
       {checkAccountingBalance ? (
         <CheckAccountingBalance
-          itemsData={checkAccountingBalance}
+          itemsData={checkAccountingBalance.data}
+          type={checkAccountingBalance.type}
           onSave={() => {
             setCheckAccountingBalance(false);
           }}

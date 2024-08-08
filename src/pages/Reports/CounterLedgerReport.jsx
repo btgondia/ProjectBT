@@ -258,7 +258,8 @@ const CounterLegerReport = () => {
   }, [itemsData, showUnknown]);
   const CreditTotal = useMemo(() => {
     return itemsData
-      .filter((a) => showUnknown || a.voucher_date)
+      .filter((a) => showUnknown || 
+      +a.voucher_date)
       .reduce((a, b) => {
         if (b.amount > 0) return a + b.amount;
         return a;

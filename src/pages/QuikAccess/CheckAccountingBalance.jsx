@@ -86,7 +86,7 @@ const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
                       </tr>
                     ) : (
                       <tr>
-                        <th colSpan={3}>
+                        <th colSpan={2}>
                           <div className="t-head-element">Voucher Date</div>
                         </th>
                        

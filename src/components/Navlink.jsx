@@ -43,11 +43,14 @@ const NavLink = ({
         className={`nav-link`}
         draggable={draggable}
         onClick={() => {
-          if (menuList) {
+          if (menuList && !subMenuList?.length) {
             setMenuVisible(true);
           }
         }}
-        onMouseLeave={(e) => setMenuVisible(false)}
+        onMouseLeave={(e) => {
+          setMenuVisible(false);
+          setSubMenuList(null);
+        }}
         id={`item-category-${title?.toLowerCase()}`}
       >
         {icon}
@@ -121,7 +124,7 @@ const NavLink = ({
                     } else if (menu.name === "GST Report") {
                       setGstReportPopup(true);
                     }
-                    if(!menu.submenu){
+                    if (!menu.submenu) {
                       setMenuVisible(false);
                     }
                   }}
@@ -149,13 +152,13 @@ const NavLink = ({
                   className="item"
                   key={Math.random()}
                   onClick={() => {
+                    setSubMenuList(null);
+                    setMenuVisible(false);
                     if (menu.name === "Closing Balance") {
                       getAccountingBalanceDetails();
                     } else if (menu.name === "Debit/Credit") {
                       getDebitCreditBalanceDetails();
                     }
-                    setSubMenuList(null);
-                    setMenuVisible(false);
                   }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}

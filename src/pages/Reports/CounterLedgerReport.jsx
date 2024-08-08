@@ -196,10 +196,9 @@ const CounterLegerReport = () => {
         continue;
       }
       balance = +item.amount + +balance;
-      balance = (balance || 0).toFixed(2);
       result.push({
         ...item,
-        balance: truncateDecimals(balance + opening_balance_amount?.amount, 2),
+        balance,
       });
     }
     return result;

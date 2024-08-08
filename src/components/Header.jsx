@@ -132,6 +132,7 @@ const Header = () => {
           onClose={() => {
             localStorage.clear();
             sessionStorage.clear();
+            window.location.reload();
             Navigate("/login");
           }}
           onSave={() => setLogoutPopup(false)}

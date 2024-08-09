@@ -498,12 +498,29 @@ const State = (props) => {
       setCheckAccountingBalance({data:response.data.result,type:"Debit/Credit"});
       setNotification({
         success: true,
-        message: "Accounting Balance Details Fetched Successfully",
+        message: "Debit/Credit Balance Details Fetched Successfully",
       });
     } else {
       setNotification({
         success: true,
-        message: "No Accounting Balance Details Difference Found",
+        message: "No Credit/Debit Balance Details Difference Found",
+      });
+    }
+    setLoading(false);
+  };
+  const getGSTErrorDetails = async () => {
+    setLoading(true);
+    const response = await axios.get("/ledger/getGSTErrorDetails");
+    if (response.data.success) {
+      setCheckAccountingBalance({data:response.data.result,type:"GST Error"});
+      setNotification({
+        success: true,
+        message: "GST Error Details Fetched Successfully",
+      });
+    } else {
+      setNotification({
+        success: true,
+        message: "No GST Error Details Found",
       });
     }
     setLoading(false);
@@ -552,6 +569,7 @@ const State = (props) => {
         gstReportPopup,
         setGstReportPopup,
         getDebitCreditBalanceDetails,
+        getGSTErrorDetails,
       }}
     >
       {props.children}

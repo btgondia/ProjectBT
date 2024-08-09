@@ -401,6 +401,10 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                         name: "Debit/Credit",
                         link: "#",
                       },
+                      {
+                        name:"GST Error",
+                        link:"#"
+                      }
                     ],
                   },
                 ]

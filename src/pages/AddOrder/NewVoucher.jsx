@@ -93,8 +93,8 @@ export default function NewVoucher() {
         details: data.details.map((a, i) => ({
           ...a,
           uuid: a.ledger_uuid,
-          add: a.amount > 0 && (![4, 6].includes(i))? a.amount : i===3 ? Math.abs(a.amount) : 0,
-          sub: a.amount < 0 && i!==3 ? Math.abs(a.amount) : 0,
+          add: a.amount > 0 ? Math.abs(a.amount) : 0,
+          sub: a.amount < 0 ? Math.abs(a.amount) : 0,
         })),
       });
     }

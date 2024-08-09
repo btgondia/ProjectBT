@@ -22,6 +22,7 @@ const NavLink = ({
     setOpeningBalanceDatePopup,
     getAccountingBalanceDetails,
     getDebitCreditBalanceDetails,
+    getGSTErrorDetails,
     setGstReportPopup,
   } = useContext(context);
   const [searchFilter, setSearchFilter] = useState();
@@ -143,7 +144,7 @@ const NavLink = ({
               top: "35px",
               width: "200px",
               minHeight: "unset",
-              left: "285px",
+              left: "280px",
             }}
           >
             <div>
@@ -158,6 +159,8 @@ const NavLink = ({
                       getAccountingBalanceDetails();
                     } else if (menu.name === "Debit/Credit") {
                       getDebitCreditBalanceDetails();
+                    }else if (menu.name === "GST Error") {
+                      getGSTErrorDetails()
                     }
                   }}
                 >

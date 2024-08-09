@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useMemo } from "react";
 
-const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
+const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
   const items = useMemo(() => itemsData, [itemsData]);
   const fixAll = async () => {
     const response = await axios({
@@ -29,7 +29,11 @@ const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
       >
         <div className="row">
           <h1>
-            {type === "accounting" ? "Accounting Balance" : "Debit Credit"}
+            {type === "accounting"
+              ? "Accounting Balance"
+              : type === "GST Error"
+              ? type
+              : "Debit Credit"}
           </h1>
           {type === "accounting" ? (
             <button
@@ -67,7 +71,23 @@ const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
                   }}
                 >
                   <thead>
-                    {type === "accounting" ? (
+                    {type === "GST Error" ? (
+                      <tr>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Counter Title</div>
+                        </th>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Invoice Number</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Date</div>
+                        </th>
+
+                        <th colSpan={2}>
+                          <div className="t-head-element">Amount</div>
+                        </th>
+                      </tr>
+                    ) : type === "accounting" ? (
                       <tr>
                         <th colSpan={3}>
                           <div className="t-head-element">Title</div>
@@ -89,7 +109,7 @@ const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
                         <th colSpan={2}>
                           <div className="t-head-element">Voucher Date</div>
                         </th>
-                       
+
                         <th colSpan={2}>
                           <div className="t-head-element">Voucher Amt</div>
                         </th>
@@ -103,41 +123,61 @@ const CheckAccountingBalance = ({ onSave, itemsData, type  }) => {
                     )}
                   </thead>
                   <tbody className="tbody">
-                    {items?.map((item, i) =>type ==="accounting"
-                    ? (
-                      <tr
-                        key={
-                          item?.ledger_uuid ||
-                          item.counter_uuid ||
-                          Math.random()
-                        }
-                        style={{
-                          height: "30px",
-                        }}
-                      >
-                        <td colSpan={3}>{item.title}</td>
-                        <td colSpan={2}>{item.opening_balance}</td>
-                        <td colSpan={2}>{item.closing_balance}</td>
-                        <td colSpan={2}>{item.amount}</td>
-                      </tr>
-                    ):(
-                      <tr
-                        key={
-                          item?.ledger_uuid ||
-                          item.counter_uuid ||
-                          Math.random()
-                        }
-                        style={{
-                          height: "30px",
-                        }}
-                      >
-             
-                        <td colSpan={2}>{item.voucher_date}</td>
-                        <td colSpan={2}>{item.amt}</td>
-                        <td colSpan={2}>{item.credit}</td>
-                        <td colSpan={2}>{item.debit}</td>
-                      </tr>
-                    ))}
+                    {items?.map((item, i) =>
+                      type === "GST Error" ? (
+                        <tr
+                          key={
+                            item?.ledger_uuid ||
+                            item.counter_uuid ||
+                            Math.random()
+                          }
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td colSpan={3}>{item.title}</td>
+                          <td colSpan={3}>{(item.invoice_number||[]).join(", ")}</td>
+                          <td colSpan={2}>
+                            {new Date(item.voucher_date).toLocaleDateString()}
+                          </td>
+                          <td colSpan={2}>{item.error_type}</td>
+                        </tr>
+                      ) : type === "accounting" ? (
+                        <tr
+                          key={
+                            item?.ledger_uuid ||
+                            item.counter_uuid ||
+                            Math.random()
+                          }
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td colSpan={3}>{item.title}</td>
+                          <td colSpan={2}>{item.opening_balance}</td>
+                          <td colSpan={2}>{item.closing_balance}</td>
+                          <td colSpan={2}>{item.amount}</td>
+                        </tr>
+                      ) : (
+                        <tr
+                          key={
+                            item?.ledger_uuid ||
+                            item.counter_uuid ||
+                            Math.random()
+                          }
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td colSpan={2}>
+                            {new Date(item.voucher_date).toLocaleDateString()}
+                          </td>
+                          <td colSpan={2}>{item.amt}</td>
+                          <td colSpan={2}>{item.credit}</td>
+                          <td colSpan={2}>{item.debit}</td>
+                        </tr>
+                      )
+                    )}
                   </tbody>
                 </table>
               </div>

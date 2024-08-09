@@ -1,8 +1,12 @@
 import axios from "axios";
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
+import context from "../../context/context";
+
 
 const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
+  const {fixAllGST} = useContext(context)
   const items = useMemo(() => itemsData, [itemsData]);
+  const [checked, setChecked] = React.useState([]);
   const fixAll = async () => {
     const response = await axios({
       method: "put",
@@ -17,6 +21,7 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
       onSave();
     }
   };
+
   return (
     <div className="overlay" style={{ zIndex: 99999999999 }}>
       <div
@@ -47,6 +52,21 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
           ) : (
             ""
           )}
+          {checked.length? (
+            <button
+              type="button"
+              onClick={()=>{
+                fixAllGST(checked)
+                onSave()
+              }}
+              className="submit"
+              style={{ width: "300px", marginRight: "100px" }}
+            >
+              Fix
+            </button>
+          ) : (
+            ""
+          )}
         </div>
 
         <div
@@ -73,18 +93,34 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
                   <thead>
                     {type === "GST Error" ? (
                       <tr>
-                        <th colSpan={3}>
+                        <th colSpan={2}>
                           <div className="t-head-element">Counter Title</div>
                         </th>
-                        <th colSpan={3}>
+                        <th>
                           <div className="t-head-element">Invoice Number</div>
                         </th>
-                        <th colSpan={2}>
+                        <th>
                           <div className="t-head-element">Date</div>
                         </th>
 
-                        <th colSpan={2}>
-                          <div className="t-head-element">Amount</div>
+                        <th>
+                          <div className="t-head-element">Error Type</div>
+                        </th>
+                        <th>
+                          <div className="t-head-element">
+                
+                            <input
+                              type="checkbox"
+                              checked={checked.length === items.length}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setChecked(items.map((item) => item.accounting_voucher_uuid));
+                                } else {
+                                  setChecked([]);
+                                }
+                              }}
+                            />
+                          </div>
                         </th>
                       </tr>
                     ) : type === "accounting" ? (
@@ -135,12 +171,33 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
                             height: "30px",
                           }}
                         >
-                          <td colSpan={3}>{item.title}</td>
-                          <td colSpan={3}>{(item.invoice_number||[]).join(", ")}</td>
-                          <td colSpan={2}>
+                          <td colSpan={2}>{item.title}</td>
+                          <td>{(item.invoice_number || []).join(", ")}</td>
+                          <td>
                             {new Date(item.voucher_date).toLocaleDateString()}
                           </td>
-                          <td colSpan={2}>{item.error_type}</td>
+                          <td>{item.error_type}</td>
+                          <td>
+                            
+                            <input
+                              type="checkbox"
+                              checked={checked.find(
+                                (a) => a === item.accounting_voucher_uuid
+                              )}
+                              onChange={(e) => {
+                                setChecked((prev) =>
+                                  prev.find(
+                                    (a) => a === item.accounting_voucher_uuid
+                                  )
+                                    ? prev.filter(
+                                        (a) =>
+                                          a !== item.accounting_voucher_uuid
+                                      )
+                                    : [...prev, item.accounting_voucher_uuid]
+                                );
+                              }}
+                            />
+                          </td>
                         </tr>
                       ) : type === "accounting" ? (
                         <tr

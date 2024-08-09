@@ -525,6 +525,23 @@ const State = (props) => {
     }
     setLoading(false);
   };
+  const fixAllGST = async (checked) => {
+    setLoading(true)
+    const response = await axios({
+      method: "post",
+      url: "/ledger/removeGSTError",
+      data: checked,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log({ response });
+    if (response.data.success) {
+      setLoading(false)
+      setNotification({success:true,message:"Data Updated"})
+      getGSTErrorDetails()
+    }
+  };
 
   return (
     <Context.Provider
@@ -570,6 +587,7 @@ const State = (props) => {
         setGstReportPopup,
         getDebitCreditBalanceDetails,
         getGSTErrorDetails,
+        fixAllGST
       }}
     >
       {props.children}

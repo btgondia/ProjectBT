@@ -1,19 +1,13 @@
 import axios from "axios";
-import React, { useState, useContext, useEffect, useMemo } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import context from "../../context/context";
-import { AddCircle as AddIcon } from "@mui/icons-material";
-import { v4 as uuid } from "uuid";
-import Select from "react-select";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import {
-  compareObjects,
-  getFormateDate,
-  getLastWeekDates,
-} from "../../utils/helperFunctions";
+import { getLastWeekDates } from "../../utils/helperFunctions";
 import CheckAccountingBalance from "../QuikAccess/CheckAccountingBalance";
 export default function GSTReport() {
   const [data, setData] = useState();
   const [gstCounterError, setGstCounterError] = useState([]);
+  const [gstReporttitle, setGstReporttitle] = useState("");
+  const [accounting_voucher_uuid, setAccounting_voucher_uuid] = useState([]);
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
@@ -21,6 +15,7 @@ export default function GSTReport() {
     status: 0,
   });
   const [expanded, setExpanded] = useState({});
+  const [returnsPopup, setReturnsPopup] = useState();
 
   const toggleExpand = (key) => {
     setExpanded((prev) => ({
@@ -48,6 +43,39 @@ export default function GSTReport() {
       endDate: curTime,
     }));
   }, []);
+  const postGSTReport = async () => {
+    if (!gstReporttitle) {
+      setNotification({
+        message: "Please enter GST Report title!",
+        success: false,
+      });
+      return;
+    }
+    const response = await axios({
+      method: "post",
+      url: "/gstReturns/postGSTReturns",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        title: gstReporttitle,
+        created_by: localStorage.getItem("user_uuid"),
+        type: "gstr1",
+        status: 0,
+        accounting_voucher_uuid,
+      },
+    });
+    if (response.data.success) {
+      copyJson();
+      setReturnsPopup(null);
+      setGstReporttitle("");
+    } else {
+      setNotification({
+        message: "Failed to save GST Report!",
+        success: false,
+      });
+    }
+  };
 
   const submitHandler = async () => {
     getGSTCounterError();
@@ -69,6 +97,7 @@ export default function GSTReport() {
     });
     if (response.data.success) {
       setData(response.data.result);
+      setAccounting_voucher_uuid(response.data.accounting_voucher_uuid);
     }
   };
   const renderJson = (data, parentKey = "") => {
@@ -111,133 +140,194 @@ export default function GSTReport() {
     if (response.data.success) {
       setGstCounterError(response.data.result);
     }
-  }
+  };
+  const copyJson = () => {
+    navigator.clipboard
+      .writeText(JSON.stringify(data, null, 2))
+      .then(() => {
+        setNotification({
+          message: "JSON copied to clipboard!",
+          success: true,
+        });
+      })
+      .catch((err) => {
+        setNotification({
+          message: "Failed to copy JSON to clipboard!",
+          success: false,
+        });
+      });
+  };
 
   return (
     <>
-      <div className="overlay" style={{ zIndex: "999999" }}>
-        <div
-          className="modal"
-          style={{ height: "fit-content", width: "fit-content" }}
-        >
+      {returnsPopup ? (
+        <div className="overlay" style={{ zIndex: "999999" }}>
           <div
-            className="content"
-            style={{
-              height: "fit-content",
-              padding: "20px",
-              minWidth: "500px",
-            }}
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
           >
-            <div style={{ overflowY: "scroll" }}>
-              <div className="form">
-                <div className="row">
-                  <h1>GST Report</h1>
-                </div>
-
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                minWidth: "500px",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
                 <div className="form">
-                  <div className="row" style={{ alignItems: "end" }}>
-                    <label className="selectLabel">
-                      From
-                      <input
-                        type="date"
-                        onChange={(e) =>
-                          setSearchData((prev) => ({
-                            ...prev,
-                            startDate: e.target.value,
-                          }))
-                        }
-                        value={searchData.startDate}
-                        placeholder="Search Counter Title..."
-                        className="searchInput"
-                        pattern="\d{4}-\d{2}-\d{2}"
-                      />
-                    </label>
-                    <label className="selectLabel">
-                      To
-                      <input
-                        type="date"
-                        onChange={(e) =>
-                          setSearchData((prev) => ({
-                            ...prev,
-                            endDate: e.target.value,
-                          }))
-                        }
-                        value={searchData.endDate}
-                        placeholder="Search Route Title..."
-                        className="searchInput"
-                        pattern="\d{4}-\d{2}-\d{2}"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      className="submit"
-                      style={{
-                        maxWidth: "250px",
-                      }}
-                      onClick={() => {
-                        submitHandler();
-                      }}
-                    >
-                      Search
-                    </button>
+                  <div className="row">
+                    <h1>GST Report</h1>
                   </div>
-                </div>
-                {data ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {renderJson(data)}
-                  </div>
-                ) : (
-                  ""
-                )}
 
-                {data ? (
+                  <div className="form">
+                    <div className="row" style={{ alignItems: "end" }}>
+                      <label className="selectLabel">
+                        GST Return title
+                        <input
+                          type="text"
+                          onChange={(e) => setGstReporttitle(e.target.value)}
+                          value={gstReporttitle}
+                          placeholder="title..."
+                          className="searchInput"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     className="submit"
                     style={{
                       maxWidth: "250px",
                     }}
-                    onClick={() => {
-                      navigator.clipboard
-                        .writeText(JSON.stringify(data, null, 2))
-                        .then(() => {
-                          setNotification({
-                            message: "JSON copied to clipboard!",
-                            success: true,
-                          });
-                        })
-                        .catch((err) => {
-                          setNotification({
-                            message: "Failed to copy JSON to clipboard!",
-                            success: false,
-                          });
-                        });
-                    }}
+                    onClick={postGSTReport}
                   >
-                    Copy Json
+                    Save
                   </button>
-                ) : (
-                  ""
-                )}
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  setReturnsPopup(null);
+                }}
+                className="closeButton"
+              >
+                x
+              </button>
             </div>
-            <button
-              onClick={() => {
-                setGstReportPopup(null);
-              }}
-              className="closeButton"
-            >
-              x
-            </button>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="overlay" style={{ zIndex: "999999" }}>
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                minWidth: "500px",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <div className="form">
+                  <div className="row">
+                    <h1>GST Report</h1>
+                  </div>
+
+                  <div className="form">
+                    <div className="row" style={{ alignItems: "end" }}>
+                      <label className="selectLabel">
+                        From
+                        <input
+                          type="date"
+                          onChange={(e) =>
+                            setSearchData((prev) => ({
+                              ...prev,
+                              startDate: e.target.value,
+                            }))
+                          }
+                          value={searchData.startDate}
+                          placeholder="Search Counter Title..."
+                          className="searchInput"
+                          pattern="\d{4}-\d{2}-\d{2}"
+                        />
+                      </label>
+                      <label className="selectLabel">
+                        To
+                        <input
+                          type="date"
+                          onChange={(e) =>
+                            setSearchData((prev) => ({
+                              ...prev,
+                              endDate: e.target.value,
+                            }))
+                          }
+                          value={searchData.endDate}
+                          placeholder="Search Route Title..."
+                          className="searchInput"
+                          pattern="\d{4}-\d{2}-\d{2}"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="submit"
+                        style={{
+                          maxWidth: "250px",
+                        }}
+                        onClick={() => {
+                          submitHandler();
+                        }}
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                  {data ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      {renderJson(data)}
+                    </div>
+                  ) : (
+                    ""
+                  )}
+
+                  {data ? (
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{
+                        maxWidth: "250px",
+                      }}
+                      onClick={() => setReturnsPopup(true)}
+                    >
+                      Copy Json
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setGstReportPopup(null);
+                }}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {gstCounterError?.length ? (
         <CheckAccountingBalance
           itemsData={gstCounterError}

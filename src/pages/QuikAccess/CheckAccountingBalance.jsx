@@ -34,7 +34,7 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
       >
         <div className="row">
           <h1>
-            {type === "accounting"
+            {type==="counterGST"?"GST Formate Error":type === "accounting"
               ? "Accounting Balance"
               : type === "GST Error"
               ? type
@@ -91,7 +91,15 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
                   }}
                 >
                   <thead>
-                    {type === "GST Error" ? (
+                    {type==="counterGST"?<tr>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Counter Title</div>
+                        </th>
+                        <th>
+                          <div className="t-head-element">GST Number</div>
+                        </th>
+                   
+                      </tr>:type === "GST Error" ? (
                       <tr>
                         <th colSpan={2}>
                           <div className="t-head-element">Counter Title</div>
@@ -160,6 +168,20 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
                   </thead>
                   <tbody className="tbody">
                     {items?.map((item, i) =>
+                    type==="counterGST"?<tr
+                    key={
+                      item?.ledger_uuid ||
+                      item.counter_uuid ||
+                      Math.random()
+                    }
+                    style={{
+                      height: "30px",
+                    }}
+                  >
+                    <td colSpan={2}>{item.counter_title}</td>
+                    <td>{item.gst}</td>
+                   
+                  </tr>:
                       type === "GST Error" ? (
                         <tr
                           key={

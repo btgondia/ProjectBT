@@ -10,8 +10,10 @@ import {
   getFormateDate,
   getLastWeekDates,
 } from "../../utils/helperFunctions";
+import CheckAccountingBalance from "../QuikAccess/CheckAccountingBalance";
 export default function GSTReport() {
   const [data, setData] = useState();
+  const [gstCounterError, setGstCounterError] = useState([]);
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
@@ -48,6 +50,7 @@ export default function GSTReport() {
   }, []);
 
   const submitHandler = async () => {
+    getGSTCounterError();
     let startDate = new Date(
       new Date(searchData.startDate).setHours(0, 0, 0, 0)
     ).getTime();
@@ -97,60 +100,103 @@ export default function GSTReport() {
     return <div>{String(data)}</div>;
   };
 
-  return (
-    <div className="overlay" style={{ zIndex: "999999" }}>
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
-      >
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            minWidth: "500px",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <div className="form">
-              <div className="row">
-                <h1>GST Report</h1>
-              </div>
+  const getGSTCounterError = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/getGSTCounterErrorReport",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setGstCounterError(response.data.result);
+    }
+  }
 
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: "999999" }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "fit-content" }}
+        >
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              minWidth: "500px",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
               <div className="form">
-                <div className="row" style={{ alignItems: "end" }}>
-                  <label className="selectLabel">
-                    From
-                    <input
-                      type="date"
-                      onChange={(e) =>
-                        setSearchData((prev) => ({
-                          ...prev,
-                          startDate: e.target.value,
-                        }))
-                      }
-                      value={searchData.startDate}
-                      placeholder="Search Counter Title..."
-                      className="searchInput"
-                      pattern="\d{4}-\d{2}-\d{2}"
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    To
-                    <input
-                      type="date"
-                      onChange={(e) =>
-                        setSearchData((prev) => ({
-                          ...prev,
-                          endDate: e.target.value,
-                        }))
-                      }
-                      value={searchData.endDate}
-                      placeholder="Search Route Title..."
-                      className="searchInput"
-                      pattern="\d{4}-\d{2}-\d{2}"
-                    />
-                  </label>
+                <div className="row">
+                  <h1>GST Report</h1>
+                </div>
+
+                <div className="form">
+                  <div className="row" style={{ alignItems: "end" }}>
+                    <label className="selectLabel">
+                      From
+                      <input
+                        type="date"
+                        onChange={(e) =>
+                          setSearchData((prev) => ({
+                            ...prev,
+                            startDate: e.target.value,
+                          }))
+                        }
+                        value={searchData.startDate}
+                        placeholder="Search Counter Title..."
+                        className="searchInput"
+                        pattern="\d{4}-\d{2}-\d{2}"
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      To
+                      <input
+                        type="date"
+                        onChange={(e) =>
+                          setSearchData((prev) => ({
+                            ...prev,
+                            endDate: e.target.value,
+                          }))
+                        }
+                        value={searchData.endDate}
+                        placeholder="Search Route Title..."
+                        className="searchInput"
+                        pattern="\d{4}-\d{2}-\d{2}"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{
+                        maxWidth: "250px",
+                      }}
+                      onClick={() => {
+                        submitHandler();
+                      }}
+                    >
+                      Search
+                    </button>
+                  </div>
+                </div>
+                {data ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {renderJson(data)}
+                  </div>
+                ) : (
+                  ""
+                )}
+
+                {data ? (
                   <button
                     type="button"
                     className="submit"
@@ -158,68 +204,51 @@ export default function GSTReport() {
                       maxWidth: "250px",
                     }}
                     onClick={() => {
-                      submitHandler();
+                      navigator.clipboard
+                        .writeText(JSON.stringify(data, null, 2))
+                        .then(() => {
+                          setNotification({
+                            message: "JSON copied to clipboard!",
+                            success: true,
+                          });
+                        })
+                        .catch((err) => {
+                          setNotification({
+                            message: "Failed to copy JSON to clipboard!",
+                            success: false,
+                          });
+                        });
                     }}
                   >
-                    Search
+                    Copy Json
                   </button>
-                </div>
+                ) : (
+                  ""
+                )}
               </div>
-              {data ? (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {renderJson(data)}
-                </div>
-              ) : (
-                ""
-              )}
-
-              {data ? (
-                <button
-                  type="button"
-                  className="submit"
-                  style={{
-                    maxWidth: "250px",
-                  }}
-                  onClick={() => {
-                    navigator.clipboard
-                      .writeText(JSON.stringify(data, null, 2))
-                      .then(() => {
-                        setNotification({
-                          message: "JSON copied to clipboard!",
-                          success: true,
-                        });
-                      })
-                      .catch((err) => {
-                        setNotification({
-                          message: "Failed to copy JSON to clipboard!",
-                          success: false,
-                        });
-                      });
-                  }}
-                >
-                  Copy Json
-                </button>
-              ) : (
-                ""
-              )}
             </div>
-          </div>
-          <button
-            onClick={() => {
+            <button
+              onClick={() => {
                 setGstReportPopup(null);
-            }}
-            className="closeButton"
-          >
-            x
-          </button>
+              }}
+              className="closeButton"
+            >
+              x
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      {gstCounterError?.length ? (
+        <CheckAccountingBalance
+          itemsData={gstCounterError}
+          type={"counterGST"}
+          onSave={() => {
+            setGstCounterError([]);
+          }}
+        />
+      ) : (
+        ""
+      )}
+    </>
   );
 }

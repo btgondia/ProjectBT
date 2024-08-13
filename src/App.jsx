@@ -97,10 +97,12 @@ import "./App.css";
 import "react-loading-bar/dist/index.css";
 import 'react-tooltip/dist/react-tooltip.css'
 import PurchaseRate from "./pages/Reports/PurchaseRate";
+import GSTReturnsReport from "./pages/Reports/GSTReturnsReport";
+import HSNCode from "./pages/Master/HsnCode";
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 338;
+export let Version = 339;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -374,6 +376,7 @@ function App() {
             <Route path="/admin/purchaseRate" element={<PurchaseRate />} />
             <Route path="/admin/adminUsers" element={<Users />} />
             <Route path="/admin/items" element={<ItemsPage />} />
+            <Route path="/admin/hsn_code" element={<HSNCode />} />
             <Route path="/admin/ledgers" element={<LedgersPage />} />
             <Route path="/admin/ledgerGroup" element={<LedgerGroups />} />
             <Route
@@ -387,6 +390,10 @@ function App() {
             <Route
               path="/admin/BankStatementImport"
               element={<BankStatementImport />}
+            />
+            <Route
+              path="/admin/GSTReturnReport"
+              element={<GSTReturnsReport />}
             />
 
             <Route path="/admin/expense" element={<ExpansesPage />} />

@@ -15,7 +15,7 @@ import { server } from "../../App";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
-
+import Select from "react-select";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
@@ -27,6 +27,14 @@ const ItemsPage = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
   const { setNotification } = useContext(context);
+  const [codes, setCodes] = useState([]);
+  const getHSnCode = async () => {
+    const response = await axios.get("/hsn_code/getHSNCode");
+    if (response?.data?.result) {
+      localStorage.setItem("hsn_code", JSON.stringify(response.data.result));
+      setCodes(response.data.result);
+    }
+  };
   const getItemCategories = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
@@ -96,8 +104,8 @@ const ItemsPage = () => {
     ]
   );
   const getCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
-    
+    const cachedData = localStorage.getItem("companiesData");
+
     if (cachedData) {
       setCompanies(JSON.parse(cachedData));
     } else {
@@ -108,17 +116,21 @@ const ItemsPage = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "companiesData",
+          JSON.stringify(response.data.result)
+        );
         setCompanies(response.data.result);
       }
     }
-  };  
+  };
   useEffect(() => {
     const controller = new AbortController();
     getCompanies(controller);
     getItemCategories();
+    getHSnCode();
     return () => {
       controller.abort(controller);
     };
@@ -222,6 +234,7 @@ const ItemsPage = () => {
           popupInfo={popupForm}
           items={itemsData}
           setNotification={setNotification}
+          codes={codes}
         />
       ) : (
         ""
@@ -610,6 +623,7 @@ function NewUserForm({
   itemCategories,
   items,
   setNotification,
+  codes,
 }) {
   const [data, setdata] = useState({ item_group_uuid: [] });
 
@@ -768,6 +782,17 @@ function NewUserForm({
         : [...(prev.item_group_uuid ?? []), item_group_uuid],
     }));
   };
+  const HSNList = useMemo(
+    () =>
+      codes.map((a) => ({
+        label: a.title ? `${a.title} :${a.hsn_code}` : "",
+        value: a.hsn_code_uuid,
+        uuid: a.hsn_code_uuid,
+        code: a.hsn_code,
+      })),
+    [codes]
+  );
+  console.log({ HSNList,codes });
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
       <div
@@ -1191,6 +1216,7 @@ function NewUserForm({
                             });
                         }}
                         maxLength={8}
+                        disabled={true}
                       />
                     </label>
                     <label className="selectLabel" style={{ width: "100px" }}>
@@ -1226,6 +1252,38 @@ function NewUserForm({
                           No
                         </div>
                       </div>
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      HSN
+                      <Select
+                        options={HSNList}
+                        
+                        filterOption={(data, value) => {
+                          let label = data.data.label;
+                          if (label.toLowerCase().includes(value.toLowerCase())) return true;
+                          return false;
+                        }}
+                        onChange={(doc) => {
+                          setdata((prev) => ({
+                            ...prev,
+                            hsn: doc.code,
+                            hsn_code_uuid: doc.uuid,
+                          }));
+                        }}
+                        value={
+                          HSNList.find((a) => a.uuid === data.hsn_code_uuid) || {
+                            label: "",
+                            uuid: "",
+                            code: "",
+                          }
+                        }
+                        openMenuOnFocus={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        placeholder="Select"
+                      />
                     </label>
                   </div>
                   <div className="row">

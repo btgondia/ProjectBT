@@ -50,6 +50,7 @@ let titleData = [
   { value: "BankStatementImport", name: "Bank Statement Import" },
   { value: "addVoucher", name: "Add Voucher" },
   { value: "Outstandings", name: "Outstandings" },
+  {value:"hsn_code",name:"HSN Code"},
   { value: "pendingEntry", name: "Pending Order Entry" },
   { value: "pendingReciptsEntry", name: "Pending Recipt Entry" },
   { value: "stockTransferVouchers", name: "Voucher" },
@@ -59,6 +60,7 @@ let titleData = [
   { value: "purchaseInvoice", name: "Purchase Invoice" },
   { value: "creditNote", name: "Credit Note" },
   { value: "addStock", name: "New Stock Tranfer" },
+  { value: "GSTReturnReport", name: "GST Return Report" },
   { value: "adjustStock", name: "Adjust Stock" },
   { value: "ItemsReport", name: "Items Report" },
   { value: "userActivity", name: "User Activities" },
@@ -154,6 +156,10 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                   {
                     name: "Items",
                     link: "/admin/items",
+                  },
+                  {
+                    name: "HSN Code",
+                    link: "/admin/hsn_code",
                   },
                   {
                     name: "Categories",
@@ -263,6 +269,10 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                   {
                     name:"GST Report",
                     link:"#"
+                  },
+                  {
+                    name:"GST Return Report",
+                    link:"/admin/GSTReturnReport"
                   },
                   {
                     name: "Purchase Rate",

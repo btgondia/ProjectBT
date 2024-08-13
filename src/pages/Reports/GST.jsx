@@ -63,6 +63,9 @@ export default function GSTReport() {
         type: "gstr1",
         status: 0,
         accounting_voucher_uuid,
+        json_data:JSON.stringify(data),
+        from_date: new Date(searchData.startDate).getTime(),
+        to_date: new Date(searchData.endDate).getTime(),
       },
     });
     if (response.data.success) {

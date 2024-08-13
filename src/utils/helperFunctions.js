@@ -129,3 +129,12 @@ export const chcekIfDecimal = (value, digit = 2) => {
     return value;
   }
 };
+export const getDDMMYYDate = (date,sign='-') => {
+  const today = new Date(date);
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+  const yy = today.getFullYear();
+
+  return `${dd}${sign}${mm}${sign}${yy}`;
+};
+

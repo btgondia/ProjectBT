@@ -97,7 +97,7 @@ const LedgerReportPDF = ({
                         }}
                         colSpan={28}
                       >
-                        FSSAI : 20230106104339794
+                        FSSAI : 11523065000057
                       </td>
                     </tr>
                   

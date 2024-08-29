@@ -82,6 +82,7 @@ export function OrderDetails({
   userData = [],
   warehouseData = [],
   reminder = null,
+  setOrders,
 }) {
   const [promptLocalState, setPromptLocalState] = useState(null);
   const {
@@ -135,8 +136,8 @@ export function OrderDetails({
   const [deductionsCoinPopup, setDeductionsCoinPopup] = useState();
   const [deductionsData, setDeductionsData] = useState();
   const getRoutesData = async () => {
-    const cachedData = localStorage.getItem('routesData');
-    
+    const cachedData = localStorage.getItem("routesData");
+
     if (cachedData) {
       setRoutesData(JSON.parse(cachedData));
     } else {
@@ -147,23 +148,29 @@ export function OrderDetails({
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('routesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "routesData",
+          JSON.stringify(response.data.result)
+        );
         setRoutesData(response.data.result);
       }
     }
   };
 
   const fetchCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
+    const cachedData = localStorage.getItem("companiesData");
     try {
       if (cachedData) {
         setCompanies(JSON.parse(cachedData));
       } else {
         const response = await axios.get("/companies/getCompanies");
         if (response?.data?.result?.[0]) {
-          localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+          localStorage.setItem(
+            "companiesData",
+            JSON.stringify(response.data.result)
+          );
           setCompanies(response.data.result);
         }
       }
@@ -171,7 +178,7 @@ export function OrderDetails({
       console.log(error);
     }
   };
-  
+
   useEffect(CONTROL_AUTO_REFRESH, []);
   const getOrder = async (order_uuid) => {
     const response = await axios({
@@ -532,9 +539,8 @@ export function OrderDetails({
     }));
   }, [category, orderData]);
 
-
   const getItemsData = async () => {
-    const cachedData = localStorage.getItem('itemsData');
+    const cachedData = localStorage.getItem("itemsData");
     if (cachedData) {
       setItemsData(JSON.parse(cachedData));
     } else {
@@ -546,7 +552,7 @@ export function OrderDetails({
         },
       });
       if (response.data.success) {
-        localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+        localStorage.setItem("itemsData", JSON.stringify(response.data.result));
         setItemsData(response.data.result);
       }
     }
@@ -835,6 +841,11 @@ export function OrderDetails({
         modeTotal,
         location: window.location.pathname,
       });
+      if (setOrders)
+        setOrders((prev) =>
+          prev?.map((a) => (a.order_uuid === data.order_uuid ? data : a))
+        );
+
       onSave();
     } else {
       setMessagePopup({
@@ -874,6 +885,13 @@ export function OrderDetails({
         setMessagePopup(false);
       }
       if (completeOrder) {
+        if (setOrders)
+          setOrders((prev) =>
+            prev?.map((a) =>
+              a.order_uuid === orderData.order_uuid ? orderData : a
+            )
+          );
+
         onSave();
       }
     } catch (err) {
@@ -1075,6 +1093,10 @@ export function OrderDetails({
       console.log(response2);
     }
     if (response.data.success) {
+      if (setOrders)
+        setOrders((prev) =>
+          prev?.map((a) => (a.order_uuid === data.order_uuid ? data : a))
+        );
       onSave();
     }
     setWaiting(false);
@@ -1550,7 +1572,7 @@ export function OrderDetails({
                     justifyContent: "space-between",
                   }}
                 >
-                <button
+                  <button
                     style={{ width: "fit-Content" }}
                     className="theme-btn"
                     onClick={(e) => {
@@ -1748,7 +1770,6 @@ export function OrderDetails({
                   >
                     <LuClipboardEdit />
                   </button>
-                  
                 </div>
               </div>
 
@@ -3255,19 +3276,17 @@ export function OrderDetails({
           onSave={() => setDeductionsCoinPopup(false)}
           data={orderData.coin}
           updateBilling={(result) => {
-           
-              callBilling(
-                {
-                  ...order,
-                  coin: result,
-                  edit_prices: edit_prices.map((a) => ({
-                    ...a,
-                    item_price: a.p_price,
-                  })),
-                },
-                true
-              );
-            
+            callBilling(
+              {
+                ...order,
+                coin: result,
+                edit_prices: edit_prices.map((a) => ({
+                  ...a,
+                  item_price: a.p_price,
+                })),
+              },
+              true
+            );
           }}
         />
       ) : (
@@ -4002,8 +4021,8 @@ function DiliveryPopup({
   }, [counters, order?.counter_uuid]);
   console.log(outstanding);
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
       GetReciptsModes();
@@ -4015,9 +4034,12 @@ function DiliveryPopup({
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
         GetReciptsModes();
       }
@@ -4184,6 +4206,7 @@ function DiliveryPopup({
       onSave({ modes, outstanding, modeTotal });
     } else {
       postOrderData({ diliveredUser, modes, outstanding, modeTotal });
+      
       onSave();
     }
     setWaiting(false);

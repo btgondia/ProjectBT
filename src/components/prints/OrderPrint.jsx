@@ -199,7 +199,7 @@ const OrderPrint = ({
                   </tr>
                   <tr>
                     <td style={{ fontWeight: "600", fontSize: "x-small" }}>
-                      FSSAI : 20230106104339794
+                      FSSAI : 11523065000057
                     </td>
                   </tr>
                 </table>

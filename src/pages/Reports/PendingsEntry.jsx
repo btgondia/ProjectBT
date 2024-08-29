@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
@@ -18,26 +18,33 @@ const PendingsEntry = () => {
   const [allDoneConfimation, setAllDoneConfimation] = useState(false);
   const [doneDisabled, setDoneDisabled] = useState(false);
   const [excelDownloadPopup, setExcelDownloadPopup] = useState(false);
-
+  const [loading, setLoading] = useState(false); 
   const [counters, setCounters] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
+
   useEffect(() => {
     if (allDoneConfimation) {
       setDoneDisabled(true);
       setTimeout(() => setDoneDisabled(false), 5000);
     }
   }, [allDoneConfimation]);
-  const getOrders = async (controller = new AbortController()) => {
-    const response = await axios({
-      method: "get",
-      url: "/orders/getPendingEntry",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log("users", response);
-    if (response.data.success) setOrders(response.data.result);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef();
+
+  const getOrders = async (page = 1) => {
+    setLoading(true);
+    const response = await axios.get(
+      `/orders/getPendingEntry?page=${page}&limit=300`
+    );
+    if (response.data.success) {
+      setOrders((prevOrders) => [...prevOrders, ...response.data.result]);
+      console.log(response.data.result.length);
+      if (response.data.result.length < 300) {
+        setHasMore(false); // No more data if returned less than limit
+      }
+    }
+    setLoading(false);
   };
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
@@ -50,35 +57,37 @@ const PendingsEntry = () => {
     });
     if (response.data.success) setCounters(response.data.result);
   };
-  
+
   const getItemsData = async (controller = new AbortController()) => {
-		const cachedData = localStorage.getItem('itemsData');
-		if (cachedData) {
-			setItemsData(JSON.parse(cachedData));
-		} else {
-		  const response = await axios({
-			method: "get",
-			url: "/items/GetItemList",
-			headers: {
-			  "Content-Type": "application/json",
-			},
-		  });
-		  if (response.data.success) {
-			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
-			setItemsData(response.data.result);
-		  }
-		}
-	  };
-  useEffect(() => {}, []);
+    const cachedData = localStorage.getItem("itemsData");
+    if (cachedData) {
+      setItemsData(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/items/GetItemList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        localStorage.setItem("itemsData", JSON.stringify(response.data.result));
+        setItemsData(response.data.result);
+      }
+    }
+  };
   useEffect(() => {
     let controller = new AbortController();
-    getOrders(controller);
+
     getItemsData(controller);
     getCounter(controller);
     return () => {
       controller.abort();
     };
   }, []);
+  useEffect(() => {
+    getOrders(page);
+  }, [page]);
   const putOrder = async (invoice_number) => {
     const response = await axios({
       method: "put",
@@ -89,7 +98,9 @@ const PendingsEntry = () => {
       },
     });
     if (response.data.success) {
-      getOrders();
+      setOrders((prev) =>
+        prev.filter((a) => a.invoice_number !== invoice_number)
+      );
       return;
     }
   };
@@ -118,7 +129,7 @@ const PendingsEntry = () => {
           Pcs: item.p || 0,
           Free: item.free || 0,
           "Item Price":
-            +(item.edit_price||item.price || itemData?.item_price || 0) *
+            +(item.edit_price || item.price || itemData?.item_price || 0) *
             +(itemData?.conversion || 1),
           "Cash Credit":
             order.modes.filter(
@@ -151,7 +162,7 @@ const PendingsEntry = () => {
       .filter((a) => a.replacement)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-console.log(order)
+      console.log(order);
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -181,7 +192,7 @@ console.log(order)
       .filter((a) => a.adjustment)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order)
+      console.log(order);
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -211,7 +222,7 @@ console.log(order)
       .filter((a) => a.shortage)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order)
+      console.log(order);
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -254,6 +265,25 @@ console.log(order)
       })),
     [counters, orders]
   );
+  const lastOrderElementRef = useRef();
+
+  useEffect(() => {
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !loading) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    });
+
+    if (lastOrderElementRef.current) {
+      observer.current.observe(lastOrderElementRef.current);
+    }
+
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, [hasMore, loading]);
   return (
     <>
       <Sidebar />
@@ -294,6 +324,14 @@ console.log(order)
             setSelectedOrders={setSelectedOrders}
             getOrders={getOrders}
           />
+          {orders.length ? (
+            <div
+              ref={lastOrderElementRef}
+              style={{ height: 20, backgroundColor: "transparent" }}
+            ></div>
+          ) : (
+            ""
+          )}
         </div>
         {selectedOrders.length ? (
           <div className="flex" style={{ justifyContent: "start" }}>
@@ -367,8 +405,8 @@ console.log(order)
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
-            getOrders();
           }}
+          setOrders={setOrders}
           order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />

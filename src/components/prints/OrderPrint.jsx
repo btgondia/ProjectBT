@@ -14,6 +14,7 @@ const OrderPrint = ({
   footer = false,
   route = [],
   defaultOrder = { item_details: [] },
+  hsn_code = [],
 }) => {
   const isEstimate = order?.order_type === "E";
   const [gstValues, setGstVAlues] = useState([]);
@@ -105,33 +106,8 @@ const OrderPrint = ({
 
   const route_title =
     route?.find((a) => a.route_uuid === counter?.route_uuid)?.route_title || "";
-  function getNextChar(char) {
-    if (char < "a" || char > "z") {
-      throw new Error("Input must be a lowercase letter from a to z");
-    }
+  
 
-    let charCode = char.charCodeAt(0);
-
-    charCode++;
-
-    if (charCode > "z".charCodeAt(0)) {
-      charCode = "a".charCodeAt(0);
-    }
-
-    return String.fromCharCode(charCode);
-  }
-  const hsn_code = useMemo(() => {
-    let hsn = [];
-    let char = "a";
-    for (let item of item_details) {
-      console.log({ item });
-      if (item.hsn && !hsn.find((a) => a.hsn === item.hsn)) {
-        hsn.push({ hsn: item.hsn, char });
-        char = getNextChar(char);
-      }
-    }
-    return hsn;
-  }, [item_details]);
 
   return (
     <div
@@ -905,7 +881,7 @@ const OrderPrint = ({
                     }}
                   >
                     {counter?.credit_rating || ""}
-                    {", "} HSN codes:: {hsn_code?.map((a) => `${a.char}:${a.hsn}`).join(", ")} 
+                    {", "} HSN codes:: {hsn_code?.map((a) => `${a?.char||""}:${a?.hsn||""}`).join(", ")} 
                   </td>
                 </tr>
               </>

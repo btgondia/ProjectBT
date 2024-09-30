@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import OrderPrint from "./OrderPrint";
 
@@ -94,6 +94,34 @@ const OrderPdf = () => {
       getRoute();
     })();
   }, [params.order_uuid]);
+  function getNextChar(char) {
+    if (char < "a" || char > "z") {
+      throw new Error("Input must be a lowercase letter from a to z");
+    }
+
+    let charCode = char.charCodeAt(0);
+
+    charCode++;
+
+    if (charCode > "z".charCodeAt(0)) {
+      charCode = "a".charCodeAt(0);
+    }
+
+    return String.fromCharCode(charCode);
+  }
+
+  const hsn_code = useMemo(() => {
+    let hsn = [];
+    let char = "a";
+    for (let item of order.item_details) {
+      console.log({ item });
+      if (item.hsn && !hsn.find((a) => a.hsn === item.hsn)) {
+        hsn.push({ hsn: item.hsn, char });
+        char = getNextChar(char);
+      }
+    }
+    return hsn;
+  }, [order.item_details]);
 
   return (
     <div id="item-container" style={{ backgroundColor: "#fff" }}>
@@ -111,6 +139,7 @@ const OrderPdf = () => {
             item_details={order?.item_details?.slice(a * 12, 12 * (a + 1))}
             footer={!(order?.item_details?.length > 12 * (a + 1))}
             route={route}
+            hsn_code={hsn_code}
           />
         ))}
     </div>

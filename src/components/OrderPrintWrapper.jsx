@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback, useMemo } from "react"
 import OrderPrint from "./prints/OrderPrint"
 import PendingPaymentsSummary from "./prints/PendingPaymentsSummary"
 
@@ -45,7 +45,35 @@ const OrderPrintWrapper = ({
 		const result = arrayOfArrays?.map(_i => ({ ...order, item_details: _i }))
 		return result
 	}
-
+	function getNextChar(char) {
+		if (char < "a" || char > "z") {
+		  throw new Error("Input must be a lowercase letter from a to z");
+		}
+	
+		let charCode = char.charCodeAt(0);
+	
+		charCode++;
+	
+		if (charCode > "z".charCodeAt(0)) {
+		  charCode = "a".charCodeAt(0);
+		}
+	
+		return String.fromCharCode(charCode);
+	  }
+	
+	  const hsn_code = useCallback((item_details=[]) => {
+		let hsn = [];
+		let char = "a";
+		for (let item of item_details) {
+		  console.log({ item });
+		  if (item.hsn && !hsn.find((a) => a.hsn === item.hsn)) {
+			hsn.push({ hsn: item.hsn, char });
+			char = getNextChar(char);
+		  }
+		}
+		return hsn;
+	  }, []);
+	
 	return (
 		<div className="order-print-layout">
 			<div ref={componentRef}>
@@ -78,6 +106,7 @@ const OrderPrintWrapper = ({
 							.map((a, i) => ({ ...a, sr: i + 1 }))
 					}))
 					?.map(__order => {
+						let order_hsn = hsn_code(__order?.item_details)
 						return getPrintData(__order)?.map((order, i, array) => (
 							<OrderPrint
 								counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
@@ -93,6 +122,7 @@ const OrderPrintWrapper = ({
 								footer={i + 1 === array.length}
 								category={category}
 								route={route}
+								hsn_code={order_hsn}
 								{...props}
 							/>
 						))

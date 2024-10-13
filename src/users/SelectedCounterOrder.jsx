@@ -12,10 +12,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
-  const [foodLicensePopup, setFoodLicencePopup] = useState(false);
+  // const [foodLicensePopup, setFoodLicencePopup] = useState(false);
   const [checkNumberPopup, setCheckNumberPopup] = useState(false);
   const [pricePopup, setPricePopup] = useState(false);
-  const [number, setNumber] = useState(false);
+  // const [number, setNumber] = useState(false);
   const [confirmItemsPopup, setConfirmItemPopup] = useState(false);
   const [enable, setEnable] = useState(false);
   const [userData, setUserData] = useState({});
@@ -79,23 +79,23 @@ const SelectedCounterOrder = () => {
   useEffect(() => {
     callBilling();
   }, [order?.items]);
-  useEffect(() => {
-    if (counter?.mobile?.length) {
-      if (
-        counter?.mobile.filter((a) =>
-          a?.lable?.find((b) => b.type === "wa" && +b.varification)
-        )?.length &&
-        counter?.mobile.filter(
-          (a) =>
-            a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
-        )
-      ) {
-        setNumber(false);
-      } else {
-        setNumber(true);
-      }
-    }
-  }, [counter?.mobile]);
+  // useEffect(() => {
+  //   if (counter?.mobile?.length) {
+  //     if (
+  //       counter?.mobile.filter((a) =>
+  //         a?.lable?.find((b) => b.type === "wa" && +b.varification)
+  //       )?.length &&
+  //       counter?.mobile.filter(
+  //         (a) =>
+  //           a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
+  //       )
+  //     ) {
+  //       setNumber(false);
+  //     } else {
+  //       setNumber(true);
+  //     }
+  //   }
+  // }, [counter?.mobile]);
   const getCounter = async () => {
     const response = await axios({
       method: "post",
@@ -108,7 +108,7 @@ const SelectedCounterOrder = () => {
     if (response.data.success) {
       setCounter(response.data.result);
       if (!response.data.result.food_license) {
-        setFoodLicencePopup(true);
+        // setFoodLicencePopup(true);
       } else {
         // setCheckNumberPopup(true);
       }
@@ -160,7 +160,7 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
-      setFoodLicencePopup(false);
+      // setFoodLicencePopup(false);
       // setCheckNumberPopup(true);
     }
   };
@@ -362,7 +362,7 @@ const SelectedCounterOrder = () => {
 
   return (
     <>
-      {number ? (
+      {/* {number ? (
         <MobileNumberPopup
           counter={counter}
           getCounter={getCounter}
@@ -370,7 +370,7 @@ const SelectedCounterOrder = () => {
         />
       ) : (
         ""
-      )}
+      )} */}
 
       <nav
         className="user_nav nav_styling"
@@ -1313,7 +1313,7 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
-      {foodLicensePopup ? (
+      {/* {foodLicensePopup ? (
         <div className="overlay">
           <div
             className="modal"
@@ -1368,7 +1368,7 @@ const SelectedCounterOrder = () => {
         </div>
       ) : (
         ""
-      )}
+      )} */}
       {invoice_number ? (
         <div className="overlay">
           <div

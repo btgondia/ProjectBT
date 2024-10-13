@@ -825,7 +825,7 @@ const OrderPrint = ({
                               textAlign: "right",
                             }}
                           >
-                            {_charge.narration} : +{_charge.amt}
+                            {_charge.narration} : {_charge.amount>0?"+":''}{_charge.amt}
                           </td>
                         </tr>
                       ))}
@@ -840,7 +840,7 @@ const OrderPrint = ({
                                 textAlign: "right",
                               }}
                             >
-                              {i[0]} : -{i[1]}
+                              {i[0]} : {i[1]>0?"-":''}{i[1]}
                             </td>
                           </tr>
                         ))}

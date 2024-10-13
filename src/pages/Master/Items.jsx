@@ -16,6 +16,8 @@ import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
 import Select from "react-select";
+import CounterSequence from "../../components/CounterSequence";
+import ItemCategorySequence from "../../components/ItemCategorySequence";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
@@ -26,6 +28,7 @@ const ItemsPage = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
+  const [sequencePopup, setSequencePopup] = useState(false);
   const { setNotification } = useContext(context);
   const [codes, setCodes] = useState([]);
   const getHSnCode = async () => {
@@ -206,7 +209,12 @@ const ItemsPage = () => {
                 <span>Disabled Items</span>
               </label>
             </div>
-
+            <button
+              className="theme-btn"
+              onClick={() => setSequencePopup(true)}
+            >
+              Sequence
+            </button>
             <button className="theme-btn" onClick={() => setPopupForm(true)}>
               Add
             </button>
@@ -235,6 +243,17 @@ const ItemsPage = () => {
           items={itemsData}
           setNotification={setNotification}
           codes={codes}
+        />
+      ) : (
+        ""
+      )}
+      {sequencePopup ? (
+        <ItemCategorySequence
+          onSave={() => {
+            setSequencePopup(false);
+            getItemCategories();
+          }}
+          itemCategories={itemCategories}
         />
       ) : (
         ""
@@ -792,7 +811,7 @@ function NewUserForm({
       })),
     [codes]
   );
-  console.log({ HSNList,codes });
+  console.log({ HSNList, codes });
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
       <div
@@ -1259,10 +1278,10 @@ function NewUserForm({
                       HSN
                       <Select
                         options={HSNList}
-                        
                         filterOption={(data, value) => {
                           let label = data.data.label;
-                          if (label.toLowerCase().includes(value.toLowerCase())) return true;
+                          if (label.toLowerCase().includes(value.toLowerCase()))
+                            return true;
                           return false;
                         }}
                         onChange={(doc) => {
@@ -1273,7 +1292,9 @@ function NewUserForm({
                           }));
                         }}
                         value={
-                          HSNList.find((a) => a.uuid === data.hsn_code_uuid) || {
+                          HSNList.find(
+                            (a) => a.uuid === data.hsn_code_uuid
+                          ) || {
                             label: "",
                             uuid: "",
                             code: "",

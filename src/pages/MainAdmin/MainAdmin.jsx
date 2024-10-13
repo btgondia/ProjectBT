@@ -53,6 +53,10 @@ const MainAdmin = () => {
   const [btn, setBtn] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
+  const [
+    confirmMarkPaymentPendingDialogue,
+    setConfirmMarkPaymentPendingDialogue,
+  ] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState([]);
 
@@ -172,8 +176,8 @@ const MainAdmin = () => {
   }, [selectedWarehouseOrders]);
 
   const getCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
-    
+    const cachedData = localStorage.getItem("companiesData");
+
     if (cachedData) {
       setCompanies(JSON.parse(cachedData));
     } else {
@@ -184,13 +188,16 @@ const MainAdmin = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "companiesData",
+          JSON.stringify(response.data.result)
+        );
         setCompanies(response.data.result);
       }
     }
-  };  
+  };
 
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
@@ -225,25 +232,25 @@ const MainAdmin = () => {
   });
 
   const getItemsData = async (item_uuid) => {
-    const cachedData = localStorage.getItem('itemsData');
+    const cachedData = localStorage.getItem("itemsData");
     if (cachedData) {
       setItems(JSON.parse(cachedData));
     } else {
       const response = await axios({
         method: "post",
         url: "/items/GetItemList",
-        data:item_uuid,
+        data: item_uuid,
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data.success) {
-        localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+        localStorage.setItem("itemsData", JSON.stringify(response.data.result));
         setItems(response.data.result);
       }
     }
   };
-  
+
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -265,16 +272,7 @@ const MainAdmin = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
-      setCounter(
-        response.data.result.map((b) => ({
-          ...b,
-          route_uuid: b.route_uuid || "none",
-          route_title:
-            routesData.find((a) => a.route_uuid === b.route_uuid)
-              ?.route_title || "-",
-        }))
-      );
+    if (response.data.success) setCounter(response.data.result);
   };
   const getDetails = async (controller) => {
     const response = await axios({
@@ -292,8 +290,8 @@ const MainAdmin = () => {
   }, [tasks]);
 
   const getRoutesData = async () => {
-    const cachedData = localStorage.getItem('routesData');
-    
+    const cachedData = localStorage.getItem("routesData");
+
     if (cachedData) {
       setRoutesData(JSON.parse(cachedData));
     } else {
@@ -304,14 +302,17 @@ const MainAdmin = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('routesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "routesData",
+          JSON.stringify(response.data.result)
+        );
         setRoutesData(response.data.result);
       }
     }
   };
-  
+
   const handleWarehouseChacking = async () => {
     let data = [];
 
@@ -413,8 +414,8 @@ const MainAdmin = () => {
   }, [location.pathname]);
 
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
     } else {
@@ -425,14 +426,17 @@ const MainAdmin = () => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
       }
     }
   };
-  
+
   useEffect(() => {
     const controller = new AbortController();
     getCounter();
@@ -451,8 +455,10 @@ const MainAdmin = () => {
     };
   }, []);
   useEffect(() => {
-    let item_uuid = ordersData.map((a) => a.item_details.map((b) => b.item_uuid)).flat();   
-    if (item_uuid?.length&&!items.length) getItemsData(item_uuid);
+    let item_uuid = ordersData
+      .map((a) => a.item_details.map((b) => b.item_uuid))
+      .flat();
+    if (item_uuid?.length && !items.length) getItemsData(item_uuid);
   }, [ordersData]);
   const orders = useMemo(
     () =>
@@ -826,7 +832,7 @@ const MainAdmin = () => {
   };
 
   const handleRefresh = async () => {
-    if (isCooldown) return; 
+    if (isCooldown) return;
 
     setOrdersSpinner(true);
     setIsCooldown(true);
@@ -873,18 +879,18 @@ const MainAdmin = () => {
       >
         <Header />
         <AiOutlineReload
-        style={{
-          position: "fixed",
-          fontSize: "20px",
-          zIndex: "99999",
-          top: "10px",
-          right: "280px",
-          cursor: isCooldown ? "not-allowed" : "pointer",
-          color: isCooldown ? "grey" : "inherit", // Optional: change color during cooldown
-        }}
-        className={ordersSpinner ? "rotating" : ""}
-        onClick={handleRefresh}
-      />
+          style={{
+            position: "fixed",
+            fontSize: "20px",
+            zIndex: "99999",
+            top: "10px",
+            right: "280px",
+            cursor: isCooldown ? "not-allowed" : "pointer",
+            color: isCooldown ? "grey" : "inherit", // Optional: change color during cooldown
+          }}
+          className={ordersSpinner ? "rotating" : ""}
+          onClick={handleRefresh}
+        />
         {selectedPrintOrder.length ? (
           <div
             style={{
@@ -965,6 +971,27 @@ const MainAdmin = () => {
               />
             </div>
           </div>
+          {confirmMarkPaymentPendingDialogue ? (
+            <MessagePopup
+              onSave={() => {
+                setConfirmMarkPaymentPendingDialogue(false);
+                setSelectedOrder((prev) =>
+                  prev.filter((i) => !i.payment_pending)
+                );
+                setNotesState({ active: true, index: 0 });
+              }}
+              onClose={() => {
+                setConfirmMarkPaymentPendingDialogue(false);
+              }}
+              message={
+                "Are you sure you want to mark the selected orders as pending payment?"
+              }
+              button2={"Confirm"}
+              button1={"Discard"}
+            />
+          ) : (
+            ""
+          )}
           {dropdown && (
             <div
               id="customer-details-dropdown"
@@ -1039,10 +1066,11 @@ const MainAdmin = () => {
                         className="simple_Logout_button"
                         type="button"
                         onClick={() => {
-                          setSelectedOrder((prev) =>
-                            prev.filter((i) => !i.payment_pending)
-                          );
-                          setNotesState({ active: true, index: 0 });
+                          // setSelectedOrder((prev) =>
+                          //   prev.filter((i) => !i.payment_pending)
+                          // );
+                          // setNotesState({ active: true, index: 0 });
+                          setConfirmMarkPaymentPendingDialogue(true);
                         }}
                       >
                         Mark As Pending Payment
@@ -1966,7 +1994,8 @@ const MainAdmin = () => {
                 category_title: category.find(
                   (b) =>
                     b.category_uuid ===
-                    items.find((b) => b.item_uuid === a.item_uuid)?.category_uuid
+                    items.find((b) => b.item_uuid === a.item_uuid)
+                      ?.category_uuid
                 )?.category_title,
               }))
               .sort(
@@ -2117,6 +2146,8 @@ const MainAdmin = () => {
             print={printPaymentSummary}
             counterOrders={printDependencies}
             paymentsSummaryRef={paymentsSummaryRef}
+            routers={routesData}
+            counters={counter}
           />
         </div>
       )}

@@ -127,7 +127,7 @@ const OrderPrintWrapper = ({
 							/>
 						))
 					})}
-				{pendingPayments && <PendingPaymentsSummary counterOrders={counterOrders} print={print} />}
+				{pendingPayments && <PendingPaymentsSummary counterOrders={counterOrders} print={print} counters={counters} routers={route}/>}
 			</div>
 		</div>
 	)

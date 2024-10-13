@@ -21,20 +21,16 @@
 
 #pending-payments-summary {
 	background: #fff;
-	padding: 10px;
+	width:100%
 }
 
-#pending-payments-summary > h3 {
-	padding-top: 5px;
-}
+
 
 #pending-payments-summary table {
 	width: 100%;
 }
 
-#pending-payments-summary td {
-	padding: 10px;
-}
+
 
 #pending-payments-summary tr > td:first-child {
 	padding-left: 0;
@@ -47,7 +43,7 @@
 }
 
 #pending-payments-summary .counter-wrapper {
-	margin: 40px 0;
+	/* margin: 10px 0; */
 }
 
 #pending-payments-summary .counter-wrapper > div {

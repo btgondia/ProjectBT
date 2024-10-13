@@ -20,7 +20,6 @@ const OrderPrint = ({
   const [gstValues, setGstVAlues] = useState([]);
   const [appliedCounterCharges, setAppliedCounterCharges] = useState(null);
   const chcekIfDecimal = (value) => {
-    console.log({ value, isDecimal: value.toString().includes(".") });
     if (value.toString().includes(".")) {
       return parseFloat(value || 0).toFixed(2);
     } else {

@@ -362,7 +362,7 @@ const OrderPrint = ({
             Free
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-            Tax (%)
+            GST (%)
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Unit Price
@@ -835,7 +835,13 @@ const OrderPrint = ({
                                 textAlign: "left",
                               }}
                             >
-                              CESS: {css_percentage}% 
+                              CESS: {css_percentage}% ={" "}
+                              {(order?.item_details?.reduce(
+                                (a, b) => a + +b?.item_total,
+                                0
+                              ) *
+                                css_percentage) /
+                                100}
                             </td>
                           </tr>
                         </>

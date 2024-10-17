@@ -521,7 +521,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
               </th>
               <th>
                 <div className="t-head-element">
-                  <span>CSS(%)</span>
+                  <span>CESS(%)</span>
                   <div className="sort-buttons-container">
                     <button
                       onClick={() => {

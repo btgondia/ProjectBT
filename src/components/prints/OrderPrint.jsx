@@ -19,6 +19,14 @@ const OrderPrint = ({
   const isEstimate = order?.order_type === "E";
   const [gstValues, setGstVAlues] = useState([]);
   const [appliedCounterCharges, setAppliedCounterCharges] = useState(null);
+
+  const css_percentage = useMemo(() => {
+    let css = 0;
+    for (let a of item_details) {
+      if (a.css_percentage) css += a.css_percentage;
+    }
+    return css;
+  }, [item_details]);
   const chcekIfDecimal = (value) => {
     if (value.toString().includes(".")) {
       return parseFloat(value || 0).toFixed(2);
@@ -57,6 +65,9 @@ const OrderPrint = ({
     const arr = [];
     const gst_value = Array.from(
       new Set(defaultOrder.item_details.map((a) => +a.gst_percentage))
+    );
+    const css_value = Array.from(
+      new Set(defaultOrder.item_details.map((a) => +a.css_percentage))
     );
 
     for (let a of gst_value) {
@@ -105,8 +116,6 @@ const OrderPrint = ({
 
   const route_title =
     route?.find((a) => a.route_uuid === counter?.route_uuid)?.route_title || "";
-  
-
 
   return (
     <div
@@ -816,6 +825,23 @@ const OrderPrint = ({
                             </tr>
                           ))
                         : ""}
+                      {css_percentage ? (
+                        <>
+                          <tr>
+                            <td
+                              style={{
+                                fontWeight: "600",
+                                fontSize: "xx-small",
+                                textAlign: "left",
+                              }}
+                            >
+                              CESS: {css_percentage}% 
+                            </td>
+                          </tr>
+                        </>
+                      ) : (
+                        ""
+                      )}
                       {appliedCounterCharges?.map((_charge) => (
                         <tr>
                           <td
@@ -825,7 +851,9 @@ const OrderPrint = ({
                               textAlign: "right",
                             }}
                           >
-                            {_charge.narration} : {_charge.amount>0?"+":''}{_charge.amt}
+                            {_charge.narration} :{" "}
+                            {_charge.amount > 0 ? "+" : ""}
+                            {_charge.amt}
                           </td>
                         </tr>
                       ))}
@@ -840,7 +868,8 @@ const OrderPrint = ({
                                 textAlign: "right",
                               }}
                             >
-                              {i[0]} : {i[1]>0?"-":''}{i[1]}
+                              {i[0]} : {i[1] > 0 ? "-" : ""}
+                              {i[1]}
                             </td>
                           </tr>
                         ))}
@@ -880,7 +909,10 @@ const OrderPrint = ({
                     }}
                   >
                     {counter?.credit_rating || ""}
-                    {", "} HSN codes:: {hsn_code?.map((a) => `${a?.char||""}:${a?.hsn||""}`).join(", ")} 
+                    {", "} HSN codes::{" "}
+                    {hsn_code
+                      ?.map((a) => `${a?.char || ""}:${a?.hsn || ""}`)
+                      .join(", ")}
                   </td>
                 </tr>
               </>

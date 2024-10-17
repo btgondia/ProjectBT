@@ -288,6 +288,7 @@ export default function AddOrder() {
           a.item_price ||
           a.price,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css,
         status: 0,
         price: a.price || a.item_price || 0,
       })),

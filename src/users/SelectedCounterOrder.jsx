@@ -184,6 +184,7 @@ const SelectedCounterOrder = () => {
           ...a,
           item_price: a.item_price || 0,
           gst_percentage: a.gst_percentage || 0,
+          css_percentage: a.css_percentage || 0,
         }))
     );
     let projectionItems = localStorage.getItem("projectionItems");
@@ -274,6 +275,7 @@ const SelectedCounterOrder = () => {
           p: a.p,
           unit_price: a.price,
           gst_percentage: a.item_gst,
+          css_percentage: a.item_css,
           status: 0,
           price: a.item_price,
         }}),

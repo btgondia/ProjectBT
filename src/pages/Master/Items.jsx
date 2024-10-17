@@ -521,6 +521,29 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
               </th>
               <th>
                 <div className="t-head-element">
+                  <span>CSS(%)</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems("item_css");
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems("item_css");
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
+                </div>
+              </th>
+              <th>
+                <div className="t-head-element">
                   <span>One Pack</span>
                   <div className="sort-buttons-container">
                     <button
@@ -577,6 +600,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                   <td>{item.conversion}</td>
                   <td>{item.hsn}</td>
                   <td>{item.item_gst}</td>
+                  <td>{item.item_css}</td>
                   <td>{item.one_pack}</td>
                   <td>
                     <div
@@ -1161,6 +1185,23 @@ function NewUserForm({
                           setdata({
                             ...data,
                             item_gst: e.target.value,
+                          })
+                        }
+                        maxLength={3}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      CSS
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.item_css}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_css: e.target.value,
                           })
                         }
                         maxLength={3}

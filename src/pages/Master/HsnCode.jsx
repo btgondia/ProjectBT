@@ -133,6 +133,12 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
             </div>
           </th>
           <th colSpan={2}>
+            <div className="t-head-element">
+              <span>CSS Percentage</span>
+              <div className="sort-buttons-container"></div>
+            </div>
+          </th>
+          <th colSpan={2}>
             {" "}
             <div className="t-head-element">
               <span>HSN Code</span>
@@ -182,6 +188,7 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
               <td>{i + 1}</td>
               <td colSpan={2}>{item.title}</td>
               <td colSpan={2}>{item.gst_percentage}</td>
+              <td colSpan={2}>{item.css_percentage}</td>
               <td colSpan={2}>{item.hsn_code}</td>
             </tr>
           ))}
@@ -194,6 +201,7 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
     title: "",
     hsn_code: "",
     gst_percentage: "",
+    css_percentage: "",
     created_by: localStorage.getItem("user_uuid"),
   });
   const [errMassage, setErrorMassage] = useState("");
@@ -306,6 +314,21 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                         setdata({
                           ...data,
                           gst_percentage: e.target.value,
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                  CSS Percentage
+                    <input
+                      type="number"
+                      name="sort_order"
+                      className="numberInput"
+                      value={data?.css_percentage}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          css_percentage: e.target.value,
                         })
                       }
                     />

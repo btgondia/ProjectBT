@@ -762,6 +762,8 @@ export function OrderDetails({
       item_details: data.item_details?.map((a) => ({
         ...a,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css,
+
         status: a.status || 0,
         price: a.p_price || a?.price || a.item_price || 0,
       })),
@@ -1006,6 +1008,7 @@ export function OrderDetails({
       item_details: data.item_details?.map((a) => ({
         ...a,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css,
         status: a.status || 0,
         price: a.p_price || a?.price || a.item_price || 0,
       })),

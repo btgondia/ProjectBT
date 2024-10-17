@@ -268,6 +268,7 @@ export default function CreditNotes() {
         item_price: a.p_price,
         price: a.p_price,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css
       })),
     });
 

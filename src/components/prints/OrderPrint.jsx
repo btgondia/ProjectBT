@@ -18,6 +18,7 @@ const OrderPrint = ({
 }) => {
   const isEstimate = order?.order_type === "E";
   const [gstValues, setGstVAlues] = useState([]);
+  const [cessValues, setCESSVAlues] = useState([]);
   const [appliedCounterCharges, setAppliedCounterCharges] = useState(null);
 
   const css_percentage = useMemo(() => {
@@ -63,33 +64,63 @@ const OrderPrint = ({
   useEffect(() => {
     if (!defaultOrder?.item_details?.length) return;
     const arr = [];
+
+    let itemsData = [];
+    for (let item of defaultOrder.item_details) {
+      let final_Amount =
+        item.item_total /
+        (1 + ((item?.gst_percentage||0) + (item?.css_percentage||0)) / 100);
+        console.log({final_Amount})
+      itemsData.push({
+        ...item,
+        final_Amount: final_Amount,
+      });
+    }
+
+
     const gst_value = Array.from(
-      new Set(defaultOrder.item_details.map((a) => +a.gst_percentage))
+      new Set(itemsData.map((a) => +a.gst_percentage))
     );
     const css_value = Array.from(
-      new Set(defaultOrder.item_details.map((a) => +a.css_percentage))
+      new Set(itemsData.map((a) => +a.css_percentage))
     );
+    let css_arr = [];
 
     for (let a of gst_value) {
-      const data = defaultOrder.item_details.filter(
-        (b) => +b.gst_percentage === a
-      );
+      const data = itemsData.filter((b) => +b.gst_percentage === a);
       const amt =
         data.length > 1
-          ? data.map((b) => +b?.item_total).reduce((a, b) => a + b, 0)
+          ? data.map((b) => +b?.final_Amount).reduce((a, b) => a + b, 0)
           : data.length
-          ? +data[0].item_total
+          ? +data[0].final_Amount
           : 0;
+          console.log({amt,a})
 
-      const value = +amt - (+amt * 100) / (100 + a);
+      const value = +amt * a / 100;
 
       if (value)
         arr.push({
           value: a,
-          tex_amt: (amt - value).toFixed(2),
+          tex_amt: (amt).toFixed(2),
           amount: value.toFixed(2),
         });
     }
+
+    for (let a of css_value) {
+      const data = itemsData.filter((b) => +b.css_percentage === a);
+      const amt = data.length
+        ? data.map((b) => +b?.final_Amount).reduce((a, b) => a + b, 0)
+        : 0;
+      const value = (amt * a) / 100;
+      if (value)
+        css_arr.push({
+          value: a,
+          tex_amt: (amt).toFixed(2),
+          amount: value.toFixed(2),
+        });
+    }
+
+    setCESSVAlues(css_arr);
 
     setGstVAlues(arr);
   }, [defaultOrder]);
@@ -365,6 +396,9 @@ const OrderPrint = ({
             GST (%)
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+            CESS (%)
+          </th>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Unit Price
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
@@ -377,7 +411,7 @@ const OrderPrint = ({
             Dsc Amt
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-            Tax Amt
+            GST Amt
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Net Unit Price
@@ -495,6 +529,16 @@ const OrderPrint = ({
                 colSpan={2}
               >
                 {item?.gst_percentage || 0} %
+              </td>
+              <td
+                style={{
+                  fontWeight: "600",
+                  fontSize: "x-small",
+                  textAlign: "center",
+                }}
+                colSpan={2}
+              >
+                {item?.css_percentage || 0} %
               </td>
               <td
                 style={{
@@ -825,29 +869,32 @@ const OrderPrint = ({
                             </tr>
                           ))
                         : ""}
-                      {css_percentage ? (
-                        <>
                           <tr>
-                            <td
-                              style={{
-                                fontWeight: "600",
-                                fontSize: "xx-small",
-                                textAlign: "left",
-                              }}
-                            >
-                              CESS: {css_percentage}% ={" "}
-                              {(order?.item_details?.reduce(
-                                (a, b) => a + +b?.item_total,
-                                0
-                              ) *
-                                css_percentage) /
-                                100}
-                            </td>
-                          </tr>
-                        </>
-                      ) : (
-                        ""
-                      )}
+                        <td
+                          style={{
+                            fontWeight: "600",
+                            fontSize: "xx-small",
+                            textAlign: "left",
+                          }}
+                        >
+                          CESS:
+                        </td>
+                      </tr>
+                      {cessValues.length
+                        ? cessValues.map((a) => (
+                            <tr>
+                              <td
+                                style={{
+                                  fontWeight: "600",
+                                  fontSize: "xx-small",
+                                  textAlign: "left",
+                                }}
+                              >
+                                {a.tex_amt}*{a.value}%={a.amount}
+                              </td>
+                            </tr>
+                          ))
+                        : ""}
                       {appliedCounterCharges?.map((_charge) => (
                         <tr>
                           <td

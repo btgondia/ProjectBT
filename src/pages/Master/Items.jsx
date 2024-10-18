@@ -17,7 +17,7 @@ import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
 import Select from "react-select";
 import CounterSequence from "../../components/CounterSequence";
-import ItemCategorySequence from "../../components/ItemCategorySequence";
+import ItemSequence from "../../components/ItemSequence";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
@@ -248,12 +248,13 @@ const ItemsPage = () => {
         ""
       )}
       {sequencePopup ? (
-        <ItemCategorySequence
+        <ItemSequence
           onSave={() => {
             setSequencePopup(false);
-            getItemCategories();
+            getItemsData();
           }}
           itemCategories={itemCategories}
+          itemsData={itemsData}
         />
       ) : (
         ""
@@ -825,17 +826,17 @@ function NewUserForm({
         : [...(prev.item_group_uuid ?? []), item_group_uuid],
     }));
   };
-  const HSNList = useMemo(
-    () =>
-      codes.map((a) => ({
-        label: a.title ? `${a.title} :${a.hsn_code}` : "",
-        value: a.hsn_code_uuid,
-        uuid: a.hsn_code_uuid,
-        code: a.hsn_code,
-      })),
-    [codes]
-  );
-  console.log({ HSNList, codes });
+  // const HSNList = useMemo(
+  //   () =>
+  //     codes.map((a) => ({
+  //       label: a.title ? `${a.title} :${a.hsn_code}` : "",
+  //       value: a.hsn_code_uuid,
+  //       uuid: a.hsn_code_uuid,
+  //       code: a.hsn_code,
+  //     })),
+  //   [codes]
+  // );
+  // console.log({ HSNList, codes });
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
       <div
@@ -1276,7 +1277,7 @@ function NewUserForm({
                             });
                         }}
                         maxLength={8}
-                        disabled={true}
+                        // disabled={true}
                       />
                     </label>
                     <label className="selectLabel" style={{ width: "100px" }}>
@@ -1314,7 +1315,7 @@ function NewUserForm({
                       </div>
                     </label>
                   </div>
-                  <div className="row">
+                  {/* <div className="row">
                     <label className="selectLabel">
                       HSN
                       <Select
@@ -1347,7 +1348,7 @@ function NewUserForm({
                         placeholder="Select"
                       />
                     </label>
-                  </div>
+                  </div> */}
                   <div className="row">
                     <label className="selectLabel">
                       Barcode

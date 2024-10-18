@@ -21,14 +21,15 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 
-const ItemCategorySequence = ({ onSave,itemCategories }) => {
+const ItemSequence = ({ onSave, itemsData, itemCategories }) => {
 
-  const [itemCategoryData, setItemCategoryData] = useState([]);
+  const [category, setItemCategories] = useState("");
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    setItemCategoryData(itemCategories);
-  }, []);
-console.log({itemCategoryData})
+    setItems(itemsData.filter((a) => a.category_uuid === category));
+  }, [category]);
+
   return (
     <div className="overlay">
       <div
@@ -48,11 +49,36 @@ console.log({itemCategoryData})
           }}
         >
           <div style={{ overflowY: "scroll" }}>
-
+            {category ? (
               <div style={{ width: "500px" }}>
-                <Table itemCategoryData={itemCategoryData} setItemCategoryData={setItemCategoryData} onSave={onSave} />
+                <Table items={items} setItems={setItems} onSave={onSave} />
               </div>
-            
+            ) : (
+              <div style={{ width: "200px" }}>
+                <h1>Select Category</h1>
+                <Select
+                  options={itemCategories.map((a) => ({
+                    value: a.category_uuid,
+                    label: a.category_title,
+                  }))}
+                  onChange={(doc) => setItemCategories((prev) => doc.value)}
+                  value={
+                    category
+                      ? {
+                        value: category,
+                        label: itemCategories?.find(
+                          (j) => j.item_uuid === category
+                        )?.category_title,
+                      }
+                      : ""
+                  }
+                  openMenuOnFocus={true}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select"
+                />
+              </div>
+            )}
           </div>
           <button onClick={onSave} className="closeButton">
             x
@@ -63,8 +89,8 @@ console.log({itemCategoryData})
   );
 };
 
-export default ItemCategorySequence;
-function Table({ itemCategoryData, setItemCategoryData, onSave }) {
+export default ItemSequence;
+function Table({ items, setItems, onSave }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -75,19 +101,19 @@ function Table({ itemCategoryData, setItemCategoryData, onSave }) {
 
   const [activeId, setActiveId] = useState(null);
   const [itemsIdList, setItemsIdList] = useState();
-  useEffect(() => setItemsIdList(itemCategoryData?.sort((a, b) => +a.sort_order - b.sort_order)?.map(i => i.category_uuid)), [itemCategoryData])
+  useEffect(() => setItemsIdList(items?.sort((a, b) => +a.sort_order - b.sort_order)?.map(i => i.item_uuid)), [items])
 
   console.log(itemsIdList)
   const handleSave = async () => {
     const response = await axios({
       method: "put",
-      url: "/itemCategories/putItemCategories/sortOrder",
-      data: itemCategoryData?.map(({ category_uuid, sort_order, ...i }) => ({ category_uuid, sort_order })),
+      url: "/items/putItems/sortOrder",
+      data: items?.map(({ item_uuid, sort_order, ...i }) => ({ item_uuid, sort_order })),
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
+    if (response.request.status === 200)
       onSave()
   }
 
@@ -100,7 +126,8 @@ function Table({ itemCategoryData, setItemCategoryData, onSave }) {
         <thead>
           <tr>
             <th>Sort Order</th>
-            <th colSpan={2}>Category Title</th>
+            <th colSpan={2}>Counter Title</th>
+            <th colSpan={2}>Address</th>
           </tr>
         </thead>
         <tbody className="tbody">
@@ -114,13 +141,13 @@ function Table({ itemCategoryData, setItemCategoryData, onSave }) {
               items={itemsIdList}
               strategy={rectSortingStrategy}
             >
-              {itemsIdList?.map((id, i) => <SortableItem key={i} id={id} activeId={activeId} setActiveId={setActiveId} counterItem={itemCategoryData?.find(i => i.category_uuid === id)} />)}
+              {itemsIdList?.map((id, i) => <SortableItem key={i} id={id} activeId={activeId} setActiveId={setActiveId} counterItem={items?.find(i => i.item_uuid === id)} />)}
             </SortableContext>
             <DragOverlay>
-              {activeId ? <Item id={activeId} counterItem={itemCategoryData?.find(i => i.category_uuid === activeId)} /> : null}
+              {activeId ? <Item id={activeId} counterItem={items?.find(i => i.item_uuid === activeId)} /> : null}
             </DragOverlay>
           </DndContext>
-            : (<tr><td colSpan={5}>No Category</td></tr>)
+            : (<tr><td colSpan={5}>No Counter</td></tr>)
           }
         </tbody>
       </table>
@@ -141,8 +168,8 @@ function Table({ itemCategoryData, setItemCategoryData, onSave }) {
       const newIndex = itemsIdList?.indexOf(over.id);
 
       let updatedIds = arrayMove(itemsIdList, oldIndex, newIndex);
-      setItemCategoryData(updatedIds?.map((id, i) => {
-        let doc = itemCategoryData?.find(counter => counter.category_uuid === id)
+      setItems(updatedIds?.map((id, i) => {
+        let doc = items?.find(counter => counter.item_uuid === id)
         return { ...doc, sort_order: i + 1 }
       }))
     }
@@ -165,16 +192,17 @@ const Item = forwardRef(({
 
   return (
     <tr
-      key={counterItem?.category_uuid}
+      key={counterItem?.item_uuid}
       ref={ref}
       style={style}
-      className={activeId === counterItem?.category_uuid ? 'dragTarget' : ''}
+      className={activeId === counterItem?.item_uuid ? 'dragTarget' : ''}
     >
       <td>
         <ViewGridIcon {...props} style={{ width: '16px', height: '16px', opacity: '0.7', marginRight: '5px' }} />
         {counterItem?.sort_order}
       </td>
-      <td colSpan={2}>{counterItem?.category_title}</td>
+      <td colSpan={2}>{counterItem?.item_title}</td>
+  
     </tr>
   )
 });

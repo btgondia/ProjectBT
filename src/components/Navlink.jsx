@@ -17,6 +17,7 @@ const NavLink = ({
     setCashRegisterPopup,
     setIsItemAvilableOpen,
     setSkipStages,
+    setPrintTypePopup,
     view,
     setBankStatementImport,
     setOpeningBalanceDatePopup,
@@ -116,6 +117,8 @@ const NavLink = ({
                       setCollectionTags(true);
                     } else if (menu.name === "Skip Stage") {
                       setSkipStages(true);
+                    }else if(menu.name === "Print Type"){
+                      setPrintTypePopup(true)
                     } else if (menu.name === "Bank Statement Import") {
                       setBankStatementImport(true);
                     } else if (menu.name === "Current Financial Year") {

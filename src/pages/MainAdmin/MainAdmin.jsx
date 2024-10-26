@@ -35,6 +35,7 @@ import NotesPopup from "../../components/popups/NotesPopup";
 import Loader from "../../components/Loader";
 import { getOrderStage, getStageName } from "../../utils/helperFunctions";
 import SkipStagesPopup from "../../components/SkipStagesPopup";
+import PrintTypePopup from "../../components/PrintTypePopup";
 
 const MainAdmin = () => {
   const [isCollectionTags, setCollectionTags] = useState(false);
@@ -91,6 +92,8 @@ const MainAdmin = () => {
     setNotification,
     skipStages,
     setSkipStages,
+    printTypePopup,
+    setPrintTypePopup,
     setView,
   } = useContext(context);
 
@@ -133,6 +136,98 @@ const MainAdmin = () => {
     setPrintDependencies(counterOrders);
   };
 
+  const createPaymentSummaryCopy = (condition) => {
+    let data;
+    if (condition === 0) data = selectedOrder?.filter((i) => i.payment_pending);
+    else data = selectedOrder;
+
+    const counterOrders = data
+      ?.sort((a, b) => +a.time_1 - +b.time_1)
+      ?.reduce(
+        (data, i) => ({
+          ...data,
+          [i.counter_uuid]: {
+            orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
+            numbers:
+              data?.[i.counter_uuid]?.numbers ||
+              counter
+                ?.find((c) => c?.counter_uuid === i?.counter_uuid)
+                ?.mobile?.map((m) => m?.mobile),
+          },
+        }),
+        {}
+      );
+
+    const itemsQuantity = (items) =>
+      Object.values(
+        items?.reduce(
+          (quantities, i) => ({
+            b: (quantities?.b || 0) + +i?.b,
+            p: (quantities?.p || 0) + +i?.p,
+          }),
+          {}
+        )
+      )?.join(":");
+    const getDate = (i) => {
+      const date = new Date(i);
+      return [date.getDate(), date.getMonth() + 1, date.getFullYear()]
+        .map((i) => i.toString().padStart(2, "0"))
+        .join("/");
+    };
+    let copyData = Object.keys(counterOrders || {})
+      .map((a) => {
+        let {
+          route_title = "",
+          counter_title = "",
+          credit_rating = "",
+          address = "",
+          sort_order = 0,
+        } = counter.find((c) => c.counter_uuid === a);
+
+        return {
+          route_title,
+          counter_title,
+          credit_rating,
+          address,
+          sort_order,
+          orders: counterOrders[a]?.orders || [],
+          numbers: counterOrders[a]?.numbers || [],
+        };
+      })
+      .filter(Boolean) // Remove any null values
+      .sort((a, b) => a?.sort_order - b?.sort_order)
+      .map(
+        ({
+          route_title,
+          counter_title,
+          credit_rating,
+          address,
+          orders,
+          numbers,
+        }) => {
+          return `
+${counter_title},${route_title} ${credit_rating ? "[" + credit_rating + "]" : ""} ${numbers?.[0]}
+${address}
+${orders?.map(
+                  (order) =>
+                    `${getDate(+order?.time_1)}        ${(order?.order_type === "I" ? "" : "E") + order?.invoice_number}        Rs.${order?.order_grandtotal} ${itemsQuantity(order?.item_details)}          [ ${order?.notes?.join(", ")} ]`
+                ).join("\n")}
+TOTAL: Rs.${orders?.reduce((sum, i) => sum + +i?.order_grandtotal, 0)}
+-----------------------------------------------
+                `;
+        }
+      )
+      .join("\n");
+
+    ///copy on clipboard
+
+    navigator.clipboard.writeText(copyData);
+    setNotification({
+      success:true,
+      message:"Copied"
+    })
+  };
+
   const paymentSummaryInvokeHandler = () => {
     if (!selectedOrder?.[0]) return;
     const pendingPayments = selectedOrder?.filter((i) => i.payment_pending);
@@ -140,6 +235,14 @@ const MainAdmin = () => {
     if (pendingPayments?.[0] && nonPendingPayments?.[0]) setShowSelect(true);
     else if (pendingPayments?.[0]) createPaymentSummary(0);
     else createPaymentSummary(1);
+  };
+  const paymentSummaryInvokeHandlerCopy = () => {
+    if (!selectedOrder?.[0]) return;
+    const pendingPayments = selectedOrder?.filter((i) => i.payment_pending);
+    const nonPendingPayments = selectedOrder?.filter((i) => !i.payment_pending);
+    if (pendingPayments?.[0] && nonPendingPayments?.[0]) setShowSelect(true);
+    else if (pendingPayments?.[0]) createPaymentSummaryCopy(0);
+    else createPaymentSummaryCopy(1);
   };
 
   const selectedOrderGrandTotal = useMemo(
@@ -1081,6 +1184,13 @@ const MainAdmin = () => {
                         onClick={paymentSummaryInvokeHandler}
                       >
                         Pending Payments Summary
+                      </button>
+                      <button
+                        type="button"
+                        className="simple_Logout_button"
+                        onClick={paymentSummaryInvokeHandlerCopy}
+                      >
+                        Copy Pending Payments Summary
                       </button>
                     </>
                   ) : (
@@ -2047,6 +2157,16 @@ const MainAdmin = () => {
         <SkipStagesPopup
           onClose={() => {
             setSkipStages(false);
+          }}
+          type="stage"
+        />
+      ) : (
+        ""
+      )}
+      {printTypePopup ? (
+        <PrintTypePopup
+          onClose={() => {
+            setPrintTypePopup(false);
           }}
           type="stage"
         />

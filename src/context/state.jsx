@@ -17,6 +17,7 @@ const State = (props) => {
   const [pageLoading, setPageLoading] = useState(null);
   const [gstReportPopup, setGstReportPopup] = useState(false);
   const [checkAccountingBalance, setCheckAccountingBalance] = useState(null);
+  const [printTypePopup, setPrintTypePopup] = useState(false);
   const submitBulkOrders = async ({
     stage,
     orders,
@@ -478,7 +479,10 @@ const State = (props) => {
     setLoading(true);
     const response = await axios.get("/ledger/getAccountingBalanceDetails");
     if (response.data.success) {
-      setCheckAccountingBalance({data:response.data.result,type:"accounting"});
+      setCheckAccountingBalance({
+        data: response.data.result,
+        type: "accounting",
+      });
       setNotification({
         success: true,
         message: "Accounting Balance Details Fetched Successfully",
@@ -493,9 +497,14 @@ const State = (props) => {
   };
   const getDebitCreditBalanceDetails = async () => {
     setLoading(true);
-    const response = await axios.get("/ledger/getDebitCreditAccountingBalanceDetails");
+    const response = await axios.get(
+      "/ledger/getDebitCreditAccountingBalanceDetails"
+    );
     if (response.data.success) {
-      setCheckAccountingBalance({data:response.data.result,type:"Debit/Credit"});
+      setCheckAccountingBalance({
+        data: response.data.result,
+        type: "Debit/Credit",
+      });
       setNotification({
         success: true,
         message: "Debit/Credit Balance Details Fetched Successfully",
@@ -512,7 +521,10 @@ const State = (props) => {
     setLoading(true);
     const response = await axios.get("/ledger/getGSTErrorDetails");
     if (response.data.success) {
-      setCheckAccountingBalance({data:response.data.result,type:"GST Error"});
+      setCheckAccountingBalance({
+        data: response.data.result,
+        type: "GST Error",
+      });
       setNotification({
         success: true,
         message: "GST Error Details Fetched Successfully",
@@ -526,7 +538,7 @@ const State = (props) => {
     setLoading(false);
   };
   const fixAllGST = async (checked) => {
-    setLoading(true)
+    setLoading(true);
     const response = await axios({
       method: "post",
       url: "/ledger/removeGSTError",
@@ -537,9 +549,9 @@ const State = (props) => {
     });
     console.log({ response });
     if (response.data.success) {
-      setLoading(false)
-      setNotification({success:true,message:"Data Updated"})
-      getGSTErrorDetails()
+      setLoading(false);
+      setNotification({ success: true, message: "Data Updated" });
+      getGSTErrorDetails();
     }
   };
 
@@ -587,7 +599,9 @@ const State = (props) => {
         setGstReportPopup,
         getDebitCreditBalanceDetails,
         getGSTErrorDetails,
-        fixAllGST
+        fixAllGST,
+        printTypePopup,
+    setPrintTypePopup,
       }}
     >
       {props.children}

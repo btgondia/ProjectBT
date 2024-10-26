@@ -97,8 +97,8 @@ const Counter = () => {
   };
 
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
     } else {
@@ -111,7 +111,10 @@ const Counter = () => {
       });
       console.log(response.data.result);
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
       }
     }
@@ -685,7 +688,7 @@ function Table({
               </div>
             </div>
           </th>
-          <th colSpan={9}>Actions</th>
+          <th colSpan={11}>Actions</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -798,6 +801,19 @@ function Table({
                   }}
                 >
                   Item Special Discounts
+                </button>
+              </td>
+              <td colSpan={2}>
+                <button
+                  type="button"
+                  style={{ fontSize: "10px" }}
+                  className="fieldEditButton"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPopupForm({ type: "dms", data: item });
+                  }}
+                >
+                  DMS
                 </button>
               </td>
               <td
@@ -1035,7 +1051,9 @@ function NewUserForm({
   useEffect(() => {
     const asyncCall = async () => {
       let _data;
-      if (popupInfo?.type === "edit") {
+      if (popupInfo?.type === "dms") {
+        setdata(popupInfo.data);
+      } else if (popupInfo?.type === "edit") {
         _data = await {
           ...popupInfo.data,
           opening_balance: popupInfo.data.opening_balance?.map((a) => ({
@@ -1093,7 +1111,6 @@ function NewUserForm({
 
     asyncCall();
   }, [paymentModes, popupInfo.data, popupInfo?.type]);
-
 
   const submitHandler = async (e) => {
     e?.preventDefault();
@@ -1169,6 +1186,30 @@ function NewUserForm({
           onSave();
         }
       }
+    }
+  };
+
+  const dmsSubmitHandler = async (e) => {
+    e.preventDefault();
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [
+        {
+          counter_uuid: popupInfo.data.counter_uuid,
+          dms_buyer_id: data.dms_buyer_id,
+          dms_beat_name: data.dms_beat_name,
+          dms_buyer_address: data.dms_buyer_address,
+          dms_buyer_name: data.dms_buyer_name,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      getCounter();
+      onSave();
     }
   };
 
@@ -1274,680 +1315,777 @@ function NewUserForm({
             }}
           >
             <div style={{ overflowY: "scroll", height: "fit-content" }}>
-              <form className="form" onSubmit={submitHandler}>
-                <div className="row">
-                  <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Counter </h1>
-                </div>
-
-                <div className="form">
+              {popupInfo.type === "dms" ? (
+                <form className="form" onSubmit={dmsSubmitHandler}>
                   <div className="row">
-                    <label className="selectLabel">
-                      Counter Title
-                      <input
-                        type="text"
-                        name="route_title"
-                        className="numberInput"
-                        value={data?.counter_title}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            counter_title: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                      />
-                    </label>
-
-                    <label className="selectLabel">
-                      Sort Order
-                      <input
-                        type="number"
-                        onWheel={(e) => e?.preventDefault()}
-                        name="sort_order"
-                        className="numberInput"
-                        value={data?.sort_order}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            sort_order: e.target.value,
-                          })
-                        }
-                      />
-                    </label>
-                  </div>
-                  <div className="row">
-                    <label className="selectLabel">
-                      Address
-                      <input
-                        type="text"
-                        name="route_title"
-                        className="numberInput"
-                        value={data?.address}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            address: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                      />
-                    </label>
-
-                    <label className="selectLabel">
-                      Route
-                      <select
-                        name="user_type"
-                        className="select"
-                        value={data?.route_uuid}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            route_uuid: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">None</option>
-                        {routesData
-                          ?.sort((a, b) => a.sort_order - b.sort_order)
-                          ?.map((a) => (
-                            <option value={a.route_uuid}>
-                              {a.route_title}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
+                    <h1>{popupInfo.data.counter_title} DMS Settings</h1>
                   </div>
 
-                  <div className="row">
-                    <label className="selectLabel">
-                      Outstanding Type
-                      <select
-                        className="numberInput"
-                        value={data.outstanding_type}
-                        onChange={(e) =>
-                          setdata((prev) => ({
-                            ...prev,
-                            outstanding_type: e.target.value,
-                          }))
-                        }
-                      >
-                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-
-                        <option value={0}>None</option>
-                        <option value={1}>Visit</option>
-                        <option value={2}>Call</option>
-                        <option value={3}>Self</option>
-                        <option value={4}>Other</option>
-                      </select>
-                    </label>
-
-                    <label className="selectLabel">
-                      Status
-                      <select
-                        className="numberInput"
-                        value={data.status}
-                        onChange={(e) =>
-                          setdata((prev) => ({
-                            ...prev,
-                            status: e.target.value,
-                          }))
-                        }
-                      >
-                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-
-                        <option value={1}>Active</option>
-                        <option value={0}>Hide</option>
-                        <option value={2}>Locked</option>
-                      </select>
-                    </label>
-                    {+data.status === 2 ? (
+                  <div className="form">
+                    <div className="row">
                       <label className="selectLabel">
-                        Remarks
+                        Dms Buyer Id
                         <input
                           type="text"
                           name="route_title"
                           className="numberInput"
-                          value={data?.remarks}
+                          value={data?.dms_buyer_id}
                           onChange={(e) =>
                             setdata({
                               ...data,
-                              remarks: e.target.value,
+                              dms_buyer_id: e.target.value,
                             })
                           }
                           maxLength={42}
                         />
                       </label>
-                    ) : (
-                      ""
-                    )}
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel">
+                        Dms Buyer Name
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.dms_buyer_name}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              dms_buyer_name: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel">
+                        DMS Beat Name
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.dms_beat_name}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              dms_beat_name: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="row">
+                      <label className="selectLabel">
+                        DMS Buyer Address
+                        <input
+                          type="text"
+                          name="GST"
+                          className="numberInput"
+                          value={data?.dms_buyer_address}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              dms_buyer_address: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
                   </div>
+                  <i style={{ color: "red" }}>
+                    {errMassage === "" ? "" : "Error: " + errMassage}
+                  </i>
+
+                  <button type="submit" className="submit">
+                    Save changes
+                  </button>
+                </form>
+              ) : (
+                <form className="form" onSubmit={submitHandler}>
                   <div className="row">
-                    <label className="selectLabel">
-                      GST
-                      <input
-                        type="text"
-                        name="GST"
-                        className="numberInput"
-                        value={data?.gst}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            gst: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                      />
-                    </label>
-                    <label className="selectLabel">
-                      Food License
-                      <input
-                        type="text"
-                        name="food_license"
-                        className="numberInput"
-                        value={data?.food_license}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            food_license: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                      />
-                    </label>
+                    <h1>
+                      {popupInfo.type === "edit" ? "Edit" : "Add"} Counter{" "}
+                    </h1>
                   </div>
-                  <div className="row">
-                    <label className="selectLabel">
-                      Counter Code
-                      <input
-                        type="text"
-                        name="one_pack"
-                        className="numberInput"
-                        value={data?.counter_code}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            counter_code: e.target.value,
-                          })
-                        }
-                      />
-                    </label>
-                    <label className="selectLabel">
-                      Payment Reminder Days
-                      <input
-                        type="number"
-                        name="payment_reminder_days"
-                        className="numberInput"
-                        value={data?.payment_reminder_days}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            payment_reminder_days: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                      />
-                    </label>
-                  </div>
-                  <div className="row">
-                    <label className="selectLabel" style={{ width: "50%" }}>
-                      Payment Modes
-                      <table>
-                        {paymentModes?.map((occ) => (
+
+                  <div className="form">
+                    <div className="row">
+                      <label className="selectLabel">
+                        Counter Title
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.counter_title}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              counter_title: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+
+                      <label className="selectLabel">
+                        Sort Order
+                        <input
+                          type="number"
+                          onWheel={(e) => e?.preventDefault()}
+                          name="sort_order"
+                          className="numberInput"
+                          value={data?.sort_order}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              sort_order: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel">
+                        Address
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.address}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              address: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+
+                      <label className="selectLabel">
+                        Route
+                        <select
+                          name="user_type"
+                          className="select"
+                          value={data?.route_uuid}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              route_uuid: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">None</option>
+                          {routesData
+                            ?.sort((a, b) => a.sort_order - b.sort_order)
+                            ?.map((a) => (
+                              <option value={a.route_uuid}>
+                                {a.route_title}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="row">
+                      <label className="selectLabel">
+                        Outstanding Type
+                        <select
+                          className="numberInput"
+                          value={data.outstanding_type}
+                          onChange={(e) =>
+                            setdata((prev) => ({
+                              ...prev,
+                              outstanding_type: e.target.value,
+                            }))
+                          }
+                        >
+                          {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                          <option value={0}>None</option>
+                          <option value={1}>Visit</option>
+                          <option value={2}>Call</option>
+                          <option value={3}>Self</option>
+                          <option value={4}>Other</option>
+                        </select>
+                      </label>
+
+                      <label className="selectLabel">
+                        Status
+                        <select
+                          className="numberInput"
+                          value={data.status}
+                          onChange={(e) =>
+                            setdata((prev) => ({
+                              ...prev,
+                              status: e.target.value,
+                            }))
+                          }
+                        >
+                          {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                          <option value={1}>Active</option>
+                          <option value={0}>Hide</option>
+                          <option value={2}>Locked</option>
+                        </select>
+                      </label>
+                      {+data.status === 2 ? (
+                        <label className="selectLabel">
+                          Remarks
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            value={data?.remarks}
+                            onChange={(e) =>
+                              setdata({
+                                ...data,
+                                remarks: e.target.value,
+                              })
+                            }
+                            maxLength={42}
+                          />
+                        </label>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel">
+                        GST
+                        <input
+                          type="text"
+                          name="GST"
+                          className="numberInput"
+                          value={data?.gst}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              gst: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                      <label className="selectLabel">
+                        Food License
+                        <input
+                          type="text"
+                          name="food_license"
+                          className="numberInput"
+                          value={data?.food_license}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              food_license: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel">
+                        Counter Code
+                        <input
+                          type="text"
+                          name="one_pack"
+                          className="numberInput"
+                          value={data?.counter_code}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              counter_code: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+                      <label className="selectLabel">
+                        Payment Reminder Days
+                        <input
+                          type="number"
+                          name="payment_reminder_days"
+                          className="numberInput"
+                          value={data?.payment_reminder_days}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              payment_reminder_days: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        Payment Modes
+                        <table>
+                          {paymentModes?.map((occ) => (
+                            <tr
+                              value={occ.mode_uuid}
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                              }}
+                              onClick={() => {
+                                setdata((prev) => ({
+                                  ...prev,
+                                  payment_modes: prev?.payment_modes?.filter(
+                                    (a) => a === occ.mode_uuid
+                                  ).length
+                                    ? prev?.payment_modes?.filter(
+                                        (a) => a !== occ.mode_uuid
+                                      )
+                                    : [
+                                        ...(prev.payment_modes || []),
+                                        occ.mode_uuid,
+                                      ],
+                                }));
+                              }}
+                            >
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    data?.payment_modes?.filter(
+                                      (a) => a === occ.mode_uuid
+                                    ).length
+                                  }
+                                />
+                              </td>
+                              <td>{occ.mode_title}</td>
+                            </tr>
+                          ))}
                           <tr
-                            value={occ.mode_uuid}
-                            style={{ marginBottom: "5px", textAlign: "center" }}
-                            onClick={() => {
+                            onClick={() =>
                               setdata((prev) => ({
                                 ...prev,
-                                payment_modes: prev?.payment_modes?.filter(
-                                  (a) => a === occ.mode_uuid
-                                ).length
-                                  ? prev?.payment_modes?.filter(
-                                      (a) => a !== occ.mode_uuid
-                                    )
-                                  : [
-                                      ...(prev.payment_modes || []),
-                                      occ.mode_uuid,
-                                    ],
-                              }));
-                            }}
+                                credit_allowed:
+                                  prev?.credit_allowed === "Y" ? "N" : "Y",
+                              }))
+                            }
+                            style={{ marginBottom: "5px", textAlign: "center" }}
+                            value="unpaid"
                           >
                             <td>
                               <input
                                 type="checkbox"
-                                checked={
-                                  data?.payment_modes?.filter(
-                                    (a) => a === occ.mode_uuid
-                                  ).length
-                                }
+                                checked={data?.credit_allowed === "Y"}
                               />
                             </td>
-                            <td>{occ.mode_title}</td>
+                            <td> Unpaid</td>
                           </tr>
-                        ))}
-                        <tr
-                          onClick={() =>
-                            setdata((prev) => ({
-                              ...prev,
-                              credit_allowed:
-                                prev?.credit_allowed === "Y" ? "N" : "Y",
-                            }))
-                          }
-                          style={{ marginBottom: "5px", textAlign: "center" }}
-                          value="unpaid"
-                        >
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={data?.credit_allowed === "Y"}
-                            />
-                          </td>
-                          <td> Unpaid</td>
-                        </tr>
-                      </table>
-                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-                    </label>
-                    <label className="selectLabel" style={{ width: "50%" }}>
-                      Counter Group
-                      {/* <select
+                        </table>
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+                      </label>
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        Counter Group
+                        {/* <select
 												className="numberInput"
 												style={{ width: "200px", height: "100px" }}
 												value={data?.counter_group_uuid}
 												onChange={onChangeGroupHandler}
 												multiple>
 												{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-                      {/* {counterGroup?.map(occ => (
+                        {/* {counterGroup?.map(occ => (
 													<option
 														value={occ.counter_group_uuid}
 														style={{ marginBottom: "5px", textAlign: "center" }}>
 														{occ.counter_group_title}
 													</option>
 												))} */}
-                      {/* </select> */}
-                      <MultiSelectElem
-                        counterGroup={counterGroup}
-                        selected={data?.counter_group_uuid}
-                        onSelect={onChangeGroupHandler}
+                        {/* </select> */}
+                        <MultiSelectElem
+                          counterGroup={counterGroup}
+                          selected={data?.counter_group_uuid}
+                          onSelect={onChangeGroupHandler}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Order Form
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.form_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            form_uuid: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">None</option>
+                        {orderFrom?.map((a) => (
+                          <option value={a.form_uuid}>{a.form_title}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="selectLabel">
+                      Trips
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.trip_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            trip_uuid: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">None</option>
+                        {TripsData?.map((a) => (
+                          <option value={a.trip_uuid}>{a.trip_title}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Credit Rating
+                      <input
+                        type="text"
+                        name="credit_rating"
+                        className="numberInput"
+                        value={data?.credit_rating}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            credit_rating: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Transaction tags
+                      <textarea
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.transaction_tags
+                          ?.toString()
+                          ?.replace(/,/g, "\n")}
+                        style={{ height: "50px" }}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            transaction_tags: e.target.value.split("\n"),
+                          })
+                        }
                       />
                     </label>
                   </div>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Order Form
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.form_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          form_uuid: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">None</option>
-                      {orderFrom?.map((a) => (
-                        <option value={a.form_uuid}>{a.form_title}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="selectLabel">
-                    Trips
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.trip_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          trip_uuid: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">None</option>
-                      {TripsData?.map((a) => (
-                        <option value={a.trip_uuid}>{a.trip_title}</option>
-                      ))}
-                    </select>
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Credit Rating
-                    <input
-                      type="text"
-                      name="credit_rating"
-                      className="numberInput"
-                      value={data?.credit_rating}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          credit_rating: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Transaction tags
-                    <textarea
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.transaction_tags
-                        ?.toString()
-                        ?.replace(/,/g, "\n")}
-                      style={{ height: "50px" }}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          transaction_tags: e.target.value.split("\n"),
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-                {view ? (
-                  <>
-                    <div className="row">
-                      <label className="selectLabel" style={{ width: "50%" }}>
-                        Opening Balance{" "}
-                        <span
-                          onClick={() => {
-                            setdata((prev) => {
-                              return {
-                                ...prev,
-                                opening_balance: [
-                                  ...(prev.opening_balance || []),
-                                  {
-                                    uuid: uuid(),
-                                    date: default_opening_balance_date,
-                                    amount: "",
-                                  },
-                                ],
-                              };
-                            });
-                          }}
-                        >
-                          <AddCircle
-                            sx={{ fontSize: 40 }}
-                            style={{ color: "#4AC959", cursor: "pointer" }}
-                          />
-                        </span>
-                        <div>
-                          {data?.opening_balance?.map((a) => (
-                            <div
-                              key={a.uuid}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                margin: "5px 0",
-                              }}
-                            >
-                              <div style={{ width: "200px" }}>
+                  {view ? (
+                    <>
+                      <div className="row">
+                        <label className="selectLabel" style={{ width: "50%" }}>
+                          Opening Balance{" "}
+                          <span
+                            onClick={() => {
+                              setdata((prev) => {
+                                return {
+                                  ...prev,
+                                  opening_balance: [
+                                    ...(prev.opening_balance || []),
+                                    {
+                                      uuid: uuid(),
+                                      date: default_opening_balance_date,
+                                      amount: "",
+                                    },
+                                  ],
+                                };
+                              });
+                            }}
+                          >
+                            <AddCircle
+                              sx={{ fontSize: 40 }}
+                              style={{ color: "#4AC959", cursor: "pointer" }}
+                            />
+                          </span>
+                          <div>
+                            {data?.opening_balance?.map((a) => (
+                              <div
+                                key={a.uuid}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  margin: "5px 0",
+                                }}
+                              >
+                                <div style={{ width: "200px" }}>
+                                  <input
+                                    type="date"
+                                    onChange={(e) =>
+                                      setdata((prev) => ({
+                                        ...prev,
+                                        opening_balance:
+                                          prev.opening_balance.map((b) =>
+                                            b.uuid === a.uuid
+                                              ? {
+                                                  ...b,
+                                                  date: new Date(
+                                                    e.target.value
+                                                  ).getTime(),
+                                                }
+                                              : b
+                                          ),
+                                      }))
+                                    }
+                                    value={getFormateDate(new Date(a.date))}
+                                    placeholder="Search Counter Title..."
+                                    className="searchInput"
+                                    pattern="\d{4}-\d{2}-\d{2}"
+                                  />
+                                </div>
                                 <input
-                                  type="date"
-                                  onChange={(e) =>
+                                  type="number"
+                                  name="route_title"
+                                  className="numberInput"
+                                  value={a?.amount}
+                                  style={{ width: "15ch" }}
+                                  onChange={(e) => {
                                     setdata((prev) => ({
                                       ...prev,
                                       opening_balance: prev.opening_balance.map(
                                         (b) =>
                                           b.uuid === a.uuid
-                                            ? {
-                                                ...b,
-                                                date: new Date(
-                                                  e.target.value
-                                                ).getTime(),
-                                              }
+                                            ? { ...b, amount: e.target.value }
                                             : b
                                       ),
-                                    }))
-                                  }
-                                  value={getFormateDate(new Date(a.date))}
-                                  placeholder="Search Counter Title..."
-                                  className="searchInput"
-                                  pattern="\d{4}-\d{2}-\d{2}"
+                                    }));
+                                  }}
+                                  maxLength={10}
+                                  placeholder="Amount"
                                 />
+                                <span
+                                  style={{
+                                    color: "red",
+
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={(e) => {
+                                    setdata((prev) => ({
+                                      ...prev,
+                                      opening_balance:
+                                        prev.opening_balance.filter(
+                                          (b) => b.uuid !== a.uuid
+                                        ),
+                                    }));
+                                  }}
+                                >
+                                  <DeleteOutlineOutlined
+                                    style={{ color: "red" }}
+                                    className="table-icon"
+                                  />
+                                </span>
                               </div>
-                              <input
-                                type="number"
-                                name="route_title"
-                                className="numberInput"
-                                value={a?.amount}
-                                style={{ width: "15ch" }}
-                                onChange={(e) => {
-                                  setdata((prev) => ({
-                                    ...prev,
-                                    opening_balance: prev.opening_balance.map(
-                                      (b) =>
-                                        b.uuid === a.uuid
-                                          ? { ...b, amount: e.target.value }
-                                          : b
-                                    ),
-                                  }));
-                                }}
-                                maxLength={10}
-                                placeholder="Amount"
-                              />
-                              <span
-                                style={{
-                                  color: "red",
-
-                                  cursor: "pointer",
-                                }}
-                                onClick={(e) => {
-                                  setdata((prev) => ({
-                                    ...prev,
-                                    opening_balance:
-                                      prev.opening_balance.filter(
-                                        (b) => b.uuid !== a.uuid
-                                      ),
-                                  }));
-                                }}
-                              >
-                                <DeleteOutlineOutlined
-                                  style={{ color: "red" }}
-                                  className="table-icon"
-                                />
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </label>
-                    </div>
-                    <div className="row">
-                      <label className="selectLabel" style={{ width: "50%" }}>
-                        Closing Balance{" "}
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            margin: "5px 0",
-                          }}
-                        >
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            value={data.closing_balance}
-                            style={{ width: "15ch" }}
-                            onChange={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                closing_balance: e.target.value,
-                              }));
-                            }}
-                            maxLength={10}
-                            placeholder="Amount"
-                          />
-                        </div>
-                      </label>
-                    </div>
-                  </>
-                ) : (
-                  ""
-                )}
-                <div className="row">
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    Mobile
-                    <div>
-                      {data?.mobile?.map((a) => (
-                        <div
-                          key={a.uuid}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            margin: "5px 0",
-                          }}
-                        >
-                          <input
-                            type="text"
-                            name="route_title"
-                            className="numberInput"
-                            value={a?.title}
-                            style={{ width: "10ch", marginLeft: "10px" }}
-                            placeholder="Title"
-                            onChange={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? { ...b, title: e.target.value }
-                                    : b
-                                ),
-                              }));
-                            }}
-                          />
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            value={a?.mobile}
-                            style={{ width: "15ch" }}
-                            // disabled={a.lable?.find(
-                            //   (c) =>
-                            //     (c.type === "cal" || c.type === "wa") &&
-                            //     +c.varification
-                            // )}
-                            onChange={(e) => {
-                              if (
-                                e.target.value.length > 10
-                                //  ||
-                                // a.lable?.find(
-                                //   (c) =>
-                                //     (c.type === "cal" || c.type === "wa") &&
-                                //     +c.varification
-                                // )
-                              ) {
-                                return;
-                              }
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? { ...b, mobile: e.target.value }
-                                    : b
-                                ),
-                              }));
-                            }}
-                            maxLength={10}
-                            placeholder="Mobile"
-                          />
-                          <span
+                            ))}
+                          </div>
+                        </label>
+                      </div>
+                      <div className="row">
+                        <label className="selectLabel" style={{ width: "50%" }}>
+                          Closing Balance{" "}
+                          <div
                             style={{
-                              color: a.lable?.find(
-                                (c) => c.type === "wa" && !+c.varification
-                              )
-                                ? "red"
-                                : a.lable?.find(
-                                    (c) => c.type === "wa" && +c.varification
-                                  )
-                                ? "green"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              if (a.mobile) sendOtp({ ...a, lable: "wa" });
-                              //   setdata((prev) => ({
-                              //     ...prev,
-                              //     mobile: prev.mobile.map((b) =>
-                              //       b.uuid === a.uuid
-                              //         ? {
-                              //             ...b,
-                              //             lable: b.lable?.find(
-                              //               (c) => c.type === "wa"
-                              //             )
-                              //               ? b.lable.filter(
-                              //                   (c) => c.type !== "wa"
-                              //                 )
-                              //               : [
-                              //                   ...(b?.lable || []),
-                              //                   { type: "wa", varification: 0 },
-                              //                 ],
-                              //           }
-                              //         : b
-                              //     ),
-                              //   }));
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              margin: "5px 0",
                             }}
                           >
-                            <WhatsApp />
-                          </span>
-                          <span
+                            <input
+                              type="number"
+                              name="route_title"
+                              className="numberInput"
+                              value={data.closing_balance}
+                              style={{ width: "15ch" }}
+                              onChange={(e) => {
+                                setdata((prev) => ({
+                                  ...prev,
+                                  closing_balance: e.target.value,
+                                }));
+                              }}
+                              maxLength={10}
+                              placeholder="Amount"
+                            />
+                          </div>
+                        </label>
+                      </div>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                  <div className="row">
+                    <label className="selectLabel" style={{ width: "50%" }}>
+                      Mobile
+                      <div>
+                        {data?.mobile?.map((a) => (
+                          <div
+                            key={a.uuid}
                             style={{
-                              color: a.lable?.find(
-                                (c) => c.type === "cal" && !+c.varification
-                              )
-                                ? "red"
-                                : a.lable?.find(
-                                    (c) => c.type === "cal" && +c.varification
-                                  )
-                                ? "green"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              if (a.mobile) sendCallOtp({ ...a, lable: "cal" });
-                              //   setdata((prev) => ({
-                              //     ...prev,
-                              //     mobile: prev.mobile.map((b) =>
-                              //       b.uuid === a.uuid
-                              //         ? {
-                              //             ...b,
-                              //             lable: b.lable?.find(
-                              //               (c) => c.type === "cal"
-                              //             )
-                              //               ? b.lable.filter(
-                              //                   (c) => c.type !== "cal"
-                              //                 )
-                              //               : [
-                              //                   ...(b?.lable || []),
-                              //                   { type: "cal", varification: 0 },
-                              //                 ],
-                              //           }
-                              //         : b
-                              //     ),
-                              //   }));
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              margin: "5px 0",
                             }}
                           >
-                            <Phone />
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </label>
-                </div>
-                <i style={{ color: "red" }}>
-                  {errMassage === "" ? "" : "Error: " + errMassage}
-                </i>
+                            <input
+                              type="text"
+                              name="route_title"
+                              className="numberInput"
+                              value={a?.title}
+                              style={{ width: "10ch", marginLeft: "10px" }}
+                              placeholder="Title"
+                              onChange={(e) => {
+                                setdata((prev) => ({
+                                  ...prev,
+                                  mobile: prev.mobile.map((b) =>
+                                    b.uuid === a.uuid
+                                      ? { ...b, title: e.target.value }
+                                      : b
+                                  ),
+                                }));
+                              }}
+                            />
+                            <input
+                              type="number"
+                              name="route_title"
+                              className="numberInput"
+                              value={a?.mobile}
+                              style={{ width: "15ch" }}
+                              // disabled={a.lable?.find(
+                              //   (c) =>
+                              //     (c.type === "cal" || c.type === "wa") &&
+                              //     +c.varification
+                              // )}
+                              onChange={(e) => {
+                                if (
+                                  e.target.value.length > 10
+                                  //  ||
+                                  // a.lable?.find(
+                                  //   (c) =>
+                                  //     (c.type === "cal" || c.type === "wa") &&
+                                  //     +c.varification
+                                  // )
+                                ) {
+                                  return;
+                                }
+                                setdata((prev) => ({
+                                  ...prev,
+                                  mobile: prev.mobile.map((b) =>
+                                    b.uuid === a.uuid
+                                      ? { ...b, mobile: e.target.value }
+                                      : b
+                                  ),
+                                }));
+                              }}
+                              maxLength={10}
+                              placeholder="Mobile"
+                            />
+                            <span
+                              style={{
+                                color: a.lable?.find(
+                                  (c) => c.type === "wa" && !+c.varification
+                                )
+                                  ? "red"
+                                  : a.lable?.find(
+                                      (c) => c.type === "wa" && +c.varification
+                                    )
+                                  ? "green"
+                                  : "gray",
+                                cursor: "pointer",
+                              }}
+                              onClick={(e) => {
+                                if (a.mobile) sendOtp({ ...a, lable: "wa" });
+                                //   setdata((prev) => ({
+                                //     ...prev,
+                                //     mobile: prev.mobile.map((b) =>
+                                //       b.uuid === a.uuid
+                                //         ? {
+                                //             ...b,
+                                //             lable: b.lable?.find(
+                                //               (c) => c.type === "wa"
+                                //             )
+                                //               ? b.lable.filter(
+                                //                   (c) => c.type !== "wa"
+                                //                 )
+                                //               : [
+                                //                   ...(b?.lable || []),
+                                //                   { type: "wa", varification: 0 },
+                                //                 ],
+                                //           }
+                                //         : b
+                                //     ),
+                                //   }));
+                              }}
+                            >
+                              <WhatsApp />
+                            </span>
+                            <span
+                              style={{
+                                color: a.lable?.find(
+                                  (c) => c.type === "cal" && !+c.varification
+                                )
+                                  ? "red"
+                                  : a.lable?.find(
+                                      (c) => c.type === "cal" && +c.varification
+                                    )
+                                  ? "green"
+                                  : "gray",
+                                cursor: "pointer",
+                              }}
+                              onClick={(e) => {
+                                if (a.mobile)
+                                  sendCallOtp({ ...a, lable: "cal" });
+                                //   setdata((prev) => ({
+                                //     ...prev,
+                                //     mobile: prev.mobile.map((b) =>
+                                //       b.uuid === a.uuid
+                                //         ? {
+                                //             ...b,
+                                //             lable: b.lable?.find(
+                                //               (c) => c.type === "cal"
+                                //             )
+                                //               ? b.lable.filter(
+                                //                   (c) => c.type !== "cal"
+                                //                 )
+                                //               : [
+                                //                   ...(b?.lable || []),
+                                //                   { type: "cal", varification: 0 },
+                                //                 ],
+                                //           }
+                                //         : b
+                                //     ),
+                                //   }));
+                              }}
+                            >
+                              <Phone />
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </label>
+                  </div>
+                  <i style={{ color: "red" }}>
+                    {errMassage === "" ? "" : "Error: " + errMassage}
+                  </i>
 
-                <button type="submit" className="submit">
-                  Save changes
-                </button>
-              </form>
+                  <button type="submit" className="submit">
+                    Save changes
+                  </button>
+                </form>
+              )}
             </div>
 
             <button onClick={onSave} className="closeButton">
@@ -2040,11 +2178,10 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
     if (response.data.success) setItemCategories(response.data.result);
   };
 
-
   const getItemsData = async () => {
-    const cachedData = localStorage.getItem('itemsData');
+    const cachedData = localStorage.getItem("itemsData");
     if (cachedData) {
-      const localData = JSON.parse(cachedData)
+      const localData = JSON.parse(cachedData);
       setItemsData(
         localData.map((b) => ({
           ...b,
@@ -2057,36 +2194,37 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
         }))
       );
     } else {
-    const response = await axios({
-      method: "get",
-      url: "/items/GetItemList",
+      const response = await axios({
+        method: "get",
+        url: "/items/GetItemList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success){
-      localStorage.setItem('itemsData', JSON.stringify(response.data.result));
-      setItemsData(
-        response.data.result.map((b) => ({
-          ...b,
-          company_title:
-            companies.find((a) => a.company_uuid === b.company_uuid)
-              ?.company_title || "-",
-          category_title:
-            itemCategories.find((a) => a.category_uuid === b.category_uuid)
-              ?.category_title || "-",
-        }))
-      );
-    }}
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        localStorage.setItem("itemsData", JSON.stringify(response.data.result));
+        setItemsData(
+          response.data.result.map((b) => ({
+            ...b,
+            company_title:
+              companies.find((a) => a.company_uuid === b.company_uuid)
+                ?.company_title || "-",
+            category_title:
+              itemCategories.find((a) => a.category_uuid === b.category_uuid)
+                ?.category_title || "-",
+          }))
+        );
+      }
+    }
   };
   useEffect(() => {
     getItemsData();
   }, [itemCategories, companies]);
 
   const getCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
-    
+    const cachedData = localStorage.getItem("companiesData");
+
     if (cachedData) {
       setCompanies(JSON.parse(cachedData));
     } else {
@@ -2097,13 +2235,16 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "companiesData",
+          JSON.stringify(response.data.result)
+        );
         setCompanies(response.data.result);
       }
     }
-  };  
+  };
 
   useEffect(() => {
     getCompanies();
@@ -2507,8 +2648,8 @@ const CounterRatesAndDiscounts = ({ onSave, itemPopup }) => {
   console.log({ value });
 
   const getCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
-    
+    const cachedData = localStorage.getItem("companiesData");
+
     if (cachedData) {
       setCompanies(JSON.parse(cachedData));
     } else {
@@ -2519,13 +2660,16 @@ const CounterRatesAndDiscounts = ({ onSave, itemPopup }) => {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "companiesData",
+          JSON.stringify(response.data.result)
+        );
         setCompanies(response.data.result);
       }
     }
-  };  
+  };
 
   useEffect(() => {
     getCompanies();

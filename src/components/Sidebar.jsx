@@ -455,6 +455,10 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                     name: "Skip Stage",
                     link: "#",
                   },
+                  {
+                    name: "Print Type",
+                    link: "#",
+                  },
                 ]
           }
         />

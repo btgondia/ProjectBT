@@ -102,7 +102,7 @@ import HSNCode from "./pages/Master/HsnCode";
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 349;
+export let Version = 350;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));

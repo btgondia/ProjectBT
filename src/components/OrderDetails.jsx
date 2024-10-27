@@ -345,7 +345,6 @@ export function OrderDetails({
 
   const invokePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
     removeAfterPrint: true,
     onAfterPrint: () => (printConfig ? setPrintConfig(null) : null),
   });

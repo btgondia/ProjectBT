@@ -50,6 +50,23 @@ const OrderPdf = () => {
       if (response.data.success) {
         localStorage.setItem("itemsData", JSON.stringify(response.data.result));
         setItemsData(response.data.result);
+
+        if (order.dms_invoice_number) {
+          setOrder((prev) => {
+            let item_details = prev.item_details.sort((a, b) => {
+              let item_a_title =
+                itemData.find((c) => c.item_uuid === a.item_uuid)
+                  ?.dms_item_name || "";
+              let item_b_title =
+                itemData.find((c) => c.item_uuid === b.item_uuid)
+                  ?.dms_item_name || "";
+              return item_a_title.localeCompare(item_b_title);
+            }).map(
+              (a,i)=>({...a, sr:i+1})
+            );
+            return { ...prev, item_details };
+          });
+        }
       }
     }
   };

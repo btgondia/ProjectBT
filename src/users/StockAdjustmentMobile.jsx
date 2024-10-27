@@ -69,7 +69,7 @@ const StockAdjustmentMobile = () => {
   }, []);
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
+    
     removeAfterPrint: true,
   });
   const getRemaingStock = (item) => {

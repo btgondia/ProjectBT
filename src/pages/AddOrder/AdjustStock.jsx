@@ -57,7 +57,6 @@ export default function AdjustStock() {
   }, []);
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
     removeAfterPrint: true,
     onAfterPrint: () => setOrder(initials),
   });

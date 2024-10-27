@@ -23,7 +23,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
+		
 		removeAfterPrint: true,
 	})
 

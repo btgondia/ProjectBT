@@ -27,7 +27,7 @@ export default function ItemAvilibility() {
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
+		
 		removeAfterPrint: true,
 	})
 

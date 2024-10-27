@@ -38,7 +38,7 @@ const CashRegisterReport = () => {
   }, [statementData]);
   const printStatement = useReactToPrint({
     content: statementContent,
-    documentTitle: "Statement",
+    
     removeAfterPrint: true,
   });
   const { setNotification } = useContext(context);

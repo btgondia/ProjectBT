@@ -115,7 +115,6 @@ export default function AddStock() {
 	}, [])
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
 		removeAfterPrint: true,
 		onAfterPrint: () => setOrder(initials)
 	})

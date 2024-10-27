@@ -67,7 +67,7 @@ const OrderPrint2 = ({
 
   const totalItemDetailsMemo = useMemo(() => {
     if (!footer) return [];
-    let allData= allOrderItems
+    let allData = allOrderItems
       ?.map((a) => ({
         ...a,
         ...(itemData?.find((b) => b.item_uuid === a.item_uuid) || {}),
@@ -105,21 +105,22 @@ const OrderPrint2 = ({
           taxable_value: taxable_value.toFixed(2),
         };
       });
-      let totalData = allData.reduce((acc, item) => {
-        return {
-          item_total: (+acc.item_total || 0) + (+item.item_total || 0),
-          desc_amt_a: (+acc.desc_amt_a || 0) + (+item.desc_amt_a || 0),
-          desc_amt_b: (+acc.desc_amt_b || 0) + (+item.desc_amt_b || 0),
-          net_amt: (+acc.net_amt || 0) + (+item.net_amt || 0),
-          tex_amt: (+acc.tex_amt || 0) + (+item.tex_amt || 0),
-          taxable_value: (((+acc.taxable_value || 0) + (+item.taxable_value || 0))||0).toFixed(2),
-          itemQty: (+acc.itemQty || 0) + (+item.itemQty || 0),
-          mrp: (+acc.mrp || 0) + (+item.mrp || 0),
-        };
-      }
-      , {});
-      
-      return totalData;
+    let totalData = allData.reduce((acc, item) => {
+      return {
+        item_total: (+acc.item_total || 0) + (+item.item_total || 0),
+        desc_amt_a: (+acc.desc_amt_a || 0) + (+item.desc_amt_a || 0),
+        desc_amt_b: (+acc.desc_amt_b || 0) + (+item.desc_amt_b || 0),
+        net_amt: (+acc.net_amt || 0) + (+item.net_amt || 0),
+        tex_amt: (+acc.tex_amt || 0) + (+item.tex_amt || 0),
+        taxable_value: (
+          (+acc.taxable_value || 0) + (+item.taxable_value || 0) || 0
+        ).toFixed(2),
+        itemQty: (+acc.itemQty || 0) + (+item.itemQty || 0),
+        mrp: (+acc.mrp || 0) + (+item.mrp || 0),
+      };
+    }, {});
+
+    return totalData;
   }, [footer, allOrderItems, itemData]);
 
   const getFormateDate = (dateStamp) => {
@@ -181,15 +182,16 @@ const OrderPrint2 = ({
                       border: "1px solid black",
                       width: "100%",
                       borderSpacing: "0px",
-                      height: "10mm",
+                      height: "14mm",
                       padding: "1mm",
+                      borderBottom: "none",
                     }}
                   >
                     <tr>
                       <td
                         style={{
                           fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                           width: "",
                         }}
                       >
@@ -198,7 +200,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                           width: "30%",
                         }}
                       >
@@ -214,7 +216,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                           width: "40%",
                         }}
                       >
@@ -225,14 +227,14 @@ const OrderPrint2 = ({
                         >
                           Invoice No:-
                         </span>{" "}
-                        {order.dms_invoice_number||""}
+                        {order.dms_invoice_number || ""}
                       </td>
                     </tr>
                     <tr>
                       <td
                         style={{
                           fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         Seller Address:- BEHIND SALES TAX OFFICE,
@@ -240,7 +242,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -255,7 +257,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -272,7 +274,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         SHASTRI WARD GONDIA
@@ -280,7 +282,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -295,7 +297,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -311,13 +313,13 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
                           style={{
                             fontWeight: "700",
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                           }}
                         >
                           Fssai Number:-{" "}
@@ -337,7 +339,7 @@ const OrderPrint2 = ({
                       border: "1px solid black",
                       width: "100%",
                       borderSpacing: "0px",
-                      height: "14mm",
+                      height: "17mm",
                       padding: "1mm",
                     }}
                   >
@@ -345,7 +347,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                           width: "30%",
                         }}
                       >
@@ -354,7 +356,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -371,7 +373,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                           width: "30%",
                         }}
                       >
@@ -389,7 +391,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         Seller Address:- {counter?.dms_buyer_address || ""}
@@ -397,7 +399,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -412,7 +414,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -429,7 +431,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         Fssai Number:-
@@ -437,7 +439,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -455,7 +457,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -472,7 +474,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       ></td>
                       <td></td>
@@ -480,7 +482,7 @@ const OrderPrint2 = ({
                       <td
                         style={{
                           // fontWeight: "700",
-                          fontSize: "xx-small",
+                          fontSize: "2.3mm",
                         }}
                       >
                         <span
@@ -506,7 +508,7 @@ const OrderPrint2 = ({
                 borderSpacing: "0px",
                 marginLeft: "3mm",
                 width: "28mm",
-                height: "28mm",
+
                 padding: "1mm",
               }}
             >
@@ -514,14 +516,14 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                   }}
                 >
                   Company QR Code:
                 </th>
               </tr>
               <tr>
-                <th style={{ height: "5mm" }}></th>
+                <th style={{ height: "3mm" }}></th>
               </tr>
               <tr>
                 <td>
@@ -530,8 +532,9 @@ const OrderPrint2 = ({
                     bgColor="#ffffff"
                     fgColor="#000000"
                     style={{
-                      width: "20mm",
-                      height: "20mm",
+                      width: "22.3mm",
+                      height: "22.3mm",
+                      paddingLeft: "1mm",
                     }}
                     level="H"
                   />
@@ -562,7 +565,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -575,7 +578,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -588,7 +591,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -602,7 +605,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -615,7 +618,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -628,7 +631,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -641,7 +644,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -654,7 +657,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -667,7 +670,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -680,7 +683,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -693,7 +696,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -706,7 +709,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -719,7 +722,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -732,7 +735,7 @@ const OrderPrint2 = ({
                 <th
                   style={{
                     fontWeight: "700",
-                    fontSize: "xx-small",
+                    fontSize: "2.3mm",
                     border: "1px solid black",
                     textAlign: "center",
                     padding: "0 1px",
@@ -754,7 +757,7 @@ const OrderPrint2 = ({
                       style={{
                         padding: "0 5px",
                         fontWeight: "700",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                       }}
                     >
@@ -763,7 +766,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "center",
                         border: "1px solid black",
                       }}
@@ -775,7 +778,7 @@ const OrderPrint2 = ({
                         padding: "5px",
                         fontWeight: "700",
                         border: "1px solid #000",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         width: "100mm",
                       }}
                       colSpan={3}
@@ -786,7 +789,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -797,7 +800,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -807,7 +810,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         fontWeight: "700",
@@ -818,7 +821,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -828,7 +831,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -838,7 +841,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -848,7 +851,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -858,7 +861,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -868,7 +871,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -878,7 +881,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                       }}
@@ -888,7 +891,7 @@ const OrderPrint2 = ({
                     <td
                       style={{
                         padding: "0 5px",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         fontWeight: "700",
@@ -906,7 +909,7 @@ const OrderPrint2 = ({
                     <th
                       style={{
                         fontWeight: "700",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
@@ -917,7 +920,7 @@ const OrderPrint2 = ({
                     <td colSpan={3} style={{ border: "1px solid black" }}></td>
                     <td
                       style={{
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
@@ -927,20 +930,18 @@ const OrderPrint2 = ({
                     </td>
                     <td
                       style={{
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      0 Cs{" "}
-                      {totalItemDetailsMemo?.free || 0}{" "}
-                      Pcs
+                      0 Cs {totalItemDetailsMemo?.free || 0} Pcs
                     </td>
                     <td
                       style={{
                         fontWeight: "700",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
@@ -951,76 +952,67 @@ const OrderPrint2 = ({
                     <td style={{ border: "1px solid black" }}></td>
                     <td
                       style={{
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      {(
-                        totalItemDetailsMemo?.net_amt || 0
-                      ).toFixed(2)}
+                      {(totalItemDetailsMemo?.net_amt || 0).toFixed(2)}
                     </td>
                     <td
                       style={{
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      {
-                        (totalItemDetailsMemo?.desc_amt_a||0)}
+                      {totalItemDetailsMemo?.desc_amt_a || 0}
                     </td>
                     <td
                       style={{
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      {(
-                        totalItemDetailsMemo?.desc_amt_b  || 0
-                      ).toFixed(2)}
+                      {(totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
                     </td>
                     <td
                       style={{
                         fontWeight: "700",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      {totalItemDetailsMemo?.taxable_value  || 0}
+                      {totalItemDetailsMemo?.taxable_value || 0}
                     </td>
 
                     <td style={{ border: "1px solid black" }}></td>
                     <td
                       style={{
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      {(
-                        totalItemDetailsMemo?.tex_amt || 0
-                      )?.toFixed(2)}
+                      {(totalItemDetailsMemo?.tex_amt || 0)?.toFixed(2)}
                     </td>
                     <td
                       style={{
                         fontWeight: "700",
-                        fontSize: "xx-small",
+                        fontSize: "2.3mm",
                         textAlign: "right",
                         border: "1px solid black",
                         padding: "0 5px",
                       }}
                     >
-                      {(
-                        totalItemDetailsMemo?.item_total || 0
-                      ).toFixed(2)}
+                      {(totalItemDetailsMemo?.item_total || 0).toFixed(2)}
                     </td>
                   </tr>
                 </>
@@ -1055,8 +1047,7 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                 
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
                           }}
                         >
@@ -1067,7 +1058,7 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
                           }}
                         >
@@ -1077,7 +1068,7 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
                           }}
                         >
@@ -1087,7 +1078,7 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
                           }}
                         >
@@ -1104,7 +1095,7 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
                           }}
                         >
@@ -1137,7 +1128,7 @@ const OrderPrint2 = ({
                         <td
                           style={{
                             fontWeight: "700",
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
                           }}
                         >
@@ -1148,8 +1139,9 @@ const OrderPrint2 = ({
                         <td
                           style={{
                             fontWeight: "700",
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
+                            fontStyle: "italic",
                           }}
                         >
                           1.
@@ -1159,9 +1151,9 @@ const OrderPrint2 = ({
                         <td
                           style={{
                             fontWeight: "700",
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
-                            color:"transparent"
+                            color: "transparent",
                           }}
                         >
                           1.
@@ -1171,9 +1163,9 @@ const OrderPrint2 = ({
                         <td
                           style={{
                             fontWeight: "700",
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
-                            color:"transparent"
+                            color: "transparent",
                           }}
                         >
                           1.
@@ -1183,15 +1175,14 @@ const OrderPrint2 = ({
                         <td
                           style={{
                             fontWeight: "700",
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             width: "30%",
-                            color:"transparent"
+                            color: "transparent",
                           }}
                         >
                           1.
                         </td>
                       </tr>
-                      
                     </table>
                   </td>
                   <td>
@@ -1209,15 +1200,13 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             textAlign: "right",
-
                           }}
                         >
                           <span
                             style={{
                               fontWeight: "700",
-
                             }}
                           >
                             CREDIT NOTE Adjustment:
@@ -1228,17 +1217,15 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
-                        
-                            textAlign: "right",
+                            fontSize: "2.3mm",
 
+                            textAlign: "right",
                           }}
                         >
                           <span
                             style={{
                               fontWeight: "700",
-                            textAlign: "right",
-
+                              textAlign: "right",
                             }}
                           >
                             DEBIT NOTE Adjustment:
@@ -1249,9 +1236,8 @@ const OrderPrint2 = ({
                       <tr>
                         <td
                           style={{
-                            fontSize: "xx-small",
+                            fontSize: "2.3mm",
                             textAlign: "right",
-
                           }}
                         >
                           <span
@@ -1261,7 +1247,11 @@ const OrderPrint2 = ({
                           >
                             Round Oﬀ:
                           </span>{" "}
-                          ₹ {(order.order_grandtotal-totalItemDetailsMemo?.item_total || 0).toFixed(2)}
+                          ₹{" "}
+                          {(
+                            order.order_grandtotal -
+                              totalItemDetailsMemo?.item_total || 0
+                          ).toFixed(2)}
                         </td>
                       </tr>
                       <tr>

@@ -80,7 +80,6 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
 		removeAfterPrint: true
 	})
 	// const getUsers = async () => {

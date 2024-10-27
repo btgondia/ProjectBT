@@ -49,7 +49,7 @@ const CounterLegerReport = () => {
   }, []);
   const invokePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
+    
     removeAfterPrint: true,
   });
   const getCounter = async (controller = new AbortController()) => {

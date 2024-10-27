@@ -25,7 +25,14 @@ const OrderPrintWrapper = ({
       ? 15
       : 19;
     const min_count =order.dms_invoice_number?9: max_count - 7;
-    const sourceArray = order?.item_details;
+    const sourceArray =order.dms_invoice_number?order?.item_details?.sort((a,b)=>{
+      let item_a_title = items.find((c) => c.item_uuid === a.item_uuid)?.dms_item_name||"";
+      let item_b_title = items.find((c) => c.item_uuid === b.item_uuid)?.dms_item_name||"";
+      return item_a_title.localeCompare(item_b_title);
+    }).map((a,i)=>({
+      ...a,
+      sr:i+1
+    })): order?.item_details;
     const arrayOfArrays = [];
 
     if (sourceArray.length > max_count) {

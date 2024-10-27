@@ -24,7 +24,7 @@ const PendingsEntry = () => {
 	}
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
+		
 		removeAfterPrint: true,
 	})
 	const getOrders = async () => {

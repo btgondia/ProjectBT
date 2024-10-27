@@ -38,7 +38,6 @@ export default function CashRegister() {
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
     removeAfterPrint: true,
   });
 
@@ -50,7 +49,7 @@ export default function CashRegister() {
 
   const printStatement = useReactToPrint({
     content: statementContent,
-    documentTitle: "Statement",
+    
     removeAfterPrint: true,
   });
 

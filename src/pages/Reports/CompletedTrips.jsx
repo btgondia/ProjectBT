@@ -23,7 +23,7 @@ const CompletedTrips = () => {
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
+		
 		removeAfterPrint: true,
 	})
 	const getTripData = async trip_uuid => {

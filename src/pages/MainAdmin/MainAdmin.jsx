@@ -330,7 +330,6 @@ TOTAL: Rs.${orders?.reduce((sum, i) => sum + +i?.order_grandtotal, 0)}
   };
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
     removeAfterPrint: true,
   });
 
@@ -2533,7 +2532,6 @@ function HoldPopup({
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
     removeAfterPrint: true,
   });
   const handleBoxPrint = useReactToPrint({

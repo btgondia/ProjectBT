@@ -135,6 +135,7 @@ export function OrderDetails({
   const [deductionsPopup, setDeductionsPopup] = useState();
   const [deductionsCoinPopup, setDeductionsCoinPopup] = useState();
   const [deductionsData, setDeductionsData] = useState();
+  const [openDMSInvoicePopup, setOpenDMSInvoicePopup] = useState();
   const getRoutesData = async () => {
     const cachedData = localStorage.getItem("routesData");
 
@@ -1328,7 +1329,15 @@ export function OrderDetails({
 
   const isCancelled = order?.status?.find((i) => +i.stage === 5);
 
-  return deliveryPopup ? (
+  return openDMSInvoicePopup ? (
+    <DMSInvoicePopup
+      order={order}
+      onClose={() => {
+        setOpenDMSInvoicePopup(false);
+      }}
+      onSave={onSave}
+    />
+  ) : deliveryPopup ? (
     <DiliveryPopup
       onSave={({ modes, outstanding, modeTotal }) => {
         if (order?.receipt_number) {
@@ -1561,6 +1570,12 @@ export function OrderDetails({
                     </span>
                   </h2>
                 )}
+                <button
+                  className="theme-btn"
+                  onClick={() => setOpenDMSInvoicePopup(true)}
+                >
+                  DMS
+                </button>
               </div>
               <div className="inventory_header">
                 <h2>Order Details</h2>
@@ -4209,7 +4224,7 @@ function DiliveryPopup({
       onSave({ modes, outstanding, modeTotal });
     } else {
       postOrderData({ diliveredUser, modes, outstanding, modeTotal });
-      
+
       onSave();
     }
     setWaiting(false);
@@ -4509,14 +4524,7 @@ function DiliveryPopup({
     </>
   );
 }
-function CounterNotesPopup({
-  onSave,
-
-  order,
-  setSelectedOrder,
-  notesPopup,
-  HoldOrder,
-}) {
+function CounterNotesPopup({ onSave, notesPopup }) {
   const [notes, setNotes] = useState([]);
   const [edit, setEdit] = useState(false);
   useEffect(() => {
@@ -4584,6 +4592,103 @@ function CounterNotesPopup({
                         value={notes?.toString()?.replace(/,/g, "\n")}
                         onChange={(e) => {
                           setNotes(e.target.value.split("\n"));
+                          setEdit(true);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button onClick={onSave} className="closeButton">
+                    x
+                  </button>
+                  {edit ? (
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={submitHandler}
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+function DMSInvoicePopup({ onSave, order }) {
+  const [invoiceNumber, setInvoiceNumber] = useState(order?.dms_invoice_number);
+  const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    setInvoiceNumber(order?.dms_invoice_number);
+  }, [order?.dms_invoice_number]);
+
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/updateDMSInvoiceNumber",
+      data: {
+        dms_invoice_number: invoiceNumber,
+        order_uuid: order?.order_uuid,
+        invoice_number: order?.invoice_number,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{
+            height: "fit-content",
+            width: "max-content",
+          }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>DMS Invoice Number</h3>
+            {/* <h3>Please Enter Notes</h3> */}
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup" style={{ backgroundColor: "#fff" }}>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "start" }}
+                  >
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "200px" }}
+                    >
+                      <input
+                        name="route_title"
+                        className="numberInput"
+                        value={invoiceNumber}
+                        onChange={(e) => {
+                          setInvoiceNumber(e.target.value);
                           setEdit(true);
                         }}
                       />

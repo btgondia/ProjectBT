@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import OrderPrint from "./OrderPrint";
+import OrderPrint2 from "./OrderPrint2";
 
 const OrderPdf = () => {
   const params = useParams();
@@ -35,24 +36,23 @@ const OrderPdf = () => {
   };
 
   const getItemsData = async () => {
-		const cachedData = localStorage.getItem('itemsData');
-		if (cachedData) {
-			setItemsData(JSON.parse(cachedData));
-		} else {
-		  const response = await axios({
-			method: "get",
-			url: "/items/GetItemList",
-			headers: {
-			  "Content-Type": "application/json",
-			},
-		  });
-		  if (response.data.success) {
-			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
-			setItemsData(response.data.result);
-		  }
-		}
-	  };
-
+    const cachedData = localStorage.getItem("itemsData");
+    if (cachedData) {
+      setItemsData(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/items/GetItemList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        localStorage.setItem("itemsData", JSON.stringify(response.data.result));
+        setItemsData(response.data.result);
+      }
+    }
+  };
 
   const getUser = async (user_uuid) => {
     const response = await axios({
@@ -128,20 +128,35 @@ const OrderPdf = () => {
       {order &&
         Array.from(
           Array(Math.ceil(order?.item_details?.length / 12)).keys()
-        )?.map((a, i) => (
-          <OrderPrint
-            counter={counter}
-            reminderDate={reminderDate}
-            order={JSON.parse(JSON.stringify(order))}
-            date={new Date(order?.status?.[0]?.time)}
-            user={user?.user_title || ""}
-            itemData={itemData}
-            item_details={order?.item_details?.slice(a * 12, 12 * (a + 1))}
-            footer={!(order?.item_details?.length > 12 * (a + 1))}
-            route={route}
-            hsn_code={hsn_code}
-          />
-        ))}
+        )?.map((a, i) =>
+          order.dms_invoice_number ? (
+            <OrderPrint2
+              counter={counter}
+              reminderDate={reminderDate}
+              order={JSON.parse(JSON.stringify(order))}
+              date={new Date(order?.status?.[0]?.time)}
+              user={user}
+              itemData={itemData}
+              item_details={order?.item_details?.slice(a * 12, 12 * (a + 1))}
+              footer={!(order?.item_details?.length > 12 * (a + 1))}
+              route={route}
+              hsn_code={hsn_code}
+            />
+          ) : (
+            <OrderPrint
+              counter={counter}
+              reminderDate={reminderDate}
+              order={JSON.parse(JSON.stringify(order))}
+              date={new Date(order?.status?.[0]?.time)}
+              user={user?.user_title || ""}
+              itemData={itemData}
+              item_details={order?.item_details?.slice(a * 12, 12 * (a + 1))}
+              footer={!(order?.item_details?.length > 12 * (a + 1))}
+              route={route}
+              hsn_code={hsn_code}
+            />
+          )
+        )}
     </div>
   );
 };

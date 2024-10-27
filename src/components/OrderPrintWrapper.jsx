@@ -19,12 +19,12 @@ const OrderPrintWrapper = ({
   ...props
 }) => {
   const getPrintData = (order) => {
-    const max_count = sessionStorage.getItem("print_type")
+    const max_count = order.dms_invoice_number
       ? 9
       : order?.order_type !== "E"
       ? 15
       : 19;
-    const min_count =sessionStorage.getItem("print_type")?9: max_count - 7;
+    const min_count =order.dms_invoice_number?9: max_count - 7;
     const sourceArray = order?.item_details;
     const arrayOfArrays = [];
 
@@ -125,7 +125,7 @@ const OrderPrintWrapper = ({
           ?.map((__order) => {
             let order_hsn = hsn_code(__order?.item_details);
             return getPrintData(__order)?.map((order, i, array) =>
-              sessionStorage.getItem("print_type") ? (
+              order.dms_invoice_number ? (
                 <OrderPrint2
                   counter={counters.find(
                     (a) => a.counter_uuid === order?.counter_uuid
@@ -133,7 +133,7 @@ const OrderPrintWrapper = ({
                   reminderDate={reminderDate}
                   order={order}
                   defaultOrder={__order}
-                  date={new Date(order?.status[0]?.time)}
+                  date={order?.status?.length?new Date(order?.status?.reduce((a, b) => a.time < b.time ? a : b).time):""}
                   user={users.find(
                     (a) => a.user_uuid === order?.status[0]?.user_uuid
                   )}

@@ -1300,6 +1300,23 @@ export function OrderDetails({
     setTimeout(() => setNotification(null), 5000);
   };
 
+  const checkHaldiramItems = async () => {
+    let haldiramsItems = orderData.item_details.filter((orderItem) => {
+      let company_uuid = itemsData.find(
+        (item) => item.item_uuid === orderItem.item_uuid
+      )?.company_uuid;
+      return company_uuid === "b153f6ae-d2b2-11ec-9d64-0242ac120002";
+    });
+    if (haldiramsItems.length !== order.item_details.length) {
+      setNotification({
+        success: false,
+        message: "Only Haldirams Items Allowed for DMS",
+      });
+    } else {
+      setOpenDMSInvoicePopup(true);
+    }
+  };
+
   const copyStageConfirmation = () => {
     setPromptLocalState({
       active: true,
@@ -1571,7 +1588,12 @@ export function OrderDetails({
                 )}
                 <button
                   className="theme-btn"
-                  onClick={() => setOpenDMSInvoicePopup(true)}
+                  onClick={
+                    checkHaldiramItems
+                    //   (
+
+                    // ) => setOpenDMSInvoicePopup(true)
+                  }
                 >
                   DMS
                 </button>

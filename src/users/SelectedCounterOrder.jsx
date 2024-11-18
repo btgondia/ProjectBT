@@ -1,16 +1,20 @@
 import { AiOutlineSearch } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
 import { AutoAdd, Billing } from "../Apis/functions";
 import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-
+import Context from "../context/context";
 import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
 const SelectedCounterOrder = () => {
+  const {
+  
+    setNotification,
+  } = useContext(Context);
   const [items, setItems] = useState([]);
   // const [foodLicensePopup, setFoodLicencePopup] = useState(false);
   const [checkNumberPopup, setCheckNumberPopup] = useState(false);
@@ -235,27 +239,32 @@ const SelectedCounterOrder = () => {
   useEffect(() => {
     setItems((prev) =>
       prev?.map((a) => {
-        let item_price=a.item_price;
-        let item_special_price=counter?.item_special_price?.find((b) => b.item_uuid === a.item_uuid)?.price;
-        let item_rate=counter?.company_discount?.find((b) => b.company_uuid === a.company_uuid)?.item_rate;
+        let item_price = a.item_price;
+        let item_special_price = counter?.item_special_price?.find(
+          (b) => b.item_uuid === a.item_uuid
+        )?.price;
+        let item_rate = counter?.company_discount?.find(
+          (b) => b.company_uuid === a.company_uuid
+        )?.item_rate;
 
-        if(item_special_price){
-          item_price=item_special_price;
-        }else if(item_rate==="a"){
-          item_price=a.item_price_a;
-        }else if(item_rate==="b"){
-          item_price=a.item_price_b;
-        }else if(item_rate==="c"){
-          item_price=a.item_price_c;
+        if (item_special_price) {
+          item_price = item_special_price;
+        } else if (item_rate === "a") {
+          item_price = a.item_price_a;
+        } else if (item_rate === "b") {
+          item_price = a.item_price_b;
+        } else if (item_rate === "c") {
+          item_price = a.item_price_c;
         }
 
-        return{
-        ...a,
-        item_price,
-        b: 0,
-        p: 0,
-        status: 0,
-      }})
+        return {
+          ...a,
+          item_price,
+          b: 0,
+          p: 0,
+          status: 0,
+        };
+      })
     );
   }, [counter]);
 
@@ -267,18 +276,17 @@ const SelectedCounterOrder = () => {
         order_uuid: uuid(),
         opened_by: 0,
         item_details: orderData.items.map((a) => {
-          
-          
-          return{
-          ...a,
-          b: a.b,
-          p: a.p,
-          unit_price: a.price,
-          gst_percentage: a.item_gst,
-          css_percentage: a.item_css,
-          status: 0,
-          price: a.item_price,
-        }}),
+          return {
+            ...a,
+            b: a.b,
+            p: a.p,
+            unit_price: a.price,
+            gst_percentage: a.item_gst,
+            css_percentage: a.item_css,
+            status: 0,
+            price: a.item_price,
+          };
+        }),
         status: [
           {
             stage: orderData.others.stage,
@@ -1190,6 +1198,16 @@ const SelectedCounterOrder = () => {
                     })),
                   }));
                   setTimeout(async () => {
+                    let checkItemHaveSameBillingType = order.items.filter(
+                      (a) => a.billing_type !== order.items[0].billing_type
+                    );
+                    if (checkItemHaveSameBillingType.length) {
+                      return setNotification({
+                        message: "Invoice and Estimate together not allowed",
+                        success: false,
+                      });
+                    }
+
                     let time = new Date();
                     Billing({
                       new_order: 1,
@@ -1198,6 +1216,7 @@ const SelectedCounterOrder = () => {
                       creating_new: true,
                       counter,
                       items: data.items,
+                      order_type:data.items[0].billing_type,
                       others: {
                         stage: 1,
                         user_uuid: localStorage.getItem("user_uuid"),
@@ -1581,7 +1600,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
         ...data,
         p_price: data.item_price,
         b_price: Math.floor(data.item_price * data.conversion || 0),
-        discount: data.discount|| 0,
+        discount: data.discount || 0,
       };
     });
   }, []);

@@ -86,14 +86,17 @@ export default function AddOrder() {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [remarks, setRemarks] = useState("");
   const fetchCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
+    const cachedData = localStorage.getItem("companiesData");
     try {
       if (cachedData) {
         setCompanies(JSON.parse(cachedData));
       } else {
         const response = await axios.get("/companies/getCompanies");
         if (response?.data?.result?.[0]) {
-          localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+          localStorage.setItem(
+            "companiesData",
+            JSON.stringify(response.data.result)
+          );
           setCompanies(response.data.result);
         }
       }
@@ -101,7 +104,7 @@ export default function AddOrder() {
       console.log(error);
     }
   };
-  
+
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -414,21 +417,11 @@ export default function AddOrder() {
         .filter((a) => a.item_uuid)
         ?.some((i) => i.billing_type !== order?.order_type)
     )
-      return setPromptState({
-        message: `${getType(
-          order?.order_type,
-          false
-        )} items are not allowed in ${getType(order?.order_type)} order type.`,
-        actions: [
-          {
-            label: "Ok",
-            classname: "text-btns",
-            action: () => setPromptState(null),
-          },
-        ],
+      return setNotification({
+        message: "Invoice and Estimate together not allowed",
+        success: false,
       });
 
-    setPopup(true);
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
@@ -831,7 +824,8 @@ export default function AddOrder() {
                                     ).length &&
                                     a.status !== 0 &&
                                     (companyFilter === "all" ||
-                                      a.company_uuid === companyFilter)
+                                      a.company_uuid === companyFilter) &&
+                                    a.billing_type === order?.order_type
                                 )
                                 .sort((a, b) =>
                                   a?.item_title?.localeCompare(b.item_title)
@@ -1353,6 +1347,8 @@ export default function AddOrder() {
               <button
                 type="button"
                 onClick={() => {
+                  console.log({ order });
+
                   let empty_item = order.item_details
                     .filter((a) => a.item_uuid)
                     .map((a) => ({
@@ -1580,8 +1576,8 @@ function DiliveryPopup({
     });
   }, [data]);
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
     } else {
@@ -1592,9 +1588,12 @@ function DiliveryPopup({
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
       }
     }

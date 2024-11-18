@@ -19,6 +19,52 @@ const OrderPrint2 = ({
   total_page = 0,
   current_page = 0,
 }) => {
+  const [gstValues, setGstVAlues] = useState([]);
+  useEffect(() => {
+    if (!defaultOrder?.item_details?.length) return;
+    const arr = [];
+
+    let itemsData = [];
+    for (let item of defaultOrder.item_details) {
+      let final_Amount =
+        item.item_total /
+        (1 + ((item?.gst_percentage||0) + (item?.css_percentage||0)) / 100);
+        console.log({final_Amount})
+      itemsData.push({
+        ...item,
+        final_Amount: final_Amount,
+      });
+    }
+
+
+    const gst_value = Array.from(
+      new Set(itemsData.map((a) => +a.gst_percentage))
+    );
+    
+
+    for (let a of gst_value) {
+      const data = itemsData.filter((b) => +b.gst_percentage === a);
+      const amt =
+        data.length > 1
+          ? data.map((b) => +b?.final_Amount).reduce((a, b) => a + b, 0)
+          : data.length
+          ? +data[0].final_Amount
+          : 0;
+          console.log({amt,a})
+
+      const value = +amt * a / 100;
+
+      if (value)
+        arr.push({
+          value: a,
+          tex_amt: (amt).toFixed(2),
+          amount: value.toFixed(2),
+        });
+    }
+
+    
+    setGstVAlues(arr);
+  }, [defaultOrder]);
   const itemDetails = useMemo(() => {
     let items = item_details?.map((a) => ({
       ...a,
@@ -52,15 +98,15 @@ const OrderPrint2 = ({
       let taxable_value = +item.item_total - desc_amt_a - desc_amt_b;
       return {
         ...item,
-        item_total: item.item_total.toFixed(2),
-        desc_amt_a: desc_amt_a.toFixed(0),
-        desc_amt_b: desc_amt_b.toFixed(2),
-        net_amt: net_amt.toFixed(2),
-        tex_amt: (tex_amt * itemQty).toFixed(2),
+        item_total: item.item_total?.toFixed(2),
+        desc_amt_a: desc_amt_a?.toFixed(0),
+        desc_amt_b: desc_amt_b?.toFixed(2),
+        net_amt: net_amt?.toFixed(2),
+        tex_amt: (tex_amt * itemQty)?.toFixed(2),
         desc_a,
         desc_b,
         itemQty,
-        taxable_value: taxable_value.toFixed(2),
+        taxable_value: taxable_value?.toFixed(2),
       };
     });
   }, [itemDetails, itemData]);
@@ -94,15 +140,15 @@ const OrderPrint2 = ({
         let taxable_value = +item.item_total - desc_amt_a - desc_amt_b;
         return {
           ...item,
-          item_total: item.item_total.toFixed(2),
-          desc_amt_a: desc_amt_a.toFixed(0),
-          desc_amt_b: desc_amt_b.toFixed(2),
-          net_amt: net_amt.toFixed(2),
-          tex_amt: (tex_amt * itemQty).toFixed(2),
+          item_total: item.item_total?.toFixed(2),
+          desc_amt_a: desc_amt_a?.toFixed(0),
+          desc_amt_b: desc_amt_b?.toFixed(2),
+          net_amt: net_amt?.toFixed(2),
+          tex_amt: (tex_amt * itemQty)?.toFixed(2),
           desc_a,
           desc_b,
           itemQty,
-          taxable_value: taxable_value.toFixed(2),
+          taxable_value: taxable_value?.toFixed(2),
         };
       });
     let totalData = allData.reduce((acc, item) => {
@@ -114,7 +160,7 @@ const OrderPrint2 = ({
         tex_amt: (+acc.tex_amt || 0) + (+item.tex_amt || 0),
         taxable_value: (
           (+acc.taxable_value || 0) + (+item.taxable_value || 0) || 0
-        ).toFixed(2),
+        )?.toFixed(2),
         itemQty: (+acc.itemQty || 0) + (+item.itemQty || 0),
         mrp: (+acc.mrp || 0) + (+item.mrp || 0),
       };
@@ -826,7 +872,7 @@ const OrderPrint2 = ({
                         border: "1px solid black",
                       }}
                     >
-                      {((item.net_amt || 0) / (item.itemQty || 1)).toFixed(2)}
+                      {((+item.net_amt || 0) / (+item.itemQty || 1)).toFixed(2)}
                     </td>
                     <td
                       style={{
@@ -876,7 +922,7 @@ const OrderPrint2 = ({
                         border: "1px solid black",
                       }}
                     >
-                      {(item.gst_percentage || 0).toFixed(2)}
+                      {(+item.gst_percentage || 0).toFixed(2)}
                     </td>
                     <td
                       style={{
@@ -958,7 +1004,7 @@ const OrderPrint2 = ({
                         padding: "0 5px",
                       }}
                     >
-                      {(totalItemDetailsMemo?.net_amt || 0).toFixed(2)}
+                      {(+totalItemDetailsMemo?.net_amt || 0).toFixed(2)}
                     </td>
                     <td
                       style={{
@@ -978,7 +1024,7 @@ const OrderPrint2 = ({
                         padding: "0 5px",
                       }}
                     >
-                      {(totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
+                      {(+totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
                     </td>
                     <td
                       style={{
@@ -1001,7 +1047,7 @@ const OrderPrint2 = ({
                         padding: "0 5px",
                       }}
                     >
-                      {(totalItemDetailsMemo?.tex_amt || 0)?.toFixed(2)}
+                      {(+totalItemDetailsMemo?.tex_amt || 0).toFixed(2)}
                     </td>
                     <td
                       style={{
@@ -1012,7 +1058,7 @@ const OrderPrint2 = ({
                         padding: "0 5px",
                       }}
                     >
-                      {(totalItemDetailsMemo?.item_total || 0).toFixed(2)}
+                      {(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
                     </td>
                   </tr>
                 </>
@@ -1051,7 +1097,7 @@ const OrderPrint2 = ({
                             width: "30%",
                           }}
                         >
-                          CGST - 158.77 , SGST - 158.77 , IGST - 0.00 , UTGST -
+                          CGST - {gstValues.length?gstValues[0].amount/2:0.00} , SGST - {gstValues.length?gstValues[0].amount/2:0} , IGST - 0.00 , UTGST -
                           0.00
                         </td>
                       </tr>
@@ -1251,7 +1297,7 @@ const OrderPrint2 = ({
                           {(
                             order.order_grandtotal -
                               totalItemDetailsMemo?.item_total || 0
-                          ).toFixed(2)}
+                          )?.toFixed(2)}
                         </td>
                       </tr>
                       <tr>

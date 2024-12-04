@@ -1301,13 +1301,15 @@ export function OrderDetails({
   };
 
   const checkHaldiramItems = async () => {
-    let haldiramsItems = orderData.item_details.filter((orderItem) => {
+    let isNotHaldiramsItems = orderData.item_details.find((orderItem) => {
       let company_uuid = itemsData.find(
         (item) => item.item_uuid === orderItem.item_uuid
       )?.company_uuid;
-      return company_uuid === "b153f6ae-d2b2-11ec-9d64-0242ac120002";
+      console.log("isNotHaldiramsItems", company_uuid ,"b153f6ae-d2b2-11ec-9d64-0242ac120002",company_uuid==="b153f6ae-d2b2-11ec-9d64-0242ac120002");
+      return company_uuid !== "b153f6ae-d2b2-11ec-9d64-0242ac120002";
     });
-    if (haldiramsItems.length !== order.item_details.length) {
+console.log("isNotHaldiramsItems", { isNotHaldiramsItems });
+    if (isNotHaldiramsItems) {
       setNotification({
         success: false,
         message: "Only Haldirams Items Allowed for DMS",
@@ -1352,6 +1354,7 @@ export function OrderDetails({
         setOpenDMSInvoicePopup(false);
       }}
       onSave={onSave}
+      setNotification={setNotification}
     />
   ) : deliveryPopup ? (
     <DiliveryPopup
@@ -4647,7 +4650,7 @@ function CounterNotesPopup({ onSave, notesPopup }) {
     </>
   );
 }
-function DMSInvoicePopup({ onSave, order }) {
+function DMSInvoicePopup({ onSave, order,setNotification }) {
   const [invoiceNumber, setInvoiceNumber] = useState(order?.dms_invoice_number);
   const [edit, setEdit] = useState(false);
   useEffect(() => {
@@ -4669,6 +4672,8 @@ function DMSInvoicePopup({ onSave, order }) {
     });
     if (response.data.success) {
       onSave();
+    }else if(response.data.message){
+      setNotification(response.data)
     }
   };
   return (

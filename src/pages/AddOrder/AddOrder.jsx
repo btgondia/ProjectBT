@@ -421,7 +421,7 @@ export default function AddOrder() {
         message: "Invoice and Estimate together not allowed",
         success: false,
       });
-
+    setPopup(true);
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({

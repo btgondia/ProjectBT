@@ -99,10 +99,7 @@ const PendingPaymentsSummary = ({
                   {orders?.map((order) => (
                     <tr>
                       <td>{getDate(+order?.time_1)}</td>
-                      <td>
-                        {(order?.order_type === "I" ? "" : "E") +
-                          order?.invoice_number}
-                      </td>
+                      <td>{order?.invoice_number}</td>
                       <td>Rs.{order?.order_grandtotal}</td>
                       <td>{itemsQuantity(order?.item_details)}</td>
                       <td>[ {order?.notes?.join(", ")} ]</td>

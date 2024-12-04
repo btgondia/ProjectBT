@@ -275,6 +275,7 @@ const SelectedCounterOrder = () => {
         order_status: orderData?.order_status || "R",
         order_uuid: uuid(),
         opened_by: 0,
+        order_type: orderData.items[0].billing_type,
         item_details: orderData.items.map((a) => {
           return {
             ...a,
@@ -1198,10 +1199,12 @@ const SelectedCounterOrder = () => {
                     })),
                   }));
                   setTimeout(async () => {
-                    let checkItemHaveSameBillingType = order.items.filter(
+                    let checkItemHaveSameBillingType = order.items.find(
                       (a) => a.billing_type !== order.items[0].billing_type
                     );
-                    if (checkItemHaveSameBillingType.length) {
+                    console.log("checkItemHaveSameBillingType",checkItemHaveSameBillingType);
+                    if (checkItemHaveSameBillingType) {
+                      setLoading(false);
                       return setNotification({
                         message: "Invoice and Estimate together not allowed",
                         success: false,
@@ -1212,11 +1215,11 @@ const SelectedCounterOrder = () => {
                     Billing({
                       new_order: 1,
                       order_uuid: order?.order_uuid,
-                      invoice_number: `${order?.order_type}${order?.invoice_number}`,
+                      invoice_number: `${order.items[0].billing_type}${order?.invoice_number}`,
                       creating_new: true,
                       counter,
                       items: data.items,
-                      order_type:data.items[0].billing_type,
+                      order_type:order.items[0].billing_type,
                       others: {
                         stage: 1,
                         user_uuid: localStorage.getItem("user_uuid"),

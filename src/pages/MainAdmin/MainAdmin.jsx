@@ -210,7 +210,7 @@ ${counter_title},${route_title} ${credit_rating ? "[" + credit_rating + "]" : ""
 ${address}
 ${orders?.map(
                   (order) =>
-                    `${getDate(+order?.time_1)}        ${(order?.order_type === "I" ? "" : "E") + order?.invoice_number}        Rs.${order?.order_grandtotal} ${itemsQuantity(order?.item_details)}          [ ${order?.notes?.join(", ")} ]`
+                    `${getDate(+order?.time_1)}        ${order?.invoice_number}        Rs.${order?.order_grandtotal} ${itemsQuantity(order?.item_details)}          [ ${order?.notes?.join(", ")} ]`
                 ).join("\n")}
 TOTAL: Rs.${orders?.reduce((sum, i) => sum + +i?.order_grandtotal, 0)}
 -----------------------------------------------
@@ -3740,7 +3740,7 @@ const OrdersEdit = ({
 
       let billingData = await Billing({
         order_uuid: data?.order_uuid,
-        invoice_number: `${data?.order_type}${data?.invoice_number}`,
+        invoice_number: data?.invoice_number,
         replacement: data.replacement,
         adjustment: data.adjustment,
         shortage: data.shortage,

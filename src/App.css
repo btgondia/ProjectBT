@@ -672,7 +672,9 @@ label {
 .nav-menu-search > input {
 	border: none;
 	border-bottom: 1px solid darkgray;
+	background: rgb(232, 237, 233);
 	padding: 14px;
+	padding-top: 18px;
 	width: 100%;
 	outline: none;
 }
@@ -704,7 +706,7 @@ label {
 		transform: rotate(360deg);
 	}
 }
-.hoverLink:hover{
+.hoverLink:hover {
 	text-decoration: underline;
 	color: blue;
 }
@@ -719,33 +721,33 @@ label {
 	z-index: 9999999999999999999999;
 	opacity: 0;
 	transition: opacity 0.3s ease;
-  }
-  
-  .loading-bar.show {
+}
+
+.loading-bar.show {
 	opacity: 1;
-  }
-  
-  .progress {
+}
+
+.progress {
 	height: 100%;
 	width: 0%;
 	background-color: #44cd4a; /* Progress bar color */
 	animation: progressAnimation 2s linear infinite; /* Animation */
-  }
-  
-  @keyframes progressAnimation {
+}
+
+@keyframes progressAnimation {
 	0% {
-	  width: 0%;
+		width: 0%;
 	}
 	100% {
-	  width: 100%;
+		width: 100%;
 	}
-  }
-  .tooltip {
+}
+.tooltip {
 	position: relative;
 	display: inline-block;
-  }
-  
-  .tooltip .tooltiptext {
+}
+
+.tooltip .tooltiptext {
 	visibility: hidden;
 	width: 120px;
 	background-color: black;
@@ -760,10 +762,9 @@ label {
 	margin-left: -60px; /* Center the tooltip */
 	opacity: 0;
 	transition: opacity 0.3s;
-  }
-  
-  .tooltip:hover .tooltiptext {
+}
+
+.tooltip:hover .tooltiptext {
 	visibility: visible;
 	opacity: 1;
-  }
-  
+}

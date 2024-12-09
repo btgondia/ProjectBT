@@ -252,7 +252,11 @@ const OrderPrint = ({
 					) : (
 						<td colSpan={32}>
 							<div>
-								<p style={{ fontWeight: "600", fontSize: "small" }}>M/S {counter?.counter_title || ""}</p>
+								<p style={{ fontWeight: "600", fontSize: "small" }}>
+									{counter?.estimatedLedgerName
+										? counter?.estimatedLedgerName
+										: `M/S ${counter?.counter_title || ""}`}
+								</p>
 								{counter?.address ? (
 									<p style={{ fontWeight: "600", fontSize: "small" }}>{counter?.address || ""}</p>
 								) : (
@@ -269,12 +273,16 @@ const OrderPrint = ({
 								) : (
 									""
 								)}
-								{counter?.food_license ? (
-									<p style={{ fontWeight: "600", fontSize: "small" }}>Food License: {counter?.food_license}</p>
-								) : (
-									""
+								{!counter?.estimatedLedgerName && (
+									<>
+										{counter?.food_license ? (
+											<p style={{ fontWeight: "600", fontSize: "small" }}>Food License: {counter?.food_license}</p>
+										) : null}
+										{counter?.gst ? (
+											<p style={{ fontWeight: "600", fontSize: "small" }}>GSTIN: {counter?.gst}</p>
+										) : null}
+									</>
 								)}
-								{counter?.gst ? <p style={{ fontWeight: "600", fontSize: "small" }}>GSTIN: {counter?.gst}</p> : ""}
 							</div>
 						</td>
 					)}
@@ -329,9 +337,6 @@ const OrderPrint = ({
 						Product
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-						Hsn
-					</th>
-					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Pack
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
@@ -342,12 +347,6 @@ const OrderPrint = ({
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Free
-					</th>
-					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-						GST (%)
-					</th>
-					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-						CESS (%)
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Unit Price
@@ -362,10 +361,10 @@ const OrderPrint = ({
 						Dsc Amt
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-						GST Amt
+						Net Unit Price
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-						Net Unit Price
+						Box Price
 					</th>
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Amount
@@ -417,16 +416,6 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{hsn_code?.find(a => a.hsn === itemInfo?.hsn)?.char || ""}
-							</td>
-							<td
-								style={{
-									fontWeight: "600",
-									fontSize: "x-small",
-									textAlign: "center"
-								}}
-								colSpan={2}
-							>
 								{itemInfo?.conversion || ""}
 							</td>
 
@@ -459,26 +448,6 @@ const OrderPrint = ({
 								colSpan={2}
 							>
 								{item?.free || 0}
-							</td>
-							<td
-								style={{
-									fontWeight: "600",
-									fontSize: "x-small",
-									textAlign: "center"
-								}}
-								colSpan={2}
-							>
-								{item?.gst_percentage || 0} %
-							</td>
-							<td
-								style={{
-									fontWeight: "600",
-									fontSize: "x-small",
-									textAlign: "center"
-								}}
-								colSpan={2}
-							>
-								{item?.css_percentage || 0} %
 							</td>
 							<td
 								style={{
@@ -528,7 +497,7 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{(tex_amt || 0).toFixed(2)}
+								{chcekIfDecimal(unit_price || 0)}
 							</td>
 							<td
 								style={{
@@ -538,7 +507,7 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{chcekIfDecimal(unit_price || 0)}
+								{+unit_price * +itemInfo?.conversion}
 							</td>
 							<td
 								style={{

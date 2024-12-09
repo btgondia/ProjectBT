@@ -234,13 +234,9 @@ TOTAL: ${amounts}
 		const pendingPayments = selectedOrder?.filter(i => i.payment_pending)
 		const nonPendingPayments = selectedOrder?.filter(i => !i.payment_pending)
 
-		if (pendingPayments?.[0] && nonPendingPayments?.[0])
-			setShowSelect({
-				status: true,
-				callback: createPaymentSummary
-			})
-		// else if (pendingPayments?.[0]) createPaymentSummary(command)
-		// else createPaymentSummary(command)
+		if (pendingPayments?.[0] && nonPendingPayments?.[0]) setShowSelect({ status: true, type: 0 })
+		else if (pendingPayments?.[0]) createPaymentSummary(0)
+		else if (nonPendingPayments?.[0]) createPaymentSummary(1)
 	}
 
 	const paymentSummaryInvokeHandlerCopy = () => {
@@ -251,10 +247,10 @@ TOTAL: ${amounts}
 		if (pendingPayments?.[0] && nonPendingPayments?.[0])
 			setShowSelect({
 				status: true,
-				callback: createPaymentSummaryCopy
+				type: 1
 			})
-		// else if (pendingPayments?.[0]) createPaymentSummaryCopy(0)
-		// else createPaymentSummaryCopy(1)
+		else if (pendingPayments?.[0]) createPaymentSummaryCopy(0)
+		else if (nonPendingPayments?.[0]) createPaymentSummaryCopy(1)
 	}
 
 	const selectedOrderGrandTotal = useMemo(
@@ -1971,8 +1967,16 @@ TOTAL: ${amounts}
 					<div className="payment-summary-type">
 						<h3>Select payment summary type</h3>
 						<div>
-							<button onClick={() => showSelect?.callback?.(0)}>Pending payments only</button>
-							<button onClick={() => showSelect?.callback?.(1)}>All payments</button>
+							<button
+								onClick={() => (showSelect?.type === 0 ? createPaymentSummary(0) : createPaymentSummaryCopy(0))}
+							>
+								Pending payments only
+							</button>
+							<button
+								onClick={() => (showSelect?.type === 0 ? createPaymentSummary(1) : createPaymentSummaryCopy(1))}
+							>
+								All payments
+							</button>
 						</div>
 						<button onClick={() => setShowSelect(null)} className="close-btn">
 							<IoCloseCircle />

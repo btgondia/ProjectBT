@@ -336,6 +336,11 @@ const OrderPrint = ({
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={3}>
 						Product
 					</th>
+					{!isEstimate ? (
+						<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+							Hsn
+						</th>
+					) : null}
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Pack
 					</th>
@@ -348,6 +353,16 @@ const OrderPrint = ({
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Free
 					</th>
+					{!isEstimate ? (
+						<>
+							<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+								GST (%)
+							</th>
+							<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+								CESS (%)
+							</th>
+						</>
+					) : null}
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Unit Price
 					</th>
@@ -360,12 +375,19 @@ const OrderPrint = ({
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Dsc Amt
 					</th>
+					{!isEstimate ? (
+						<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+							GST Amt
+						</th>
+					) : null}
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Net Unit Price
 					</th>
-					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
-						Box Price
-					</th>
+					{isEstimate ? (
+						<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+							Box Price
+						</th>
+					) : null}
 					<th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
 						Amount
 					</th>
@@ -393,7 +415,6 @@ const OrderPrint = ({
 					return (
 						<tr style={{ borderBottom: "1px solid #000" }} className="order_item">
 							<td style={{ fontWeight: "600", fontSize: "x-small" }}>{item?.sr || i + 1}.</td>
-
 							<td
 								style={
 									boldedItem
@@ -408,6 +429,18 @@ const OrderPrint = ({
 							>
 								{itemInfo?.item_title || ""}
 							</td>
+							{!isEstimate ? (
+								<td
+									style={{
+										fontWeight: "600",
+										fontSize: "x-small",
+										textAlign: "center"
+									}}
+									colSpan={2}
+								>
+									{hsn_code?.find(a => a.hsn === itemInfo?.hsn)?.char || ""}
+								</td>
+							) : null}
 							<td
 								style={{
 									fontWeight: "600",
@@ -418,7 +451,6 @@ const OrderPrint = ({
 							>
 								{itemInfo?.conversion || ""}
 							</td>
-
 							<td
 								style={{
 									fontWeight: "600",
@@ -449,6 +481,30 @@ const OrderPrint = ({
 							>
 								{item?.free || 0}
 							</td>
+							{!isEstimate ? (
+								<>
+									<td
+										style={{
+											fontWeight: "600",
+											fontSize: "x-small",
+											textAlign: "center"
+										}}
+										colSpan={2}
+									>
+										{item?.gst_percentage || 0} %
+									</td>
+									<td
+										style={{
+											fontWeight: "600",
+											fontSize: "x-small",
+											textAlign: "center"
+										}}
+										colSpan={2}
+									>
+										{item?.css_percentage || 0} %
+									</td>
+								</>
+							) : null}
 							<td
 								style={{
 									fontWeight: "600",
@@ -489,6 +545,18 @@ const OrderPrint = ({
 							>
 								{(dsc_amt || 0).toFixed(2)}
 							</td>
+							{!isEstimate ? (
+								<td
+									style={{
+										fontWeight: "600",
+										fontSize: "x-small",
+										textAlign: "center"
+									}}
+									colSpan={2}
+								>
+									{(tex_amt || 0).toFixed(2)}
+								</td>
+							) : null}
 							<td
 								style={{
 									fontWeight: "600",
@@ -499,16 +567,18 @@ const OrderPrint = ({
 							>
 								{chcekIfDecimal(unit_price || 0)}
 							</td>
-							<td
-								style={{
-									fontWeight: "600",
-									fontSize: "x-small",
-									textAlign: "center"
-								}}
-								colSpan={2}
-							>
-								{+unit_price * +itemInfo?.conversion}
-							</td>
+							{isEstimate ? (
+								<td
+									style={{
+										fontWeight: "600",
+										fontSize: "x-small",
+										textAlign: "center"
+									}}
+									colSpan={2}
+								>
+									{+unit_price * +itemInfo?.conversion}
+								</td>
+							) : null}
 							<td
 								style={{
 									fontWeight: "600",

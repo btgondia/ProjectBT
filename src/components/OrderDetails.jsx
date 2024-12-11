@@ -382,6 +382,20 @@ export function OrderDetails({
 		setPrintLoading(false)
 	}
 
+	const deductionsNotAllowedWarning = () =>
+		setPromptLocalState({
+			active: true,
+			heading: "Deductions Unavailable",
+			message: "Deductions are not allowed for estimate orders.",
+			actions: [
+				{
+					label: "Okay",
+					classname: "confirm",
+					action: () => setPromptLocalState(null)
+				}
+			]
+		})
+
 	const getUsers = async () => {
 		if (userData.length) {
 			setUsers(userData)
@@ -1523,7 +1537,9 @@ export function OrderDetails({
 									<button
 										style={{ width: "fit-Content", backgroundColor: "blue" }}
 										className="theme-btn"
-										onClick={() => setDeductionsPopup(true)}
+										onClick={() =>
+											order?.order_type === "E" ? deductionsNotAllowedWarning() : setDeductionsPopup(true)
+										}
 										data-tooltip-id="my-tooltip"
 										data-tooltip-content="Deductions"
 									>

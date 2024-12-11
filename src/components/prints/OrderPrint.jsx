@@ -576,7 +576,7 @@ const OrderPrint = ({
 									}}
 									colSpan={2}
 								>
-									{+unit_price * +itemInfo?.conversion}
+									{(+unit_price * +itemInfo?.conversion).toFixed(2)}
 								</td>
 							) : null}
 							<td

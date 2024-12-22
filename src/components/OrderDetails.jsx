@@ -228,7 +228,10 @@ export function OrderDetails({
 			setOrderData(prev => ({ ...prev, ...response.data.result }))
 			setPromptLocalState(null)
 		} catch (error) {
-			setPromptLocalState(prev => ({ ...prev, loading: true }))
+			setPromptLocalState(prev => ({
+				...prev,
+				actions: prev.actions.map(i => ({ ...i, disabled: false, loading: false }))
+			}))
 			// console.log(error.message)
 		}
 	}

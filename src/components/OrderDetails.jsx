@@ -219,10 +219,18 @@ export function OrderDetails({
 					loading: i.classname?.includes?.("confirm")
 				}))
 			}))
-			const response = await axios.patch("/orders/order_type", {
-				invoice_number: orderData.invoice_number,
-				order_uuid: orderData.order_uuid,
-				order_type
+
+			const response = await axios({
+				method: "put",
+				url: "/orders/updateOrderType",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				data: {
+					invoice_number: orderData.invoice_number,
+					order_uuid: orderData.order_uuid,
+					order_type
+				}
 			})
 
 			setOrderData(prev => ({ ...prev, ...response.data.result }))

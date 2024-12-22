@@ -87,6 +87,7 @@ const NavLink = ({ title, icon, menuList, draggable, setCollectionTags, setcalcu
 									className="item"
 									key={Math.random()}
 									onClick={() => {
+										if (menu?.action) return menu.action()
 										if (menu.name === "Cash Register") {
 											setCashRegisterPopup(true)
 										} else if (menu.name === "Trips") {

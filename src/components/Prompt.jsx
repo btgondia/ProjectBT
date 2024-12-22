@@ -1,5 +1,4 @@
 import React from "react"
-import Loader from "./Loader"
 
 const Prompt = ({ message, heading, actions, classes, loading }) => {
 	return (
@@ -9,14 +8,32 @@ const Prompt = ({ message, heading, actions, classes, loading }) => {
 				<p>{message}</p>
 				<div className="prompt-actions">
 					{actions?.map(i => (
-						<button className={i.classname} onClick={i.action}>
-							{i.label}
+						<button disabled={i.loading || i.disabled} className={i.classname} style={i.style} onClick={i.action}>
+							{i.loading ? (
+								<span
+									className="loader small"
+									style={{
+										borderColor: "white",
+										borderBottomColor: "transparent",
+										width: "16px",
+										height: "16px",
+										borderWidth: "2.5px"
+									}}
+								/>
+							) : null}
+							<span>{i.label}</span>
 						</button>
 					))}
 				</div>
 				{loading && (
 					<div id="spinner-wrapper" className={classes?.wrapper}>
-						<span className="loader white small" />
+						<span
+							className="loader small"
+							style={{
+								borderColor: "var(--mainColor)",
+								borderBottomColor: "transparent"
+							}}
+						/>
 					</div>
 				)}
 			</div>

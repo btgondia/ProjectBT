@@ -169,7 +169,8 @@ const MainAdmin = () => {
 					counter_title = "",
 					credit_rating = "",
 					address = "",
-					sort_order = 0
+					sort_order = 0,
+					dms_buyer_name
 				} = counter.find(c => c.counter_uuid === a)
 
 				return {
@@ -178,13 +179,14 @@ const MainAdmin = () => {
 					credit_rating,
 					address,
 					sort_order,
+					dms_buyer_name,
 					orders: counterOrders[a]?.orders || [],
 					numbers: counterOrders[a]?.numbers || []
 				}
 			})
 			.filter(Boolean) // Remove any null values
 			.sort((a, b) => a?.sort_order - b?.sort_order)
-			.map(({ route_title, counter_title, credit_rating, address, orders, numbers }) => {
+			.map(({ route_title, counter_title, credit_rating, address, orders, numbers, dms_buyer_name }) => {
 				const orderDetails = orders
 					?.map(
 						order =>
@@ -211,7 +213,9 @@ const MainAdmin = () => {
 				else amounts = "Rs." + amounts[0]
 
 				return `
-${counter_title},${route_title} ${credit_rating ? "[" + credit_rating + "]" : ""} ${numbers?.[0]}
+${counter_title}${
+					dms_buyer_name?.length > 0 && dms_buyer_name !== counter_title ? ` / ${dms_buyer_name}` : ""
+				},${route_title} ${credit_rating ? "[" + credit_rating + "]" : ""} ${numbers?.[0]}
 ${address}
 ${orderDetails}
 TOTAL: ${amounts}
@@ -244,11 +248,7 @@ TOTAL: ${amounts}
 		const pendingPayments = selectedOrder?.filter(i => i.payment_pending)
 		const nonPendingPayments = selectedOrder?.filter(i => !i.payment_pending)
 
-		if (pendingPayments?.[0] && nonPendingPayments?.[0])
-			setShowSelect({
-				status: true,
-				type: 1
-			})
+		if (pendingPayments?.[0] && nonPendingPayments?.[0]) setShowSelect({ status: true, type: 1 })
 		else if (pendingPayments?.[0]) createPaymentSummaryCopy(0)
 		else if (nonPendingPayments?.[0]) createPaymentSummaryCopy(1)
 	}

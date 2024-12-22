@@ -154,9 +154,14 @@ const ProcessingOrders = () => {
         },
       });
       if (response.data.success) {
-        const data = response.data.result
-          .sort((a, b) => a.time_1 - b.time_1)
-          .sort((a, b) => (+b.priority || 0) - +a.priority);
+        let data = response.data.result
+
+        if (response.data?.mobileOrderSequence === 1)
+          data=data.sort((a, b) => (+a.sort_order || 0) - (+b.sort_order || 0))
+        else
+          data.sort((a, b) => a.time_1 - b.time_1)
+
+        data=data.sort((a, b) => (+b.priority || 0) - +a.priority);
         let sortedOrders = data.reduce(
           (result, order) =>
             !result.some((i) => i.counter_uuid === order.counter_uuid)

@@ -25,6 +25,8 @@ import {
 	Splitscreen,
 	WhatsApp
 } from "@mui/icons-material"
+import { TbArrowsExchange2 } from "react-icons/tb"
+
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
 
@@ -125,6 +127,7 @@ export function OrderDetails({
 	const [deductionsCoinPopup, setDeductionsCoinPopup] = useState()
 	const [deductionsData, setDeductionsData] = useState()
 	const [openDMSInvoicePopup, setOpenDMSInvoicePopup] = useState()
+
 	const getRoutesData = async () => {
 		const cachedData = localStorage.getItem("routesData")
 
@@ -205,6 +208,60 @@ export function OrderDetails({
 		}
 		fetchCompanies()
 	}, [])
+
+	const handleConvertOrder = async order_type => {
+		try {
+			setPromptLocalState(prev => ({
+				...prev,
+				actions: prev.actions.map(i => ({
+					...i,
+					disabled: true,
+					loading: i.classname?.includes?.("confirm")
+				}))
+			}))
+			const response = await axios.patch("/orders/order_type", {
+				invoice_number: orderData.invoice_number,
+				order_uuid: orderData.order_uuid,
+				order_type
+			})
+
+			setOrderData(prev => ({ ...prev, ...response.data.result }))
+			setPromptLocalState(null)
+		} catch (error) {
+			setPromptLocalState(prev => ({ ...prev, loading: true }))
+			// console.log(error.message)
+		}
+	}
+
+	const convertConfirmation = () => {
+		setPromptLocalState({
+			active: true,
+			heading: "Confirm to convert order?",
+			message: (
+				<>
+					On confirm, the order{" "}
+					<b>
+						{orderData?.order_type === "E" ? "E-" : null}
+						{orderData?.invoice_number}
+					</b>{" "}
+					will be converted to <b>{orderData?.order_type === "E" ? "invoice" : "estimate"}</b> order.
+				</>
+			),
+			actions: [
+				{
+					label: "Cancel",
+					classname: "cancel",
+					action: () => setPromptLocalState(null)
+				},
+				{
+					label: "Yes, convert",
+					classname: "confirm flex",
+					style: { gap: "5px" },
+					action: () => handleConvertOrder(orderData?.order_type === "E" ? "I" : "E")
+				}
+			]
+		})
+	}
 
 	const getItemCategories = async () => {
 		if (itemCategories.length) {
@@ -1472,6 +1529,15 @@ export function OrderDetails({
 								)}
 								<button className="theme-btn" onClick={checkDMSWrapper}>
 									DMS
+								</button>
+								<button
+									className="theme-btn"
+									style={{ marginLeft: "5px", width: "fit-Content", padding: "8px" }}
+									onClick={convertConfirmation}
+									data-tooltip-id="my-tooltip"
+									data-tooltip-content="Convert"
+								>
+									<TbArrowsExchange2 style={{ fontSize: "1.45rem" }} />
 								</button>
 							</div>
 							<div className="inventory_header">

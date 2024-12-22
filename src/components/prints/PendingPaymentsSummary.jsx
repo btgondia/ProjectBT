@@ -31,6 +31,7 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef, coun
 						counter_title = "",
 						credit_rating = "",
 						address = "",
+						dms_buyer_name,
 						sort_order = 0
 					} = counters.find(c => c.counter_uuid === a)
 					return {
@@ -39,6 +40,7 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef, coun
 						credit_rating,
 						address,
 						sort_order,
+						dms_buyer_name,
 						orders: counterOrders[a]?.orders || [],
 						numbers: counterOrders[a]?.numbers || []
 					}
@@ -57,7 +59,7 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef, coun
 			</tr>
 			{counterList
 				?.filter(i => i)
-				?.map(({ route_title, counter_title, credit_rating, address, orders, numbers }) => {
+				?.map(({ route_title, counter_title, credit_rating, address, orders, numbers, dms_buyer_name }) => {
 					const estimateCashTotal = orders
 						?.filter(i => i.order_type === "E")
 						?.reduce((sum, i) => sum + +i?.order_grandtotal, 0)
@@ -70,7 +72,9 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef, coun
 						<>
 							<tr>
 								<th colSpan={3} style={{ textAlign: "left" }}>
-									{counter_title},{route_title} {credit_rating ? "[" + credit_rating + "]" : ""}
+									{counter_title}
+									{dms_buyer_name?.length > 0 && dms_buyer_name !== counter_title ? ` / ${dms_buyer_name}` : ""},
+									{route_title} {credit_rating ? "[" + credit_rating + "]" : ""}
 								</th>
 								<th colSpan={2} style={{ textAlign: "right" }}>
 									{numbers?.[0]}

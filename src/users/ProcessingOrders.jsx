@@ -504,38 +504,26 @@ const ProcessingOrders = () => {
 				return acc
 			}, [])
 
-			for (let a of item_details) {
-				let orderItem = tempQuantity.find(b => b.item_uuid === a.item_uuid)
-				let ItemData = items.find(b => b.item_uuid === a.item_uuid)
+			for (let orderItem of item_details) {
+				let tempItem = tempQuantity.find(b => b.item_uuid === orderItem.item_uuid)
+				let ItemData = items.find(b => b.item_uuid === orderItem.item_uuid)
+
 				if (
-					(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + (+orderItem?.p || 0) + (+orderItem?.free || 0) !==
-					(+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
+					(+tempItem?.b || 0) * +(+ItemData?.conversion || 1) + (+tempItem?.p || 0) !==
+					(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p + (+orderItem?.free || 0)
 				)
-					setBarcodeMessage(prev =>
-						prev.length
-							? [
-									...prev,
-									{
-										...ItemData,
-										...orderItem,
-										...a,
-										barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
-										case: 1,
-										qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
-									}
-							  ]
-							: [
-									{
-										...ItemData,
-										...orderItem,
-										...a,
-										barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
-										case: 1,
-										qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
-									}
-							  ]
-					)
-				else data.push(a)
+					setBarcodeMessage(prev => [
+						...(prev?.length ? prev : []),
+						{
+							...ItemData,
+							...tempItem,
+							...orderItem,
+							barcodeQty: (+tempItem?.b || 0) * +(+ItemData?.conversion || 1) + tempItem?.p,
+							case: 1,
+							qty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p + (+orderItem?.free || 0)
+						}
+					])
+				else data.push(orderItem)
 			}
 			setTimeout(() => {
 				setPopupBarcode(true)
@@ -1215,7 +1203,8 @@ const ProcessingOrders = () => {
 										id={item.order_uuid + selected_order_label}
 										className={+item.priority ? "blink" : ""}
 										style={{
-											height: "30px",
+											height: "60px",
+											maxHeight: "100px",
 											backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff"
 										}}
 										onClick={e => {
@@ -1662,19 +1651,17 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 	return (
 		<>
 			<div className="overlay" style={{ zIndex: "999999" }}>
-				<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
+				<div className="modal" style={{ height: "fit-content", width: "480px" }}>
 					<h1>{BarcodeMessage.length ? "Correction" : "Perfect"}</h1>
 					<div
 						className="content"
 						style={{
-							height: "fit-content",
-							padding: "20px",
-							width: "500px"
+							height: "fit-content"
 						}}
 					>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{BarcodeMessage?.filter(a => +a.case === 1).length ? (
-								<div className="flex" style={{ flexDirection: "column", width: "300px" }}>
+								<div className="flex" style={{ flexDirection: "column", alignItems: "flex-start" }}>
 									<i>Incorrect Quantity</i>
 									<table
 										className="user-table"

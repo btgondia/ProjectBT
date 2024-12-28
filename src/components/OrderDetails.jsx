@@ -1423,7 +1423,7 @@ export function OrderDetails({
 												<Select
 													options={counters?.map(a => ({
 														value: a.counter_uuid,
-														label: a.counter_title
+														label: a.counter_title + ", " + a.route_title
 													}))}
 													onChange={doc => {
 														setOrderData(prev => ({
@@ -1541,15 +1541,17 @@ export function OrderDetails({
 								<button className="theme-btn" onClick={checkDMSWrapper}>
 									DMS
 								</button>
-								<button
-									className="theme-btn"
-									style={{ marginLeft: "5px", width: "fit-Content", padding: "8px" }}
-									onClick={convertConfirmation}
-									data-tooltip-id="my-tooltip"
-									data-tooltip-content="Convert"
-								>
-									<TbArrowsExchange2 style={{ fontSize: "1.45rem" }} />
-								</button>
+								{order?.order_type === "E" && (
+									<button
+										className="theme-btn"
+										style={{ marginLeft: "5px", width: "fit-Content", padding: "8px" }}
+										onClick={convertConfirmation}
+										data-tooltip-id="my-tooltip"
+										data-tooltip-content="Convert"
+									>
+										<TbArrowsExchange2 style={{ fontSize: "1.45rem" }} />
+									</button>
+								)}
 							</div>
 							<div className="inventory_header">
 								<h2>Order Details</h2>

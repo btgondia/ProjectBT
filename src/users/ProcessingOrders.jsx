@@ -819,7 +819,7 @@ const ProcessingOrders = () => {
 						) : (
 							""
 						)}
-						<div className="flex" style={{ justifyContent: "space-between", margin: "10px 0" }}>
+						<div className="flex" style={{ justifyContent: "space-between", padding: "5px" }}>
 							<h2 style={{ width: "20vw", textAlign: "start" }}>{selectedOrder.invoice_number}</h2>
 							{Location.pathname.includes("delivery") ? (
 								<h2 style={{ width: "20vw", textAlign: "start" }}>Rs: {selectedOrder.order_grandtotal}</h2>
@@ -840,7 +840,7 @@ const ProcessingOrders = () => {
 								<div className="user_searchbar flex">
 									<AiOutlineSearch className="user_search_icon" />
 									<input
-										style={{ width: "200px" }}
+										style={{ width: "45vw", maxWidth: "180px" }}
 										className="searchInput"
 										type="text"
 										placeholder="search"
@@ -908,6 +908,7 @@ const ProcessingOrders = () => {
 						className="user-table"
 						style={{
 							width: "max-content",
+							minWidth: "100%",
 							height: "fit-content"
 						}}
 					>
@@ -991,7 +992,7 @@ const ProcessingOrders = () => {
 											<tr
 												key={item.item_uuid}
 												style={{
-													height: "30px",
+													height: window.location.pathname.includes("checking") ? "60px" : "35px",
 													backgroundColor:
 														window.location.pathname.includes("processing") ||
 														window.location.pathname.includes("delivery")

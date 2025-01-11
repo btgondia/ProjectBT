@@ -45,7 +45,7 @@ const CovertedQty = (qty, conversion) => {
   return b + ":" + p;
 };
 
-export let getInititalValues = () => ({
+export let getInitialValues = () => ({
   counter_uuid: "",
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
   item: [],
@@ -68,7 +68,7 @@ export default function AddOrder() {
     spcPricePrompt,
     setNotification,
   } = useContext(Context);
-  const [order, setOrder] = useState(getInititalValues());
+  const [order, setOrder] = useState(getInitialValues());
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [counters, setCounters] = useState([]);
   const [counterFilter] = useState("");
@@ -386,7 +386,7 @@ export default function AddOrder() {
     console.log(response);
     if (response.data.success) {
       // window.location.reload();
-      setOrder(getInititalValues());
+      setOrder(getInitialValues());
       getCounter();
       setItemsData([]);
       setEditPrices([]);
@@ -438,7 +438,6 @@ export default function AddOrder() {
         stage: 1,
         user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
-
         type: "NEW",
       },
       add_discounts: true,

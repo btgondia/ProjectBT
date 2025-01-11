@@ -252,7 +252,6 @@ export const Billing = async ({
 }) => {
   let counterCharges = [];
   let counter_charges = [];
-  console.log("invoice_number", invoice_number);
   try {
     counterCharges = await axios.post(
       `/counterCharges/list`,

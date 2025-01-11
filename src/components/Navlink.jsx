@@ -114,7 +114,13 @@ const NavLink = ({ title, icon, menuList, draggable, setCollectionTags, setcalcu
 										}
 									}}
 								>
-									{<Link to={menu.link}>{menu.name}</Link>}
+									{menu.link ? (
+										<Link className="nav-link-anchor" to={menu.link}>
+											{menu.name}
+										</Link>
+									) : menu.action ? (
+										<span className="link-label">{menu.name}</span>
+									) : menu.customComponent || null}
 								</div>
 							))}
 						</div>

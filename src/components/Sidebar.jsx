@@ -12,6 +12,7 @@ import { useLocation } from "react-router-dom"
 import context from "../context/context"
 import { Version } from "../App"
 import MobileOrderSequence from "./MobileOrderSequence"
+import ImportInvoices from "./ImportInvoices"
 
 let titleData = [
 	{ value: "LedgerClosingBalance", name: "Ledger Closing Balance" },
@@ -75,7 +76,10 @@ let titleData = [
 ]
 const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 	const { setcalculationPopup, view, setCounterNotesPopup } = useContext(context)
-	const [mobileOrderSequence, setMobileOrderSequence] = useState()
+	const [flags, setFlags] = useState({
+		importInvoiceState: { active: false, file: null },
+		mobileOrderSequence: false
+	})
 
 	const location = useLocation()
 	document.title = useMemo(() => {
@@ -85,7 +89,8 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 
 	return (
 		<>
-			{mobileOrderSequence && <MobileOrderSequence onClose={() => setMobileOrderSequence(false)} />}
+			{flags?.importInvoiceState?.active && <ImportInvoices file={flags?.importInvoiceState?.file} onClose={() => setFlags({})} />}
+			{flags?.mobileOrderSequence && <MobileOrderSequence onClose={() => setFlags({})} />}
 			<div className="left-panel" style={{ position: "relative", zIndex: "9000000" }}>
 				<button
 					className="submit"
@@ -129,6 +134,25 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 										{
 											name: "Adjust Stock",
 											link: "/admin/adjustStock"
+										},
+										{
+											name: "Import Invoices",
+											customComponent: (
+												<label key={'import-invoice-file-input'} className="link-label">
+													Import Invoice
+													<input
+														type="file"
+														name="file"
+														hidden
+														onChange={e => {
+															const file = e.target.files?.[0]
+															if (!file) return
+															setFlags({ importInvoiceState: { active: true, file } })
+														}}
+														accept=".json"
+													/>
+												</label>
+											)
 										}
 								  ]
 						}
@@ -463,7 +487,7 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 										{
 											name: "Mobile Order Sequence",
 											link: "#",
-											action: () => setMobileOrderSequence(true)
+											action: () => setFlags({ mobileOrderSequence: true })
 										}
 								  ]
 						}

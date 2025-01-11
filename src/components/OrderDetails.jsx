@@ -39,7 +39,7 @@ import { IoCheckmarkDoneOutline } from "react-icons/io5"
 import { FaSave } from "react-icons/fa"
 import Prompt from "./Prompt"
 import OrderPrintWrapper from "./OrderPrintWrapper"
-import { getInititalValues } from "../pages/AddOrder/AddOrder"
+import { getInitialValues } from "../pages/AddOrder/AddOrder"
 import NotesPopup from "./popups/NotesPopup"
 import {
 	chcekIfDecimal,
@@ -1194,7 +1194,7 @@ export function OrderDetails({
 	const recreateOrder = async copyStages => {
 		try {
 			setPromptLocalState(null)
-			const { time_1, time_2 } = getInititalValues()
+			const { time_1, time_2 } = getInitialValues()
 			const oldOrder = order
 			const newOrder = {
 				status: copyStages

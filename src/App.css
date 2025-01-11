@@ -182,7 +182,8 @@ svg.table-icon {
 	overflow: hidden;
 }
 
-.prompt #spinner-wrapper {
+.prompt #spinner-wrapper,
+#spinner-overlay-wrapper {
 	position: absolute;
 	top: 50%;
 	left: 50%;

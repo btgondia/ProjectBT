@@ -209,7 +209,7 @@ const State = (props) => {
         clearTimeout(timeout);
       }
     } catch (error) {
-      console.log(error);
+     
     }
     setLoading(false);
   };
@@ -367,7 +367,7 @@ const State = (props) => {
     }
   };
   const updateServerPdf = async (data) => {
-    console.log(data);
+   
   };
 
   const [promptState, setPromptState] = useState();
@@ -394,7 +394,7 @@ const State = (props) => {
 
   const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
     try {
-      console.log({ item, counter_uuid, setCounters });
+     
       const response = await axios({
         method: "patch",
         url: "/counters/item_special_price/" + counter_uuid,
@@ -408,13 +408,13 @@ const State = (props) => {
         )
       );
     } catch (error) {
-      console.log(error);
+     
     }
   };
 
   const deleteSpecialPrice = async (item, counter_uuid, setCounters) => {
     try {
-      console.log({ item, counter_uuid, setCounters });
+     
       setPromptState(null);
       const response = await axios({
         method: "patch",
@@ -429,7 +429,7 @@ const State = (props) => {
         )
       );
     } catch (error) {
-      console.log(error);
+     
     }
   };
 
@@ -547,7 +547,7 @@ const State = (props) => {
         "Content-Type": "application/json",
       },
     });
-    console.log({ response });
+   
     if (response.data.success) {
       setLoading(false);
       setNotification({ success: true, message: "Data Updated" });

@@ -325,7 +325,7 @@ function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
       const res = await axios.get("/details/getOpeningBalanceDate");
       setDefaultOpeningBalanceDate(res.data.result);
     } catch (error) {
-      console.log(error);
+     
     }
   };
   useEffect(() => {
@@ -485,7 +485,7 @@ function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
                     >
                       <AddCircle
                         sx={{ fontSize: 40 }}
-                        style={{ color: "#4AC959", cursor: "pointer" }}
+                        style={{ color: "#32bd33", cursor: "pointer" }}
                       />
                     </span>
                     <div>
@@ -672,7 +672,7 @@ function DeleteItemPopup({ onSave, popupInfo, setLedgerData }) {
         onSave();
       }
     } catch (err) {
-      console.log(err);
+     
       setErrorMassage("Order already exist");
     }
     setLoading(false);
@@ -772,7 +772,7 @@ function CounterPrices({ close, item }) {
             : i
         )
       );
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setLoadingState((prev) => ({ ...prev, [counter_uuid]: false }));
   };
 
@@ -788,7 +788,7 @@ function CounterPrices({ close, item }) {
       setCountersList((prev) =>
         prev.filter((i) => i.counter_uuid !== counter_uuid)
       );
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setLoadingState((prev) => ({ ...prev, [counter_uuid]: false }));
   };
 

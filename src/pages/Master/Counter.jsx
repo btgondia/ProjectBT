@@ -105,7 +105,7 @@ const Counter = () => {
 					"Content-Type": "application/json"
 				}
 			})
-			console.log(response.data.result)
+			
 			if (response.data.success) {
 				localStorage.setItem("paymentModesData", JSON.stringify(response.data.result))
 				setPaymentModes(response.data.result)
@@ -208,7 +208,7 @@ const Counter = () => {
 		setSelectedRoutes([])
 	}
 
-	console.log({ filterCounter })
+	
 
 	const onChangeHandler = e => {
 		const params = {}
@@ -763,10 +763,10 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 	const [notes, setNotes] = useState([])
 	const [edit, setEdit] = useState(false)
 	useEffect(() => {
-		// console.log(order?.notes);
+		
 		setNotes(notesPopup?.notes || [])
 	}, [notesPopup?.notes])
-	console.log(notesPopup)
+	
 	const submitHandler = async () => {
 		const response = await axios({
 			method: "put",
@@ -873,7 +873,7 @@ function NewUserForm({
 			})
 			setDefaultOpeningBalanceDate(res.data.result)
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 	const getTripData = async (controller = new AbortController()) => {
@@ -1685,7 +1685,7 @@ function NewUserForm({
 															})
 														}}
 													>
-														<AddCircle sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+														<AddCircle sx={{ fontSize: 40 }} style={{ color: "#32bd33", cursor: "pointer" }} />
 													</span>
 													<div>
 														{data?.opening_balance?.map(a => (
@@ -2003,7 +2003,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 	useEffect(() => {
 		setValue(itemPopup.item[itemPopup.type] ? itemPopup.item[itemPopup.type] : [])
 	}, [])
-	console.log(value)
+	
 	const getItemCategories = async () => {
 		const response = await axios({
 			method: "get",
@@ -2417,7 +2417,7 @@ const CounterRatesAndDiscounts = ({ onSave, itemPopup }) => {
 			setValue(response.data.result?.company_discount)
 		}
 	}
-	console.log({ value })
+	
 
 	const getCompanies = async () => {
 		const cachedData = localStorage.getItem("companiesData")
@@ -2631,7 +2631,7 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 				onSave()
 			}
 		} catch (err) {
-			console.log(err)
+			
 			setErrorMassage("Order already exist")
 		}
 		setLoading(false)

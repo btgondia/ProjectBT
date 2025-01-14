@@ -76,7 +76,7 @@
 	text-align: center;
 	line-height: 1;
 	transition: all ease 3s;
-	/* text-shadow: 0 1px 2px #4ac959; */
+	/* text-shadow: 0 1px 2px #32bd33; */
 }
 
 .unavailable-text {
@@ -109,14 +109,14 @@
 	position: absolute;
 	left: 2px;
 	z-index: 9999;
-	color: #4ac959;
+	color: #32bd33;
 	font-size: 20px;
 }
 .user_cross_icon {
 	position: absolute;
 	right: 2px;
 	z-index: 9999;
-	color: #4ac959;
+	color: #32bd33;
 	font-size: 20px;
 }
 .user_Back_icon {
@@ -224,24 +224,24 @@
 	margin-bottom: 10px;
 	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 2px 8px #4ac959;
+	box-shadow: 0 2px 8px #32bd33;
 }
 .boxPcsInput {
 	padding: 5px 10px;
 	cursor: pointer;
-	border: 2px solid #4ac959;
+	border: 2px solid #32bd33;
 	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 2px 8px #4ac959;
+	box-shadow: 0 2px 8px #32bd33;
 	width: 80px;
 	text-align: center;
 }
 .boxPcsInput:focus {
 	cursor: pointer;
-	border: 2px solid #4ac959;
+	border: 2px solid #32bd33;
 	border-radius: 8px;
 	overflow: hidden;
-	box-shadow: 0 2px 8px #4ac959;
+	box-shadow: 0 2px 8px #32bd33;
 	outline: none;
 }
 .selectInput {
@@ -249,7 +249,7 @@
 	border: none;
 	border: 2px solid #fff;
 	color: #fff;
-	background: #4ac959;
+	background: #32bd33;
 }
 .selectInput:focus {
 	border: 2px solid #fff;
@@ -258,13 +258,13 @@
 .cartBtn {
 	border: none;
 	cursor: pointer;
-	border: #4ac959;
-	background-color: #4ac959;
+	border: #32bd33;
+	background-color: #32bd33;
 	color: #fff;
 	border-top-left-radius: 30px;
 	border-top-right-radius: 30px;
 	overflow: hidden;
-	box-shadow: 0 -3px 8px #4ac959;
+	box-shadow: 0 -3px 8px #32bd33;
 	position: fixed;
 	bottom: 0px;
 	left: 0;
@@ -290,12 +290,12 @@
 .nav_styling {
 	border: none;
 	cursor: pointer;
-	border: #4ac959;
-	background-color: #4ac959;
+	border: #32bd33;
+	background-color: #32bd33;
 	color: #fff;
 
 	overflow: hidden;
-	box-shadow: 0 2px 8px #4ac959;
+	box-shadow: 0 2px 8px #32bd33;
 
 	width: 100vw;
 
@@ -362,12 +362,12 @@
 	height: 40px;
 	font-size: 1rem;
 	font-weight: 800;
-	color: #4ac959;
+	color: #32bd33;
 	text-transform: uppercase;
 	border-radius: 5px;
-	border: 1px solid #4ac959;
+	border: 1px solid #32bd33;
 	background: rgb(237 249 238);
-	box-shadow: 0 2px 8px #4ac959;
+	box-shadow: 0 2px 8px #32bd33;
 	cursor: pointer;
 }
 
@@ -475,14 +475,14 @@
 }
 
 .tag {
-	border-left: 1px solid #4ac959;
+	border-left: 1px solid #32bd33;
 	font-size: 0.8rem;
 	font-weight: 700;
 	padding: 0.2rem;
 	padding-right: 0.5rem;
-	background: #4ac9591a;
+	background: #32bd331a;
 	cursor: pointer;
-	color: #4ac959;
+	color: #32bd33;
 }
 
 .tagRed {
@@ -579,7 +579,7 @@
 	justify-content: space-between;
 	flex-direction: column;
 	align-items: center;
-	background-color: #4ac959;
+	background-color: #32bd33;
 	border-radius: 1rem 1rem 0 0;
 	color: white;
 }
@@ -613,7 +613,7 @@
 	font-weight: 700;
 	text-transform: uppercase;
 	font-size: 0.9rem;
-	color: #4ac959;
+	color: #32bd33;
 	text-indent: 5px;
 }
 
@@ -723,7 +723,7 @@ h6 {
 	font-weight: 900;
 	color: var(--mainColor);
 	border: 1px solid var(--mainColor);
-	background: #4ac9591e;
+	background: #32bd331e;
 }
 
 .additem {

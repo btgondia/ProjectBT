@@ -83,16 +83,6 @@ const CounterReport = () => {
 
 			if (lastSortNo) {
 				counters = await data?.table_data?.concat(counters)
-				console.log({
-					old_length: data?.table_data?.length,
-					new_length: counters?.length,
-					added_length: response.data.result?.length
-				})
-				console.log({
-					old: data?.table_data,
-					new: counters,
-					added: response.data.result
-				})
 			}
 
 			const total_values = await counters.reduce((result, i) => {
@@ -156,7 +146,7 @@ const CounterReport = () => {
 				setSelectedCompanies(data.map(i => i.company_uuid));
 			  }
 			} catch (error) {
-			  console.log(error);
+			 
 			}
 		  }
 	
@@ -192,7 +182,7 @@ const CounterReport = () => {
 			key: "route_uuid"
 		}
 	]
-console.log({routes})
+
 	const getRenderValue = (selected, type, key, label, selectedValues, menu_items) => (
 		<span style={{ fontSize: ".9rem" }}>
 			{selected.length === 0 ? (
@@ -228,7 +218,7 @@ console.log({routes})
 			FETCH_MORE = false
 			setLoading(true)
 			search(data?.table_data?.at(-1)?.sort_order).finally(result => {
-				console.log({ result })
+				
 				setLoading(false)
 				if (result !== -1)
 					setTimeout(() => {
@@ -236,7 +226,7 @@ console.log({routes})
 					}, 1000)
 			})
 
-			console.log("YOU ARE AT THE BOTTOM OF THE PAGE!!")
+			
 		}
 	}
 

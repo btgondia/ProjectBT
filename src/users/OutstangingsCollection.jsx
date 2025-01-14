@@ -67,7 +67,7 @@ const OutstangingsCollection = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setItemsData(response.data.result)
 		else setItemsData([])
 	}
@@ -80,11 +80,11 @@ const OutstangingsCollection = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setTags(response.data.result)
 		else setTags([])
 	}
-	console.log(warehouse)
+	
 
 	useEffect(() => {
 		getIndexedDbData()
@@ -285,7 +285,7 @@ const OutstangingsCollection = () => {
 													{item?.mobile?.length ? (
 														<Phone
 															className="user_Back_icon"
-															style={{ color: "#4ac959" }}
+															style={{ color: "#32bd33" }}
 															onClick={e => {
 																e.stopPropagation()
 																if (item.mobile.length === 1) {

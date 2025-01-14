@@ -22,7 +22,7 @@ const Users = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -517,7 +517,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 														else catData = [...catData, i]
 													}
 													// data = occasionsData.filter(a => options.filter(b => b === a.occ_uuid).length)
-													console.log(options, catData)
+													
 
 													setdata({ ...data, user_role: catData })
 												}}
@@ -717,7 +717,7 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
 	const submitHandler = async e => {
 		e.preventDefault()
 
-		console.log(data)
+		
 		let obj = { user_uuid: popupInfo.user_uuid, ...data }
 		const response = await axios({
 			method: "post",

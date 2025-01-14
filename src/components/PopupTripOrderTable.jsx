@@ -40,7 +40,7 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log("activity", response)
+			
 			if (response.data.success) {
 				setItemDetails(response.data.result)
 				setTotal(response.data.total)
@@ -53,7 +53,7 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
 	}, [trip_uuid])
 	const downloadHandler = async () => {
 		let sheetData = itemDetails.map(a => {
-			// console.log(a)
+			
 			return {
 				"Order Date": new Date(a.order_date).toDateString() + "-" + formatAMPM(new Date(a.order_date)),
 				"Delivery Date": new Date(a.delivery_date).toDateString() + "-" + formatAMPM(new Date(a.delivery_date)),
@@ -67,7 +67,7 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
 				Unpaid: a.unpaid || 0,
 			}
 		})
-		// console.log(sheetData)
+		
 		sheetData = [
 			...sheetData,
 			{

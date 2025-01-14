@@ -630,14 +630,7 @@ function ItemsTable({
 						c?.item_uuid === b?.item_uuid &&
 						c.item_group_uuid.filter(d => d === itemGroup.item_group_uuid).length
 				)?.length
-				console.log(
-					includesArray?.filter(
-						c =>
-							c?.item_uuid === b?.item_uuid &&
-							c.item_group_uuid.filter(d => d === itemGroup.item_group_uuid).length
-					)?.length,
-					a
-				)
+				
 				if (aLength && bLength) {
 					return a.item_title.localeCompare(b.item_title)
 				} else if (aLength) {
@@ -765,7 +758,7 @@ function DeleteCounterPopup({ onSave, popupInfo, getCounterGroup }) {
 				onSave()
 			}
 		} catch (err) {
-			console.log(err)
+			
 			// setErrorMassage("Order already exist");
 		}
 		setLoading(false)

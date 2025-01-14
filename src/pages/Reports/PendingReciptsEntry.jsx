@@ -37,7 +37,7 @@ const PendingReciptsEntry = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -119,7 +119,7 @@ const PendingReciptsEntry = () => {
 	}
 	const downloadHandler = async () => {
 		let sheetData = []
-		// console.log(sheetData)
+		
 		for (let order of selectedOrders?.sort((a, b) => +a.receipt_number - +b.receipt_number)) {
 			sheetData.push({
 				Amount: order.modes.map(a => +a.amt).reduce((a, b) => a + b) || "0",
@@ -295,7 +295,7 @@ const PendingReciptsEntry = () => {
 }
 
 function Table({ itemsDetails, setPopupOrder, putOrder, selectedOrders, setSelectedOrders, getOrders }) {
-	console.log(selectedOrders)
+	
 	return (
 		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>

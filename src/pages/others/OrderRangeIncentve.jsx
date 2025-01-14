@@ -84,7 +84,7 @@ const Incetives = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			setDeletePopup(false)
 			getItemsData()
@@ -180,7 +180,7 @@ const CounterDiscounts = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			setDeletePopup(false)
 			getItemsData()
@@ -262,7 +262,7 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			getItemsData()
 		}
@@ -355,7 +355,7 @@ function TableDiscount({ itemsDetails = [], setPopupForm, setDeletePopup, getIte
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			getItemsData()
 		}
@@ -448,7 +448,7 @@ function IncentivePopup({ onSave, popupForm }) {
 		counters: [],
 		counter_groups: [],
 	})
-	console.log(popupForm)
+	
 	useEffect(() => {
 		if (popupForm?.type === "edit") setObgData(popupForm.data)
 	}, [])
@@ -668,7 +668,7 @@ function IncentivePopup({ onSave, popupForm }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	useEffect(() => {
@@ -696,7 +696,7 @@ function IncentivePopup({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -709,7 +709,7 @@ function IncentivePopup({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -1377,7 +1377,7 @@ function DiscountPopup({ onSave, popupForm }) {
 		counter_uuid: "",
 		counter_groups: [],
 	})
-	console.log(popupForm)
+	
 	useEffect(() => {
 		if (popupForm?.type === "edit") setObgData(popupForm.data)
 	}, [])
@@ -1588,7 +1588,7 @@ function DiscountPopup({ onSave, popupForm }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -1614,7 +1614,7 @@ function DiscountPopup({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -1627,13 +1627,13 @@ function DiscountPopup({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
 		}
 	}
-	console.log(objData)
+	
 	return (
 		<div className="overlay">
 			<div className="modal" style={{ height: "fit-content", width: "fit-content" }}>

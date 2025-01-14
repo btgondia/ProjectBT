@@ -3,16 +3,22 @@ import React, { useEffect, useState } from "react"
 import { Billing } from "../Apis/functions"
 import { ContentCopy } from "@mui/icons-material"
 import { getInitialValues } from "../pages/AddOrder/AddOrder"
-import { IoIosClose } from "react-icons/io"
+import { IoIosCheckmarkCircleOutline, IoIosClose } from "react-icons/io"
+
+const localErrorTypes = {
+	counter: "Counter",
+	item: "Item"
+}
 
 const ImportInvoices = ({ file, onClose }) => {
 	const [timer, setTimer] = useState(30)
 	const [existingInvoicesState, setExistingInvoicesState] = useState(null)
-	const [result, setResult] = useState({
+	const [results, setResults] = useState({
 		succeed: [],
 		failed: [],
 		skipped: [],
 		reimported: [],
+		resolved: [],
 		count: 0,
 		total: 0
 	})
@@ -34,21 +40,20 @@ const ImportInvoices = ({ file, onClose }) => {
 			const errors = []
 
 			if (!billingParams.counter)
-				errors.push(
-					<>
-						<b>Counter</b> not found. DMS buyer id: <b>{invoice.dms_buyer_id}</b>, Name:{" "}
-						<b>{invoice.dms_buyer_name}</b>
-					</>
-				)
+				errors.push({
+					errorType: localErrorTypes.counter,
+					name: invoice.dms_buyer_name,
+					id: invoice.dms_buyer_id
+				})
 
 			for (const i of invoice.items_details) {
-				const item = data.items.find(j => j.dms_erp_id === i.dms_erp_id)
+				const item = data.items.find(j => j.dms_erp_ids.includes(i.dms_erp_id))
 				if (!item) {
-					errors.push(
-						<>
-							<b>Item</b> not found. DMS ERP Id: <b>{i.dms_erp_id}</b>, Name: <b>{i.dms_item_name}</b>
-						</>
-					)
+					errors.push({
+						errorType: localErrorTypes.item,
+						name: i.dms_item_name,
+						id: i.dms_erp_id
+					})
 					continue
 				}
 
@@ -97,7 +102,7 @@ const ImportInvoices = ({ file, onClose }) => {
 		} catch (error) {
 			console.error(error)
 			return {
-				error: "Order billing failed, please try again."
+				message: "Order billing failed, please try again."
 			}
 		}
 
@@ -112,11 +117,11 @@ const ImportInvoices = ({ file, onClose }) => {
 			})
 
 			if (response?.data?.success) return { success: true }
-			else return { error: "Order not created, please check the invoice details." }
+			else return { message: "Order not created, please check the invoice details." }
 		} catch (error) {
 			console.error(error)
 			return {
-				error:
+				message:
 					error.response.status === 500 || !error.response?.data?.message
 						? "Something broke, please contact support."
 						: error.response?.data?.message
@@ -131,7 +136,7 @@ const ImportInvoices = ({ file, onClose }) => {
 			}, ms)
 		})
 
-	const initiateIntervalImporting = async (json, data) => {
+	const processJson = async (json, data) => {
 		for (let idx = 0; idx < json.length; idx++) {
 			setFlags({ posting: true })
 
@@ -139,21 +144,28 @@ const ImportInvoices = ({ file, onClose }) => {
 			const result = await createOrder(invoice, data)
 
 			if (result.success)
-				setResult(prev => ({
+				setResults(prev => ({
 					...prev,
-					succeed: prev.succeed.concat([{ dms_invoice_number: invoice.dms_invoice_number }]),
-					count: idx + 1
+					succeed: prev.succeed.concat([
+						{
+							dms_invoice_number: invoice.dms_invoice_number,
+							dms_buyer_name: invoice.dms_buyer_name
+						}
+					]),
+					count: prev.count + 1
 				}))
 			else
-				setResult(prev => ({
+				setResults(prev => ({
 					...prev,
 					failed: prev.failed.concat([
 						{
 							dms_invoice_number: invoice.dms_invoice_number,
-							message: result.errors || result.error
+							dms_buyer_name: invoice.dms_buyer_name,
+							...(result.local ? { invoice } : {}),
+							...result
 						}
 					]),
-					count: idx + 1
+					count: prev.count + 1
 				}))
 
 			if (result?.local) continue
@@ -166,6 +178,91 @@ const ImportInvoices = ({ file, onClose }) => {
 		}
 
 		setFlags({})
+	}
+
+	const initiateIntervalImport = async json => {
+		const payload = {
+			dms_counters: [],
+			dms_users: [],
+			dms_invoice_numbers: [],
+			dms_items: []
+		}
+
+		for (const invoice of json) {
+			payload.dms_counters.push(invoice.dms_buyer_id)
+			payload.dms_users.push(invoice.dms_erp_user)
+			payload.dms_invoice_numbers.push(invoice.dms_invoice_number)
+			payload.dms_items = payload.dms_items.concat(invoice.items_details.map(i => i.dms_erp_id))
+		}
+
+		const response = await axios.post("/invoice-import-prerequisite", payload)
+		if (!response.data?.existing_invoice_orders?.length) {
+			setResults(prev => ({ ...prev, total: prev.total + json.length, resolved: [] }))
+			processJson(json, response.data)
+		} else {
+			setFlags({ loading: false })
+			const callback = ({ skipped, reimported }) => {
+				setExistingInvoicesState(null)
+
+				if (skipped?.length > 0) {
+					const tempJson = json.filter(i => !skipped?.includes(i.dms_invoice_number))
+
+					skipped = json
+						?.filter(i => skipped.includes(i.dms_invoice_number))
+						?.map(i => ({
+							dms_buyer_name: i.dms_buyer_name,
+							dms_invoice_number: i.dms_invoice_number
+						}))
+
+					json = tempJson
+				}
+
+				if (reimported?.length > 0)
+					reimported = json
+						?.filter(i => reimported.includes(i.dms_invoice_number))
+						?.map(i => ({
+							dms_buyer_name: i.dms_buyer_name,
+							dms_invoice_number: i.dms_invoice_number
+						}))
+
+				setResults(prev => ({
+					...prev,
+					total: prev.total + json.length,
+					skipped: prev.skipped.concat(skipped),
+					reimported: prev.reimported.concat(reimported),
+					resolved: []
+				}))
+
+				processJson(json, response.data)
+			}
+
+			setExistingInvoicesState({
+				list: response.data?.existing_invoice_orders,
+				callback
+			})
+		}
+	}
+
+	/**
+	 * For local errors: if all the errors for a doc have been resolved,
+	 * then move the 'doc.json' to resolved status.
+	 */
+	const onMapped = id => {
+		setResults(prev => {
+			for (const doc of prev.failed) {
+				if (!doc.local) continue
+				doc.errors = doc.errors.map(i => (i.id === id ? { ...i, resolved: true } : i))
+				doc.resolved = !doc.errors.some(i => !i.resolved)
+				if (doc.resolved) prev.resolved.push(doc.invoice)
+			}
+			prev.failed = prev.failed.filter(i => !i.resolved)
+			return prev
+		})
+	}
+
+	const importResolved = () => {
+		const json = [...results.resolved]
+		initiateIntervalImport(json)
 	}
 
 	useEffect(() => {
@@ -182,14 +279,12 @@ const ImportInvoices = ({ file, onClose }) => {
 							const json = JSON.parse(e.target.result)
 							res(json)
 						} catch (error) {
-							console.log(e.target.error)
 							alert("The file content is not valid JSON.")
 							rej()
 						}
 					}
 
 					reader.onerror = e => {
-						console.log(e.target.error)
 						alert("Failed to read file, please contact support.")
 						rej()
 					}
@@ -197,40 +292,8 @@ const ImportInvoices = ({ file, onClose }) => {
 					reader.readAsText(file)
 				})
 
-				const payload = {
-					dms_counters: [],
-					dms_users: [],
-					dms_invoice_numbers: [],
-					dms_items: []
-				}
-
-				for (const invoice of json) {
-					payload.dms_counters.push(invoice.dms_buyer_id)
-					payload.dms_users.push(invoice.dms_erp_user)
-					payload.dms_invoice_numbers.push(invoice.dms_invoice_number)
-					payload.dms_items = payload.dms_items.concat(invoice.items_details.map(i => i.dms_erp_id))
-				}
-
-				const response = await axios.post("/invoice-import-prerequisite", payload)
-				if (!response.data?.existing_invoice_orders?.length) {
-					setResult(prev => ({ ...prev, total: json.length }))
-					initiateIntervalImporting(json, response.data)
-				} else {
-					setFlags({ loading: false })
-					const callback = ({ skipped, reimported }) => {
-						setExistingInvoicesState(null)
-						if (skipped?.length > 0) json = json.filter(i => !skipped?.includes(i.dms_invoice_number))
-						setResult(prev => ({ ...prev, total: json.length, skipped, reimported }))
-						initiateIntervalImporting(json, response.data)
-					}
-
-					setExistingInvoicesState({
-						list: response.data?.existing_invoice_orders,
-						callback
-					})
-				}
+				initiateIntervalImport(json)
 			} catch (error) {
-				console.log(error)
 				setFlags({})
 			}
 		})()
@@ -239,7 +302,7 @@ const ImportInvoices = ({ file, onClose }) => {
 
 	return (
 		<>
-			{result.total === 0 && existingInvoicesState === null ? null : flags?.loading ? (
+			{results.total === 0 && existingInvoicesState === null ? null : flags?.loading ? (
 				<div id="spinner-overlay-wrapper" style={{ background: "#00000062", zIndex: 1000 }}>
 					<span
 						className="loader small"
@@ -262,7 +325,7 @@ const ImportInvoices = ({ file, onClose }) => {
 							<span>
 								<b>Interval Importing Invoice</b>
 							</span>
-							{result.total === result.count || existingInvoicesState !== null ? (
+							{results.total === results.count || existingInvoicesState !== null ? (
 								<button id="close-btn" onClick={onClose}>
 									<IoIosClose />
 								</button>
@@ -279,7 +342,7 @@ const ImportInvoices = ({ file, onClose }) => {
 									<div style={{ margin: "16px 0 8px", fontSize: "1rem" }}>
 										<span>
 											<b>
-												Processed {result.count} invoices out of {result.total}
+												Processed {results.count} invoices out of {results.total}
 											</b>
 										</span>
 									</div>
@@ -296,7 +359,7 @@ const ImportInvoices = ({ file, onClose }) => {
 											style={{
 												background: "var(--main)",
 												height: "100%",
-												width: (result.count / result.total) * 100 + "%"
+												width: (results.count / results.total) * 100 + "%"
 											}}
 										/>
 									</div>
@@ -317,7 +380,7 @@ const ImportInvoices = ({ file, onClose }) => {
 												/>
 												<span>posting...</span>
 											</div>
-										) : result?.count < result?.total ? (
+										) : results?.count < results?.total ? (
 											<span>
 												Next order will be created in{" "}
 												<span style={{ background: "#e2e2e2", borderRadius: "0 5px", padding: "0 4px" }}>
@@ -326,7 +389,7 @@ const ImportInvoices = ({ file, onClose }) => {
 											</span>
 										) : null}
 									</div>
-									<ResultStatusTabs result={result} />
+									<ResultStatusTabs result={results} onMapped={onMapped} handleImportResolved={importResolved} />
 								</>
 							)}
 						</div>
@@ -399,9 +462,9 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{orders?.map(i => (
+						{orders?.map((i, idx) => (
 							<tr
-								key={i.dms_invoice_number}
+								key={`${i.dms_invoice_number}:${idx}`}
 								style={{ cursor: "pointer" }}
 								onClick={() =>
 									setSelection(prev =>
@@ -415,6 +478,7 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 									<input
 										type="checkbox"
 										checked={selection.includes(i.dms_invoice_number)}
+										onChange={() => null}
 										style={{ pointerEvents: "none" }}
 									/>
 								</td>
@@ -453,17 +517,25 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 const tabs = [
 	{ label: "Skipped", keyName: "skipped" },
 	{ label: "Re-Imported", keyName: "reimported" },
+	{ label: "Succeed", keyName: "succeed" },
 	{ label: "Failed", keyName: "failed" },
-	{ label: "Succeed", keyName: "succeed" }
+	{ label: "Resolved", keyName: "resolved" }
 ]
 
-const ResultStatusTabs = ({ result }) => {
+const ResultStatusTabs = ({ result, onMapped, handleImportResolved }) => {
 	const [tab, setTab] = useState(null)
+	const [companyWiseItems, setCompanyWiseItems] = useState([])
+	const [mapItemState, setMapItemState] = useState()
+
+	useEffect(() => {
+		axios.get("/items/company-wise/basic").then(({ data }) => setCompanyWiseItems(data.result))
+	}, [])
+
 	return (
 		<div id="tabs-container">
 			{tabs.map((i, idx) => (
 				<button
-					key={"result-status:" + i.keyName}
+					key={"result-status-tab-btn:" + i.keyName}
 					className={tab === idx ? "selected" : null}
 					onClick={() => setTab(idx)}
 					disabled={!result?.[i.keyName]?.length}
@@ -474,26 +546,223 @@ const ResultStatusTabs = ({ result }) => {
 
 			{tab !== null && (
 				<div id="status-results">
-					<ol>
-						{result?.[tabs[tab].keyName]?.map((i, idx) => (
-							<li key={`${tabs[tab].keyName}-${idx}`} style={{ padding: "5px 0" }}>
-								{typeof i === "string" ? (
-									i
-								) : (
-									<>
-										<div>
-											<span>
-												<b>{i.dms_invoice_number}</b>
-											</span>
-										</div>
-										{typeof i.message == "string" ? <p>{i.message}</p> : i.message?.map(m => <p>{m}</p>)}
-									</>
-								)}
+					{tab === tabs.length - 1 && (
+						<button
+							className="theme-btn"
+							style={{ background: "black" }}
+							onClick={handleImportResolved}
+							disabled={result?.count !== result?.total}
+						>
+							Import all resolved invoice ↑
+						</button>
+					)}
+					<ol style={{ paddingLeft: "32.33px" }}>
+						{result?.[tabs[tab].keyName]?.map((detail, idx) => (
+							<li key={`${tabs[tab].keyName}:${idx}`}>
+								<p>
+									<b>{detail.dms_buyer_name} :</b> {detail.dms_invoice_number}
+								</p>
+								<section>
+									{typeof detail.message == "string" ? (
+										<p>{detail.message}</p>
+									) : (
+										detail.errors?.map((err, err_idx) => (
+											<div key={["err_message", idx, err_idx].join(":")}>
+												<p>
+													<b>{err.errorType} not found :</b> {err.name} - {err.id}
+												</p>
+												{!err.resolved && err.errorType === localErrorTypes.item && (
+													<button className="map-item-btn" onClick={() => setMapItemState(err)}>
+														Map Item →
+													</button>
+												)}
+											</div>
+										))
+									)}
+								</section>
 							</li>
 						))}
 					</ol>
 				</div>
 			)}
+
+			{mapItemState && (
+				<MapItem
+					mapItemState={mapItemState}
+					companyWiseItems={companyWiseItems}
+					onMapped={() => {
+						onMapped(mapItemState.id)
+						setMapItemState()
+					}}
+					onClose={() => setMapItemState()}
+				/>
+			)}
+		</div>
+	)
+}
+
+const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
+	const [companySearch, setCompanySearch] = useState("")
+	const [itemSearch, setItemSearch] = useState("")
+	const [selectedItem, setSelectedItem] = useState()
+	const [loading, setLoading] = useState(false)
+
+	const noSearch = companySearch?.length < 3 && itemSearch?.length < 3
+	const handleMapping = async () => {
+		setLoading(true)
+		try {
+			const response = await axios.patch("/items/map-item", {
+				item_uuid: selectedItem.item_uuid,
+				dms_item_code: mapItemState.id
+			})
+			if (response.data.success) onMapped()
+			else {
+				alert(response.data.error)
+				setLoading(false)
+			}
+		} catch (error) {
+			console.error(error)
+			setLoading(false)
+		}
+	}
+
+	return (
+		<div id="map-items" className="overlay" style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999 }}>
+			<div className="modal" style={{ height: "fit-content", width: "50vw", padding: 0 }}>
+				{loading && (
+					<div id="spinner-overlay-wrapper" style={{ background: "#00000062", zIndex: 1000 }}>
+						<span
+							className="loader small"
+							style={{
+								borderColor: "var(--mainColor)",
+								borderBottomColor: "transparent",
+								margin: "auto",
+								display: "block"
+							}}
+						/>
+					</div>
+				)}
+				<div className="heading relative" style={{ padding: ".75rem 0" }}>
+					<span>
+						<b>Map Item</b>
+					</span>
+					<button id="close-btn" onClick={onClose}>
+						<IoIosClose />
+					</button>
+				</div>
+				<div style={{ padding: "0 .5rem .25rem" }}>
+					<div style={{ margin: ".5rem 0" }}>
+						<p>
+							<b>{mapItemState?.name}</b> - {mapItemState.id}
+						</p>
+					</div>
+					<div id="search-fields-container" style={{ margin: ".25rem 0 .5rem" }}>
+						<input
+							type="text"
+							className="searchInput"
+							placeholder="Search items..."
+							value={itemSearch}
+							onChange={e => setItemSearch(e.target.value)}
+						/>
+						<input
+							type="text"
+							className="searchInput"
+							placeholder="Search companies..."
+							value={companySearch}
+							onChange={e => setCompanySearch(e.target.value)}
+						/>
+					</div>
+
+					<div className="items_table">
+						<table>
+							<thead>
+								<tr>
+									<th></th>
+									<th>Item</th>
+									<th>Company</th>
+								</tr>
+							</thead>
+							<tbody>
+								{noSearch && !selectedItem ? (
+									<tr>
+										<td colSpan={3} id="search-data-user-info">
+											<i>Please search data to view results here.</i>
+										</td>
+									</tr>
+								) : (
+									/**
+										1. show company if
+											company is selected or
+											searched or
+											item is searched
+
+										2. show item if
+											item is selected or
+											(item is searched and company is searched) or
+											(item is searched when companySearch is empty) or
+											(company is searched when itemSearch is empty)
+									*/
+									companyWiseItems?.map(comp => {
+										const isCompanySelected = selectedItem && selectedItem?.company_uuid === comp.company_uuid
+										const isCompanySearched =
+											companySearch.length >= 3 &&
+											comp.company_title.toLowerCase().includes(companySearch.toLowerCase())
+
+										if (!(isCompanySelected || isCompanySearched || itemSearch.length >= 3)) return null
+										return comp?.items?.map(i => {
+											const isItemSelected = selectedItem && selectedItem?.item_uuid === i.item_uuid
+											const isItemSearched =
+												itemSearch.length >= 3 && i.item_title.toLowerCase().includes(itemSearch.toLowerCase())
+
+											if (
+												!(
+													isItemSelected ||
+													(isItemSearched && isCompanySearched) ||
+													(isItemSearched && companySearch.length < 3) ||
+													(isCompanySearched && itemSearch.length < 3)
+												)
+											)
+												return null
+											return (
+												<tr
+													key={"item:" + i.item_uuid}
+													onClick={() =>
+														setSelectedItem({
+															...i,
+															company_uuid: comp.company_uuid,
+															company_title: comp.company_title
+														})
+													}
+													className={isItemSelected ? "selected" : null}
+												>
+													<td>
+														<IoIosCheckmarkCircleOutline className="item-checkmark" />
+													</td>
+													<td>{i.item_title}</td>
+													<td>{comp.company_title}</td>
+												</tr>
+											)
+										})
+									})
+								)}
+							</tbody>
+						</table>
+					</div>
+					<button
+						className="theme-btn"
+						disabled={!selectedItem}
+						onClick={handleMapping}
+						style={{
+							background: "black",
+							width: "100%",
+							marginTop: ".5rem",
+							padding: ".75rem 1rem"
+						}}
+					>
+						Map to selected item
+					</button>
+				</div>
+			</div>
 		</div>
 	)
 }

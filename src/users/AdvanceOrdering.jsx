@@ -46,7 +46,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
 
   const locationHandler = () => {
     if (!navigator.geolocation)
-      return console.log("Geolocation is not supported by this browser.");
+      return
     try {
       const counter_uuid = locationState?.counter_uuid;
       setLocationState((i) => ({ ...i, active: false }));
@@ -86,7 +86,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
         }
       });
     } catch (err) {
-      console.log(err);
+     
     } finally {
       setLoading(false);
     }
@@ -273,7 +273,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
                                   }
                                 }}
                                 className="user_Back_icon"
-                                style={{ color: "#4ac959" }}
+                                style={{ color: "#32bd33" }}
                               />
                             ) : (
                               ""
@@ -464,7 +464,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
           "Content-Type": "application/json",
         },
       });
-      console.log(response.data.result);
+     
       if (response.data.success) {
         localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
         setPaymentModes(response.data.result);
@@ -494,7 +494,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
       })),
     });
   }, [paymentModes]);
-  console.log(data);
+ 
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.counter_title) {
@@ -537,7 +537,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
       else temp = [...temp, i];
     }
     // temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-    console.log(options, temp);
+   
 
     setdata((prev) => ({ ...prev, payment_modes: temp }));
   };

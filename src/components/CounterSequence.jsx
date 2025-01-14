@@ -103,7 +103,7 @@ function Table({ counterData, setCounterData, onSave }) {
   const [itemsIdList, setItemsIdList] = useState();
   useEffect(() => setItemsIdList(counterData?.sort((a, b) => +a.sort_order - b.sort_order)?.map(i => i.counter_uuid)), [counterData])
 
-  console.log(itemsIdList)
+ 
   const handleSave = async () => {
     const response = await axios({
       method: "put",

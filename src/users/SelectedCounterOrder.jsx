@@ -127,7 +127,7 @@ const SelectedCounterOrder = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("users", response);
+   
     if (response.data.success) setUserData(response.data.result);
   };
 
@@ -296,7 +296,7 @@ const SelectedCounterOrder = () => {
           },
         ],
       };
-      console.log(data);
+     
       const response = await axios({
         method: "post",
         url: "/orders/postOrder",
@@ -306,7 +306,7 @@ const SelectedCounterOrder = () => {
         },
       });
       if (response.data.success) {
-        console.log(response.data);
+       
         setInvioceNumber(response.data.result.invoice_number);
         let qty = `${
           data?.item_details?.length > 1
@@ -332,7 +332,7 @@ const SelectedCounterOrder = () => {
         }
       }
     } catch (error) {
-      console.log(error);
+     
     } finally {
       setLoading(false);
     }
@@ -360,7 +360,7 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
-      console.log(response);
+     
     }
   };
   useEffect(() => {
@@ -368,7 +368,7 @@ const SelectedCounterOrder = () => {
       postActivity({ activity: "Order Start" });
       setOrderCreated(true);
     }
-    console.log({ order });
+   
   }, [order]);
 
   return (
@@ -404,7 +404,7 @@ const SelectedCounterOrder = () => {
               className="theme-btn"
               style={{
                 width: "max-content",
-                backgroundColor: "#4ac959",
+                backgroundColor: "#32bd33",
               }}
               onClick={() => setPopupState(true)}
             >
@@ -414,7 +414,7 @@ const SelectedCounterOrder = () => {
               className="theme-btn"
               style={{
                 width: "max-content",
-                backgroundColor: "#4ac959",
+                backgroundColor: "#32bd33",
               }}
               onClick={() => setDiscountPopup("Summary")}
             >
@@ -424,7 +424,7 @@ const SelectedCounterOrder = () => {
               className="theme-btn"
               style={{
                 width: "max-content",
-                backgroundColor: "#4ac959",
+                backgroundColor: "#32bd33",
               }}
               onClick={() => setHoldPopup("Summary")}
             >
@@ -851,7 +851,7 @@ const SelectedCounterOrder = () => {
                   className="menus"
                   style={{
                     position: "fixed",
-                    boxShadow: "#4ac959 0 0 50px -10px",
+                    boxShadow: "#32bd33 0 0 50px -10px",
                     width: "100vw",
                     maxWidth: "500px",
                     maxHeight: "80vh",
@@ -1202,7 +1202,7 @@ const SelectedCounterOrder = () => {
                     let checkItemHaveSameBillingType = order.items.find(
                       (a) => a.billing_type !== order.items[0].billing_type
                     );
-                    console.log("checkItemHaveSameBillingType",checkItemHaveSameBillingType);
+                   
                     if (checkItemHaveSameBillingType) {
                       setLoading(false);
                       return setNotification({
@@ -1471,10 +1471,10 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
       ? NonFilterItem
       : [];
     setOrder((prev) => ({ ...prev, items: item_details }));
-    console.log(item_details);
+   
     onSave();
   };
-  console.log(orders);
+ 
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div
@@ -1619,10 +1619,10 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
         : a
     );
     setOrder((prev) => ({ ...prev, order_status: "A", items: item_details }));
-    console.log(item_details);
+   
     onSave();
   };
-  console.log(orders);
+ 
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div

@@ -10,7 +10,7 @@ const MobileNumberPopup = ({ onSave, counter, getCounter }) => {
   const context = useContext(Context);
 
   const { setNotification } = context;
-  console.log(data, otppoup);
+ 
   useEffect(() => {
     setdata({
       ...counter,

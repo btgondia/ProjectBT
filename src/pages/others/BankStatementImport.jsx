@@ -45,7 +45,7 @@ export default function BankStatementImport() {
       const res = await axios.get("/details/getBankStatementItem");
       setData(res.data.result);
     } catch (error) {
-      console.log(error);
+     
     }
   };
   useEffect(() => {

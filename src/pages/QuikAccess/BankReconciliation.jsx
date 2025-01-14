@@ -313,7 +313,7 @@ function ImportStatements({
         ...a,
         counter_uuid: a?.counter_uuid || a.ledger_uuid,
       }));
-    console.log(dataArray);
+   
     let array = [];
     let time = new Date();
     for (let item of dataArray) {
@@ -419,7 +419,7 @@ function ImportStatements({
         voucher_date: item.date_time_stamp,
       });
     }
-    console.log(array);
+   
     const response = await axios({
       method: "post",
       url: "/vouchers/postAccountVouchers",

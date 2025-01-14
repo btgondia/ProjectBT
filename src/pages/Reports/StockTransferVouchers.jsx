@@ -31,7 +31,7 @@ const StockTransferVouchers = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -139,7 +139,7 @@ const StockTransferVouchers = () => {
 					}))
 				)
 			else setItemsData([])
-		} catch (error) {}
+		} catch (error) { console.error(error) }
 	}
 
 	return (
@@ -625,7 +625,7 @@ function NewUserForm({ onSave, popupInfo }) {
 		setDisabled(false)
 	}
 
-	console.log(data)
+	
 	return (
 		<div className="overlay">
 			<div className="modal" style={{ width: "fit-content" }}>

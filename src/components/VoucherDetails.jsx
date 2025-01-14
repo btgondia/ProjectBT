@@ -91,7 +91,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 	//       "Content-Type": "application/json",
 	//     },
 	//   });
-	//   // console.log("users", response);
+	//   
 	//   if (response.data.success) setUsers(response.data.result);
 	// };
 
@@ -115,7 +115,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 			}
 		})
 		if (response1.data.success) data = data ? response1.data.result : [...data, ...response1.data.result]
-		console.log(data)
+		
 	}
 
 	useEffect(() => {
@@ -138,7 +138,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 				}))
 		})
 	}, [itemsData, category, order])
-	console.log(orderData)
+	
 	useEffect(() => {
 		setPrintData({
 			...printData,
@@ -377,7 +377,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 												<th className="pa2 tl bb b--black-20">Remarks</th>
 											)}
 										</tr>
-										{console.log({ orderData })}
+										
 									</thead>
 									<tbody className="lh-copy">
 										{orderData?.item_details.map((item, i) => {
@@ -665,7 +665,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 														}))
 													}
 												>
-													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#32bd33", cursor: "pointer" }} />
 												</td>
 											</tr>
 										) : (

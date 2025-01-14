@@ -258,7 +258,7 @@ export const Billing = async ({
       creating_new ? { counter_uuid: counter.counter_uuid } : { invoice_number }
     );
     counterCharges = await counterCharges?.data?.result;
-  } catch (error) {}
+  } catch (error) { console.error(error) }
   let newPriceItems = [];
   for (let item of items) {
     item = { ...item, item_total: 0 };
@@ -673,7 +673,7 @@ export const audioLoopFunction = ({
             audioLoopFunction({ i, recall, src, callback });
           }, 3000);
       });
-  } catch (error) {}
+  } catch (error) { console.error(error) }
 };
 
 export const audioAPIFunction = ({ speechString, elem_id, callback }) => {

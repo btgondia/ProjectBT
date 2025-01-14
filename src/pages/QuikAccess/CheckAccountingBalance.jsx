@@ -16,7 +16,7 @@ const CheckAccountingBalance = ({ onSave, itemsData, type }) => {
         "Content-Type": "application/json",
       },
     });
-    console.log({ response });
+   
     if (response.data.success) {
       onSave();
     }

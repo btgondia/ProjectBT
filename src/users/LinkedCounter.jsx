@@ -100,7 +100,7 @@ const LinkedCounter = () => {
 			})
 			if (response.data.message) setNotification(response.data)
 			setTimeout(() => setNotification(""), 5000)
-			console.log(response.data)
+			
 			if (response.data.success) {
 				if (!response.data.result.order_status) {
 					setNotification({
@@ -130,7 +130,7 @@ const LinkedCounter = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUserData(response.data.result)
 	}
 
@@ -240,7 +240,7 @@ const LinkedCounter = () => {
 				counter_order: 1,
 				campaign_short_link: params.campaign_short_link?.includes("cam-") ? params?.campaign_short_link?.replace("cam-", "") : ""
 			}
-			console.log(data)
+			
 			const response = await axios({
 				method: "post",
 				url: "/orders/postOrder",
@@ -275,7 +275,7 @@ const LinkedCounter = () => {
 				}
 			}
 		} catch (error) {
-			console.log(error)
+			
 		} finally {
 			setLoading(false)
 		}
@@ -302,7 +302,7 @@ const LinkedCounter = () => {
 	//       },
 	//     });
 	//     if (response.data.success) {
-	//       console.log(response);
+	//      
 	//     }
 	//   };
 	//   useEffect(() => {
@@ -343,7 +343,7 @@ const LinkedCounter = () => {
                 className="theme-btn"
                 style={{
                   width: "max-content",
-                  backgroundColor: "#4ac959",
+                  backgroundColor: "#32bd33",
                 }}
                 onClick={() => setDiscountPopup("Summary")}
               >
@@ -353,7 +353,7 @@ const LinkedCounter = () => {
                 className="theme-btn"
                 style={{
                   width: "max-content",
-                  backgroundColor: "#4ac959",
+                  backgroundColor: "#32bd33",
                 }}
                 onClick={() => setHoldPopup("Summary")}
               >
@@ -610,7 +610,7 @@ const LinkedCounter = () => {
 									className="menus"
 									style={{
 										position: "fixed",
-										boxShadow: "0 -10px 50px #4ac959",
+										boxShadow: "0 -10px 50px #32bd33",
 										width: "100vw",
 										maxHeight: "70vh",
 										bottom: "0px",
@@ -1129,10 +1129,10 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 			? NonFilterItem
 			: []
 		setOrder(prev => ({ ...prev, items: item_details }))
-		console.log(item_details)
+		
 		onSave()
 	}
-	console.log(orders)
+	
 	return (
 		<div className="overlay" style={{ zIndex: 999999999 }}>
 			<div
@@ -1263,10 +1263,10 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 				: a
 		)
 		setOrder(prev => ({ ...prev, order_status: "A", items: item_details }))
-		console.log(item_details)
+		
 		onSave()
 	}
-	console.log(orders)
+	
 	return (
 		<div className="overlay" style={{ zIndex: 999999999 }}>
 			<div

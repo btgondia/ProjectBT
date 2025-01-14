@@ -89,7 +89,7 @@ const CounterLegerReport = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
+   
     if (response.data.success) {
       setItems(response.data.result);
       setOpening_balance_amount(response.data.opening_balance);
@@ -337,7 +337,7 @@ const CounterLegerReport = () => {
                 )}
                 filterOption={filterOption}
                 onChange={(doc) => {
-                  console.log({ doc });
+                 
                   setSearchData((prev) => ({
                     ...prev,
                     counter_uuid: doc.value,
@@ -755,7 +755,7 @@ function DiliveryPopup({
         ?.outstanding_type || 0
     );
   }, [counters, order.counter_uuid]);
-  console.log(outstanding);
+ 
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -781,7 +781,7 @@ function DiliveryPopup({
           "Content-Type": "application/json",
         },
       });
-      console.log(response.data.result);
+     
       if (response.data.success) {
         localStorage.setItem(
           "paymentModesData",
@@ -898,10 +898,6 @@ function DiliveryPopup({
       modeTotal = +mode.amt + modeTotal;
       modeTotal = modeTotal.toFixed(2);
     }
-    //console.log(
-    // Tempdata?.order_grandtotal,
-    //   +(+modeTotal + (+outstanding?.amount || 0))
-    // );
     if (
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {

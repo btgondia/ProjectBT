@@ -36,7 +36,7 @@ const PendingsEntry = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setOrders(response.data.result)
 		else setOrders([])
 	}

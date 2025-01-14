@@ -44,7 +44,7 @@ const AdvanceOrderingPage = () => {
       });
       if (response.data.message) setNotification(response.data);
       setTimeout(() => setNotification(""), 5000);
-      console.log(response.data);
+     
       if (response.data.success) {
         setOrderStatus(response.data.result.order_status);
         setCounter(response.data.result.counter);
@@ -59,7 +59,7 @@ const AdvanceOrderingPage = () => {
             stockValue: getStockData(a),
           }))
         );
-        console.log(items);
+       
         setCompanies(response.data.result.company);
       }
     } catch (error) {
@@ -160,7 +160,7 @@ const AdvanceOrderingPage = () => {
           items: prevItems,
         };
       });
-      console.log(order);
+     
     }
     setLoading(false);
   };

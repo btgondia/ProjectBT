@@ -102,7 +102,7 @@ import HSNCode from "./pages/Master/HsnCode"
 
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
-export let Version = 365
+export let Version = 366
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
@@ -136,7 +136,7 @@ function App() {
 					"Content-Type": "application/json"
 				}
 			})
-			console.log(response.data.result.user_type)
+			
 			if (response.data.success) setUserType(response.data.result.user_type || false)
 			sessionStorage.setItem("userType", response.data.result.user_type)
 		}

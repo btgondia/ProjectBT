@@ -55,7 +55,7 @@ const CampaignBody = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			setDeletePopup(false)
 			getItemsData()
@@ -70,7 +70,7 @@ const CampaignBody = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		setNotification(response.data)
 		setTimeout(() => setNotification(null), 5000)
 		if (response.data.success) {
@@ -359,7 +359,7 @@ function AddIncentives({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -372,7 +372,7 @@ function AddIncentives({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -411,7 +411,7 @@ function AddIncentives({ onSave, popupForm }) {
 	}, [objData.counter_status])
 	const addVariable = name => {
 		let element = document.getElementById(active)
-		console.log(element.selectionStart)
+		
 		setObgData(prev => ({
 			...prev,
 			message: prev.message.map(a =>
@@ -443,9 +443,9 @@ function AddIncentives({ onSave, popupForm }) {
 				})
 
 				if (response.data?.success) setCounterGroups(sortCounterGroups(response.data.result))
-				console.log({ objData, cgroups: response?.data?.result })
+				
 			} catch (error) {
-				console.log({ error })
+				
 			}
 		}
 		getCounterGroups()
@@ -585,7 +585,7 @@ function AddIncentives({ onSave, popupForm }) {
 													<b style={{ width: "100px" }}>Message : </b>
 													<span
 														onClick={e => {
-															console.log(objData)
+															
 															setObgData(prev => ({
 																...prev,
 																message: [
@@ -1382,7 +1382,7 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 
 	const addVariable = name => {
 		let element = document.getElementById(active)
-		console.log(element.selectionStart)
+		
 		setMessage(prev =>
 			prev.message.map(a =>
 				a.uuid === active

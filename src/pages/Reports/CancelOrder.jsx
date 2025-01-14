@@ -30,7 +30,7 @@ const CancelOrders = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("activity", response)
+		
 		if (response.data.success) setItems(response.data.result)
 		else setItems([])
 	}
@@ -103,7 +103,7 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
 							<td colSpan={2}>
 								{new Date(+item?.status[0]?.time).toDateString()} - {formatAMPM(new Date(+item?.status[0]?.time))}
 							</td>
-							{console.log(item.status)}
+							
 							<td colSpan={2}>
 								{+item?.status.filter(a => +a.stage === 5).length
 									? new Date(+item?.status.find(a => +a.stage === 5)?.time).toDateString() +

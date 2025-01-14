@@ -61,7 +61,7 @@ const UPITransection = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("transactions", response);
+   
     if (response.data.success) setItems(response.data.result);
     setLoading(false);
   };
@@ -73,7 +73,7 @@ const UPITransection = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("transactions", response);
+   
     if (response.data.success) setPopupOrder(response.data.result);
   };
   const getCounter = async (counter_uuid) => {
@@ -115,7 +115,7 @@ const UPITransection = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("transactions", response);
+   
     if (response.data.success) {
       getActivityData();
     }
@@ -129,7 +129,7 @@ const UPITransection = () => {
   }, []);
   const downloadHandler = async () => {
     let sheetData = items.map((a) => {
-      // console.log(a)
+      
       return {
         "Counter Title": a.counter_title,
         Amount: a.amt,
@@ -147,7 +147,7 @@ const UPITransection = () => {
         type: a.mode_title,
       };
     });
-    // console.log(sheetData)
+    
 
     const ws = XLSX.utils.json_to_sheet(sheetData);
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
@@ -330,7 +330,7 @@ function Table({
       },
     });
 
-    console.log(response.data);
+   
     setNotification(response.data);
     setTimeout(() => setNotification(null), 3000);
     setLoading(false);
@@ -347,12 +347,12 @@ function Table({
       },
     });
 
-    console.log(response.data);
+   
     if (response.data.success) {
       setNotification({ success: true, message: "Message Copied" });
       setTimeout(() => setNotification(null), 3000);
       setLoading(false);
-      console.log(response.data.result.WhatsappNotification.message[0]?.text);
+     
       navigator.clipboard.writeText(
         response.data.result.WhatsappNotification.message[0]?.text || ""
       );
@@ -540,7 +540,7 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
   const [edit, setEdit] = useState(false);
 
   useEffect(() => {
-    console.log(notesPopup?.payment_remarks);
+   
     setNotes(notesPopup?.payment_remarks || []);
   }, [notesPopup]);
   const submitHandler = async () => {
@@ -761,7 +761,7 @@ function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
                         >
                           <AddIcon
                             sx={{ fontSize: 40 }}
-                            style={{ color: "#4AC959", cursor: "pointer" }}
+                            style={{ color: "#32bd33", cursor: "pointer" }}
                           />
                         </td>
                       </tr>
@@ -826,7 +826,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
       controller.abort();
     };
   }, []);
-  console.log({ listData });
+ 
 
   const submitHandler = async (data) => {
     //receipts/putBulkReceiptUPIStatus

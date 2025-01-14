@@ -206,7 +206,7 @@ export default function CounterNotesPopup() {
                                       (a) => a.uuid !== item.uuid
                                     ),
                                   }));
-                                  //console.log(item);
+                                  
                                 }}
                               />
                             </td>
@@ -231,7 +231,7 @@ export default function CounterNotesPopup() {
                           >
                             <AddIcon
                               sx={{ fontSize: 40 }}
-                              style={{ color: "#4AC959", cursor: "pointer" }}
+                              style={{ color: "#32bd33", cursor: "pointer" }}
                             />
                           </td>
                         </tr>

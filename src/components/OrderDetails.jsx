@@ -162,7 +162,7 @@ export function OrderDetails({
 				}
 			}
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 
@@ -240,7 +240,7 @@ export function OrderDetails({
 				...prev,
 				actions: prev.actions.map(i => ({ ...i, disabled: false, loading: false }))
 			}))
-			// console.log(error.message)
+			
 		}
 	}
 
@@ -477,7 +477,7 @@ export function OrderDetails({
 				"Content-Type": "application/json"
 			}
 		})
-		// console.log("users", response);
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -678,7 +678,7 @@ export function OrderDetails({
 
 	useEffect(() => {
 		const controller = new AbortController()
-		console.log({ order })
+		
 		if (order) {
 			getItemsData(
 				order?.item_details?.map(a => a.item_uuid),
@@ -758,7 +758,7 @@ export function OrderDetails({
 				})
 			}
 		}
-		// console.log(fulfillment);
+		
 		let data = {
 			...orderData,
 			item_details: orderData?.item_details?.filter(a => a.item_uuid) || []
@@ -885,7 +885,7 @@ export function OrderDetails({
 			setWaiting(false)
 		}, 45000)
 		try {
-			console.log({ param })
+			
 			updateCompleteOrder(param)
 			setTimeout(() => {
 				getOrder(order_uuid, true)
@@ -939,7 +939,7 @@ export function OrderDetails({
 				})
 			}
 		}
-		// console.log(fulfillment);
+		
 		let data = {
 			...orderData,
 
@@ -1041,7 +1041,7 @@ export function OrderDetails({
 							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])
 						]
 				  }
-		// console.log("data", data);
+		
 
 		const response = await axios({
 			method: "put",
@@ -1067,7 +1067,7 @@ export function OrderDetails({
 
 		if (response2.data.success) {
 			// window.location.reload();
-			console.log(response2)
+			
 		}
 		if (response.data.success) {
 			if (setOrders) setOrders(prev => prev?.map(a => (a.order_uuid === data.order_uuid ? data : a)))
@@ -1291,8 +1291,8 @@ export function OrderDetails({
 
 		for (let item of item_details) {
 			let itemData = itemsData.find(_item => _item.item_uuid === item.item_uuid)
-
-			if (!itemData?.dms_erp_id || !itemData?.dms_item_name) return "Item DMS details are missing"
+			if (!itemData?.dms_erp_id || !itemData?.dms_item_name)
+				return `Item DMS details are missing for ${itemData?.dms_erp_id || itemData?.dms_item_name}`
 		}
 	}
 
@@ -1657,7 +1657,7 @@ export function OrderDetails({
 											) {
 												handleWarehouseChacking()
 											} else {
-												console.log("Invoked: Print")
+												
 												handlePrint()
 											}
 										}}
@@ -1717,7 +1717,7 @@ export function OrderDetails({
 											onClick={e => {
 												reactInputsRef.current = {}
 												e.target.blur()
-												console.log({ editOrder })
+												
 												if (!editOrder) {
 													getItemsData([])
 													getCounters([])
@@ -2198,7 +2198,7 @@ export function OrderDetails({
 																ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
 																styles={{
 																	control: styles => {
-																		// console.log(styles);
+																		
 																		return {
 																			...styles,
 																			minHeight: 25,
@@ -2488,7 +2488,7 @@ export function OrderDetails({
 														}))
 													}
 												>
-													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#32bd33", cursor: "pointer" }} />
 												</td>
 											</tr>
 										) : (
@@ -3200,7 +3200,7 @@ const DeleteOrderPopup = ({
 		updateCompleteOrder({ data })
 		onDeleted()
 	}
-	console.log({ messageTemplate })
+	
 	return (
 		<div className="overlay" style={{ zIndex: 9999999999 }}>
 			{confirm ? (
@@ -3719,7 +3719,7 @@ function DiliveryPopup({
 	let type = useMemo(() => {
 		return counters.find(a => a.counter_uuid === order?.counter_uuid)?.outstanding_type || 0
 	}, [counters, order?.counter_uuid])
-	console.log(outstanding)
+	
 	const GetPaymentModes = async () => {
 		const cachedData = localStorage.getItem("paymentModesData")
 
@@ -3752,7 +3752,7 @@ function DiliveryPopup({
 			}
 		})
 		if (response.data.success) {
-			console.log("dilivereduser", response.data.result[0]?.users[0])
+			
 			if (response.data.result[0]?.users[0]) setDiliveredUser(response.data.result[0]?.users[0])
 		}
 	}
@@ -3848,7 +3848,7 @@ function DiliveryPopup({
 				}))
 			)
 	}, [PaymentModes])
-	console.log(modes)
+	
 	const submitHandler = async () => {
 		if (waiting) {
 			return
@@ -3870,10 +3870,6 @@ function DiliveryPopup({
 		})
 		setError("")
 		let modeTotal = modes?.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
-		//console.log(
-		// Tempdata?.order_grandtotal,
-		//   +(+modeTotal + (+outstanding?.amount || 0))
-		// );
 		if (+order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))) {
 			setError("Invoice Amount and Payment mismatch")
 			setWaiting(false)
@@ -4144,10 +4140,10 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 	const [notes, setNotes] = useState([])
 	const [edit, setEdit] = useState(false)
 	useEffect(() => {
-		// console.log(order?.notes);
+		
 		setNotes(notesPopup?.notes || [])
 	}, [notesPopup?.notes])
-	console.log(notesPopup)
+	
 	const submitHandler = async () => {
 		const response = await axios({
 			method: "put",
@@ -4640,7 +4636,7 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log({ response })
+		
 		if (response.data.success) {
 			setOrderData(prev => ({
 				...prev,
@@ -4715,7 +4711,7 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 																...prev,
 																counter_notes: prev.counter_notes.filter(a => a.uuid !== item.uuid)
 															}))
-															//console.log(item);
+															
 														}}
 													/>
 												</td>
@@ -4734,7 +4730,7 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 													])
 												}
 											>
-												<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+												<AddIcon sx={{ fontSize: 40 }} style={{ color: "#32bd33", cursor: "pointer" }} />
 											</td>
 										</tr>
 									</tbody>

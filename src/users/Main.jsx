@@ -137,7 +137,7 @@ const Main = () => {
 
       await refreshDb();
       await updateWarehouseState(selected_warehouse);
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setPromptState();
     setLoading();
   };
@@ -301,7 +301,7 @@ function Logout({ onSave, popupForm }) {
     setIsLoading(true);
     try {
       e.preventDefault();
-      console.log(popupForm);
+     
       if (popupForm === "refresh") {
         setTimeout(() => setIsLoading(false), 10000);
         await refreshDb();
@@ -320,7 +320,7 @@ function Logout({ onSave, popupForm }) {
         sessionStorage.clear();
         window.location.assign("/login");
       }
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setIsLoading(false);
   };
 

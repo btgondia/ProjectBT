@@ -34,7 +34,7 @@ const CompletedTrips = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setStatementTrip(response.data.result)
 	}
 	const getUsers = async () => {
@@ -46,7 +46,7 @@ const CompletedTrips = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	function formatAMPM(date) {
@@ -59,7 +59,7 @@ const CompletedTrips = () => {
 		var strTime = date.toDateString() + " - " + hours + ":" + minutes + " " + ampm
 		return strTime
 	}
-	console.log(searchData)
+	
 	const getActivityData = async () => {
 		let startDate = new Date(searchData.startDate + " 00:00:00 AM")
 		startDate = startDate.getTime()
@@ -74,7 +74,7 @@ const CompletedTrips = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("activity", response)
+		
 		if (response.data.success) setItems(response.data.result)
 	}
 	useEffect(() => {
@@ -91,7 +91,7 @@ const CompletedTrips = () => {
 		getUsers()
 	}, [])
 
-	console.log(searchData)
+	
 	return (
 		<>
 			<Sidebar />

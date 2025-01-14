@@ -42,7 +42,7 @@ export default function CashRegister() {
   });
 
   const statementContent = useCallback(() => {
-    console.log(statementRef.current);
+   
     if (statementData) return statementRef.current;
     else return <></>;
   }, [statementData]);
@@ -100,7 +100,7 @@ export default function CashRegister() {
         "Content-Type": "application/json",
       },
     });
-    console.log("users", response);
+   
     if (response.data.success)
       setUsers(
         response.data.result
@@ -146,7 +146,7 @@ export default function CashRegister() {
       },
     });
     if (response.data.success) {
-      console.log(response);
+     
       setStatementTrip(response.data.result);
       setStatementTrip_uuid(false);
       setTimeout(handlePrint, 2000);

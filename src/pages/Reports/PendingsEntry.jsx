@@ -39,7 +39,7 @@ const PendingsEntry = () => {
     );
     if (response.data.success) {
       setOrders((prevOrders) => [...prevOrders, ...response.data.result]);
-      console.log(response.data.result.length);
+     
       if (response.data.result.length < 300) {
         setHasMore(false); // No more data if returned less than limit
       }
@@ -106,7 +106,7 @@ const PendingsEntry = () => {
   };
   const downloadHandler = async () => {
     let sheetData = [];
-    // console.log(sheetData)
+    
     for (let order of selectedOrders?.sort(
       (a, b) => +a.invoice_number - +b.invoice_number
     )) {
@@ -157,12 +157,12 @@ const PendingsEntry = () => {
   };
   const downloadHandlerTwo = async () => {
     let sheetData = [];
-    // console.log(sheetData)
+    
     for (let order of selectedOrders
       .filter((a) => a.replacement)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order);
+     
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -192,7 +192,7 @@ const PendingsEntry = () => {
       .filter((a) => a.adjustment)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order);
+     
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -222,7 +222,7 @@ const PendingsEntry = () => {
       .filter((a) => a.shortage)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order);
+     
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -593,7 +593,7 @@ function Table({
   setSelectedOrders,
   getOrders,
 }) {
-  console.log(selectedOrders);
+ 
   return (
     <table
       className="user-table"

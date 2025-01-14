@@ -44,10 +44,10 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
       ? NonFilterItem
       : [];
     setOrder((prev) => ({ ...prev, item_details }));
-    console.log(item_details);
+   
     onSave();
   };
-  console.log(orders);
+ 
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div

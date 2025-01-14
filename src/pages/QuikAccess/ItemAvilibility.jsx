@@ -50,7 +50,7 @@ export default function ItemAvilibility() {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success)
 			setUsers(
 				response.data.result
@@ -77,7 +77,7 @@ export default function ItemAvilibility() {
 						users_name:
 							b?.users?.map(a => {
 								let data = users.find(c => a === c.user_uuid)?.user_title
-								console.log(a)
+								
 								return data
 							}) || [],
 					}))
@@ -94,7 +94,7 @@ export default function ItemAvilibility() {
 			},
 		})
 		if (response.data.success) {
-			console.log(response)
+			
 			setStatementTrip(response.data.result)
 			setStatementTrip_uuid(false)
 			setTimeout(handlePrint, 2000)

@@ -103,7 +103,7 @@ function Table({ items, setItems, onSave }) {
   const [itemsIdList, setItemsIdList] = useState();
   useEffect(() => setItemsIdList(items?.sort((a, b) => +a.sort_order - b.sort_order)?.map(i => i.item_uuid)), [items])
 
-  console.log(itemsIdList)
+ 
   const handleSave = async () => {
     const response = await axios({
       method: "put",

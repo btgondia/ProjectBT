@@ -37,7 +37,7 @@ export default function OpeningBalanceDate() {
       const res = await axios.get("/details/getOpeningBalanceDate");
       setData(res.data.result);
     } catch (error) {
-      console.log(error);
+     
     }
   };
   useEffect(() => {

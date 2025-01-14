@@ -35,7 +35,7 @@ const CounterCharges = () => {
       setPageLoading(false);
     } catch (error) {
       setPageLoading(false);
-      console.log(error);
+     
     }
   };
 
@@ -45,13 +45,13 @@ const CounterCharges = () => {
       charge.charge_uuid = v4();
       charge.user_uuid = localStorage.getItem("user_uuid");
       const response = await axios.post("/counterCharges", charge);
-      console.log(response.data);
+     
       if (response?.data?.success)
         setCharges((state) => state.concat([response.data.result]));
       setPageLoading(false);
     } catch (error) {
       setPageLoading(false);
-      console.log(error);
+     
     }
   };
 
@@ -70,7 +70,7 @@ const CounterCharges = () => {
       setPageLoading(false);
     } catch (error) {
       setPageLoading(false);
-      console.log(error);
+     
     }
   };
 
@@ -85,7 +85,7 @@ const CounterCharges = () => {
       setPageLoading(false);
     } catch (error) {
       setPageLoading(false);
-      console.log(error);
+     
     }
   };
 

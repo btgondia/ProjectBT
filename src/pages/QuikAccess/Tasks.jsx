@@ -23,7 +23,7 @@ const ItemsPage = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	const getCounter = async () => {
@@ -137,7 +137,7 @@ const ItemsPage = () => {
 							type="text"
 							onChange={e => {
 								setCompleted(e.target.value)
-								console.log(e.target.value)
+								
 							}}
 							value={completed}
 							placeholder="Search User..."
@@ -472,7 +472,7 @@ function NewUserForm({ onSave, popupInfo, counter, users }) {
 		}
 	}
 
-	console.log(data)
+	
 	return (
 		<div className="overlay">
 			<div className="modal" style={{ width: "fit-content" }}>

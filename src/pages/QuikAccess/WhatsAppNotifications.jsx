@@ -66,7 +66,7 @@ const Incetives = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			setDeletePopup(false)
 			getItemsData()
@@ -151,7 +151,7 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 				"Content-Type": "application/json"
 			}
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			getItemsData()
 		}
@@ -334,7 +334,7 @@ function IncentivePopup({ onSave, popupForm }) {
 					"Content-Type": "application/json"
 				}
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -347,7 +347,7 @@ function IncentivePopup({ onSave, popupForm }) {
 					"Content-Type": "application/json"
 				}
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -470,7 +470,7 @@ function IncentivePopup({ onSave, popupForm }) {
 										<b style={{ width: "100px" }}>Message : </b>
 										<span
 											onClick={e => {
-												console.log(objData)
+												
 												setObgData(prev => ({
 													...prev,
 													message: [...(prev.message || []), { type: "text", uuid: uuid() }]
@@ -560,7 +560,7 @@ function IncentivePopup({ onSave, popupForm }) {
 																		}))
 																	}
 																/>
-																{console.log(server + item.uuid + ".png")}
+																
 																<img
 																	style={{
 																		width: "100px",

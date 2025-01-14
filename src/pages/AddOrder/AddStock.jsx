@@ -69,7 +69,7 @@ export default function AddStock() {
 
 				let dataJson = []
 				for (let item in json) {
-					// console.log(json[item]["Item Code"] || json[item]["ITEM CODE"]);
+					
 					if (!json[item]["ITEM CODE"] && !json[item]["ITEM CODE"]) {
 						setNotification("Excel Error: CODE not found in Line Number " + json[item]?.__rowNum__)
 						setTimeout(() => setNotification(false), 5000)
@@ -85,7 +85,7 @@ export default function AddStock() {
 								+a.item_code === json[item]["ITEM CODE"] ||
 								a.item_code === +json[item]["ITEM CODE"])
 					)
-					console.log(itemData)
+					
 					if (!itemData) {
 						setNotification(
 							"BT Error: ITEM not found for Item Code " + (json[item]["ITEM CODE"] || json[item]["ITEM CODE"])
@@ -214,19 +214,19 @@ export default function AddStock() {
 		return q + " : " + p
 	}, [order?.item_details])
 	const jumpToNextIndex = id => {
-		//console.log(id);
+		
 		document.querySelector(`#${id}`).blur()
 		const index = document.querySelector(`#${id}`).getAttribute("index")
-		//console.log("this is index", index);
+		
 
 		const nextElem = document.querySelector(`[index="${+index + 1}"]`)
 
 		if (nextElem) {
 			if (nextElem.id.includes("selectContainer-")) {
-				//console.log("next select container id: ", nextElem.id);
+				
 				reactInputsRef.current[nextElem.id.replace("selectContainer-", "")].focus()
 			} else {
-				//console.log("next input id: ", nextElem.id);
+				
 				setFocusedInputId("")
 				setTimeout(() => document.querySelector(`[index="${+index + 1}"]`).focus(), 10)
 				return
@@ -400,7 +400,7 @@ export default function AddStock() {
 																option: (a, b) => {
 																	return {
 																		...a,
-																		color: b.data.qty === 0 ? "" : b.data.qty > 0 ? "#4ac959" : "red"
+																		color: b.data.qty === 0 ? "" : b.data.qty > 0 ? "#32bd33" : "red"
 																	}
 																}
 															}}
@@ -504,7 +504,7 @@ export default function AddStock() {
 																...order,
 																item_details: order.item_details.filter(a => a.uuid !== item.uuid)
 															})
-															//console.log(item);
+															
 														}}
 													/>
 												</td>
@@ -519,7 +519,7 @@ export default function AddStock() {
 													}))
 												}
 											>
-												<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+												<AddIcon sx={{ fontSize: 40 }} style={{ color: "#32bd33", cursor: "pointer" }} />
 											</td>
 										</tr>
 									</tbody>
@@ -921,7 +921,7 @@ function Table({
 														{order.from_warehouse ? (
 															<td
 																style={{
-																	color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red"
+																	color: qty === 0 ? "" : qty > 0 ? "#32bd33" : "red"
 																}}
 															>
 																{CovertedQty(
@@ -935,7 +935,7 @@ function Table({
 														<td
 															colSpan={2}
 															style={{
-																color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red"
+																color: qty === 0 ? "" : qty > 0 ? "#32bd33" : "red"
 															}}
 														>
 															{CovertedQty(qty || 0, +item.conversion || 1) || ""}

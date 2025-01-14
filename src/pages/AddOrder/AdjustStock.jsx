@@ -120,7 +120,7 @@ export default function AdjustStock() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
+   
     if (response.data.success) {
       handlePrint();
     }
@@ -501,7 +501,7 @@ export default function AdjustStock() {
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   let ap = e.target.value;
-                                  console.log({ap,qty:item.qty,b:item.b,conversion:item.conversion});
+                                 
                                   let p = +ap + (+item.qty - item.b* +item.conversion);
                                   return {
                                     ...prev,
@@ -823,7 +823,7 @@ function Table({
   selectedOrders,
   setSelectedOrders,
 }) {
-  console.log(selectedOrders);
+ 
   return (
     <table
       className="user-table"
@@ -875,7 +875,7 @@ function Table({
                 <td
                   colSpan={2}
                   style={{
-                    color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
+                    color: qty === 0 ? "" : qty > 0 ? "#32bd33" : "red",
                   }}
                 >
                   {CovertedQty(qty || 0, item.conversion || 1) || ""}

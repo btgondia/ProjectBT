@@ -61,7 +61,7 @@ const Counter = () => {
 			  "Content-Type": "application/json",
 			},
 		  });
-		  console.log(response.data.result);
+		 
 		  if (response.data.success) {
 			localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
 			setPaymentModes(response.data.result);
@@ -107,9 +107,9 @@ const Counter = () => {
 				...item,
 				mobile: item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)),
 			}))
-		console.log(selectedRoutes, sheetData)
+		
 		sheetData = sheetData.map(a => {
-			// console.log(a)
+			
 			return {
 				"Route Title": a.route_title,
 				"Counter Title": a.counter_title,
@@ -120,7 +120,7 @@ const Counter = () => {
 				GST: a.gst || "",
 			}
 		})
-		// console.log(sheetData)
+		
 		const ws = XLSX.utils.json_to_sheet(sheetData)
 		const wb = { Sheets: { data: ws }, SheetNames: ["data"] }
 		const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" })
@@ -136,7 +136,7 @@ const Counter = () => {
 			else temp = [...temp, i]
 		}
 		// temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-		console.log(options, temp)
+		
 
 		setSelectedRoutes(temp)
 	}
@@ -522,7 +522,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData, paymentModes,
 			})
 		}
 	}, [paymentModes, popupInfo.data, popupInfo?.type])
-	console.log(data)
+	
 	const submitHandler = async e => {
 		e.preventDefault()
 		if (!data.counter_title) {
@@ -581,7 +581,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData, paymentModes,
 			else temp = [...temp, i]
 		}
 		// temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-		console.log(options, temp)
+		
 
 		setdata(prev => ({ ...prev, payment_modes: temp }))
 	}
@@ -593,7 +593,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData, paymentModes,
 			else temp = [...temp, i]
 		}
 		// temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-		console.log(options, temp)
+		
 
 		setdata(prev => ({ ...prev, counter_group_uuid: temp }))
 	}
@@ -920,7 +920,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 	useEffect(() => {
 		setValue(itemPopup.item[itemPopup.type] ? itemPopup.item[itemPopup.type] : [])
 	}, [])
-	console.log(value)
+	
 	const getItemCategories = async () => {
 		const response = await axios({
 			method: "get",
@@ -1347,7 +1347,7 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 				onSave()
 			}
 		} catch (err) {
-			console.log(err)
+			
 			setErrorMassage("Order already exist")
 		}
 		setLoading(false)

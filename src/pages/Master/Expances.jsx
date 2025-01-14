@@ -370,7 +370,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
           onSave();
         }
       } catch (err) {
-        console.log(err);
+       
         setErrorMassage("Order already exist");
       }
       setLoading(false);

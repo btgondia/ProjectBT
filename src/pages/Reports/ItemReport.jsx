@@ -133,7 +133,7 @@ const ItemDetails = () => {
   const ExcelDownload = async () => {
 	const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
 	let sheetData = data.map(a => {
-			// console.log(a)
+			
 			return {
 				"Item Title": a.item_title,
 				"MRP": a.mrp,
@@ -148,7 +148,7 @@ const ItemDetails = () => {
 				
 			}
 		})
-		// console.log(sheetData)
+		
 		const ws = XLSX.utils.json_to_sheet(sheetData)
 		const wb = { Sheets: { data: ws }, SheetNames: ["data"] }
 		const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" })
@@ -188,7 +188,7 @@ const ItemDetails = () => {
           FETCH_MORE = true;
         }, 1000);
 
-      console.log("YOU ARE AT THE BOTTOM OF THE PAGE!!");
+     
     }
   };
 
@@ -381,7 +381,7 @@ function Table({ data = [], loading, tableRef }) {
                       className={"mui-multi-select"}
                       onChange={(e) => {
                         e.stopPropagation();
-                        console.log(e.target.value);
+                       
                         setSalesIn(e.target.value);
                       }}
                       style={{

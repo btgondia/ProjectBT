@@ -36,7 +36,7 @@ const OpeningBalanceReport = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
+   
     if (response.data.success) {
       setItems(response.data.result);
       setDatePopup(false);
@@ -240,7 +240,7 @@ function DiliveryPopup({
       const res = await axios.get("/details/getOpeningBalanceDate");
       setDefaultOpeningBalanceDate(res.data.result);
     } catch (error) {
-      console.log(error);
+     
     }
   };
   useEffect(() => {
@@ -324,7 +324,7 @@ function DiliveryPopup({
                         >
                           <AddCircle
                             sx={{ fontSize: 40 }}
-                            style={{ color: "#4AC959", cursor: "pointer" }}
+                            style={{ color: "#32bd33", cursor: "pointer" }}
                           />
                         </span>
                         <div>

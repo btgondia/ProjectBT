@@ -20,7 +20,7 @@ const UserActivity = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	const getActivityData = async () => {
@@ -36,7 +36,7 @@ const UserActivity = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("activity", response)
+		
 		if (response.data.success) setItems(response.data.result)
 	}
 	useEffect(() => {
@@ -55,7 +55,7 @@ const UserActivity = () => {
 	useEffect(() => {
 		if (users.length) setSearchData(prev => ({ ...prev, user_uuid: users[0]?.user_uuid }))
 	}, [users])
-	console.log(searchData)
+	
 	return (
 		<>
 			<Sidebar />

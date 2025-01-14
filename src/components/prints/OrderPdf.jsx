@@ -100,7 +100,7 @@ const OrderPdf = () => {
         "/orders/GetOrder/" + params.order_uuid
       );
       if (!api_response.data.success)
-        return console.log("Failed to fetch order");
+        return
       setOrder(api_response.data.result);
       getItemsData(
         api_response.data.result.item_details.map((a) => a.item_uuid)
@@ -131,7 +131,7 @@ const OrderPdf = () => {
     let hsn = [];
     let char = "a";
     for (let item of order.item_details) {
-      console.log({ item });
+     
       if (item.hsn && !hsn.find((a) => a.hsn === item.hsn)) {
         hsn.push({ hsn: item.hsn, char });
         char = getNextChar(char);

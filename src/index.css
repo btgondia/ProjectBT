@@ -19,6 +19,8 @@ code {
 }
 
 :root {
+	/* --main: #32bd33; */
+	/* --secondary: #eaf8ea */
 	--main: #4ac959;
 	--secondary: #deffe1;
 	--secondary-light: #deffe1;

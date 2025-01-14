@@ -52,7 +52,7 @@ const AutoIncreaseItem = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			setDeletePopup(false)
 			getItemsData()
@@ -142,7 +142,7 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			getItemsData()
 		}
@@ -464,7 +464,7 @@ function NewUserForm({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -477,7 +477,7 @@ function NewUserForm({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -1135,7 +1135,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
 		}))
 		onSave()
 	}
-	console.log(filterItemData)
+	
 	return (
 		<div className="overlay">
 			<div className="modal" style={{ height: "fit-content", width: "fit-content" }}>

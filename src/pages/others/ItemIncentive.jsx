@@ -52,7 +52,7 @@ const ItemIncentive = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			setDeletePopup(false)
 			getItemsData()
@@ -141,7 +141,7 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 				"Content-Type": "application/json",
 			},
 		})
-		console.log(response)
+		
 		if (response.data.success) {
 			getItemsData()
 		}
@@ -235,7 +235,7 @@ function NewUserForm({ onSave, popupForm }) {
 		counters: [],
 		counter_groups: [],
 	})
-	console.log(popupForm)
+	
 	useEffect(() => {
 		if (popupForm?.type === "edit") setObgData(popupForm.data)
 	}, [])
@@ -455,7 +455,7 @@ function NewUserForm({ onSave, popupForm }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	useEffect(() => {
@@ -483,7 +483,7 @@ function NewUserForm({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}
@@ -496,7 +496,7 @@ function NewUserForm({ onSave, popupForm }) {
 					"Content-Type": "application/json",
 				},
 			})
-			console.log(response)
+			
 			if (response.data.success) {
 				onSave()
 			}

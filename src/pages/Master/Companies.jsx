@@ -32,7 +32,7 @@ const Companies = () => {
 			}
 		  }
 		} catch (error) {
-		  console.log(error);
+		 
 		}
 	  };
 	const createCompany = async company => {
@@ -44,10 +44,10 @@ const Companies = () => {
 				data: company,
 				headers: { "Content-Type": "application/json" },
 			})
-			console.log(response.data)
+			
 			setCompanies(state => state.concat([company]))
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 
@@ -59,12 +59,12 @@ const Companies = () => {
 				data: company,
 				headers: { "Content-Type": "application/json" },
 			})
-			console.log(response.data)
+			
 			setCompanies(state =>
 				state?.map(i => (i.company_uuid !== company?.company_uuid ? i : { ...i, ...company }))
 			)
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 
@@ -77,10 +77,10 @@ const Companies = () => {
 				data: { company_uuid: company?.company_uuid },
 				headers: { "Content-Type": "application/json" },
 			})
-			console.log(response.data)
+			
 			setCompanies(state => state?.filter(i => i.company_uuid !== company?.company_uuid))
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 

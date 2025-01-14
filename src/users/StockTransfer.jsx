@@ -240,7 +240,7 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 		if (response.data.success) onSave()
 	}
 
-	// console.log(tempQuantity);
+	
 	return (
 		<>
 			<div className="overlay">

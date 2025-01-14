@@ -31,7 +31,7 @@ const UknownVouchers = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
+   
     if (response.data.success) {
       setItems(response.data.result);
     } else {
@@ -198,7 +198,7 @@ function DiliveryPopup({
         ?.outstanding_type || 0
     );
   }, [counters, order.counter_uuid]);
-  console.log(outstanding);
+ 
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -336,10 +336,6 @@ function DiliveryPopup({
       modeTotal = +mode.amt + modeTotal;
       modeTotal = modeTotal.toFixed(2);
     }
-    //console.log(
-    // Tempdata?.order_grandtotal,
-    //   +(+modeTotal + (+outstanding?.amount || 0))
-    // );
     if (
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {

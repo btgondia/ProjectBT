@@ -313,7 +313,7 @@ export default function NewVoucher() {
     return false;
   };
 
-  console.log(order);
+ 
 
   return (
     <>
@@ -685,7 +685,7 @@ export default function NewVoucher() {
                                   (a) => a.uuid !== item.uuid
                                 ),
                               }));
-                              //console.log(item);
+                              
                             }}
                           />
                         )}
@@ -708,7 +708,7 @@ export default function NewVoucher() {
                     >
                       <AddIcon
                         sx={{ fontSize: 40 }}
-                        style={{ color: "#4AC959", cursor: "pointer" }}
+                        style={{ color: "#32bd33", cursor: "pointer" }}
                       />
                     </td>
                   </tr>

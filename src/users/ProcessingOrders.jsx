@@ -157,7 +157,7 @@ const ProcessingOrders = () => {
 				setOrders(sortedOrders)
 			}
 		} catch (error) {
-			console.log(error)
+			
 		}
 		setLoading(false)
 	}
@@ -193,7 +193,7 @@ const ProcessingOrders = () => {
 			if (!elem) return
 			clearInterval(ivl_id)
 			elem.scrollIntoViewIfNeeded(true)
-			console.log(`Interval Running`)
+			
 		}, 1000)
 	}, [selectedOrder, orders])
 
@@ -222,10 +222,10 @@ const ProcessingOrders = () => {
 				}
 			})
 			if (response.data.success) {
-				console.log(response)
+				
 			}
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 
@@ -341,7 +341,7 @@ const ProcessingOrders = () => {
 				preventPrintUpdate
 			})
 		}
-		console.log(finalData)
+		
 
 		try {
 			const response = await axios({
@@ -419,7 +419,7 @@ const ProcessingOrders = () => {
 				return obj
 			}, {})
 
-		console.log(data)
+		
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrders",
@@ -492,7 +492,7 @@ const ProcessingOrders = () => {
 				  )
 			let item_details = itemsDetails.reduce((acc, curr) => {
 				let itemData = acc.find(item => item.item_uuid === curr.item_uuid)
-				console.log(acc)
+				
 				if (itemData) {
 					itemData.b = (+itemData.b || 0) + (+curr.b || 0)
 					itemData.p = (+itemData.p || 0) + (+curr.p || 0)
@@ -536,7 +536,7 @@ const ProcessingOrders = () => {
 	}
 
 	const updateBillingAmount = async (order = selectedOrder) => {
-		// console.log(order);
+		
 		let billingData = await Billing({
 			order_uuid: order?.order_uuid,
 			invoice_number: `${order?.order_type}${order?.invoice_number}`,
@@ -677,7 +677,7 @@ const ProcessingOrders = () => {
 									}}
 									defaultValue={playerSpeed}
 									onChange={e => {
-										console.log(e.target.value)
+										
 										setPlayerSpeed(e.target.value)
 										audiosRef.current.forEach(i => (i.playbackRate = +e.target.value))
 									}}
@@ -1240,7 +1240,7 @@ const ProcessingOrders = () => {
 											{item?.mobile ? (
 												<Phone
 													className="user_Back_icon"
-													style={{ color: "#4ac959" }}
+													style={{ color: "#32bd33" }}
 													onClick={e => {
 														e.stopPropagation()
 														if (item.mobile.length === 1) {
@@ -1570,7 +1570,7 @@ function NotesPopup({ onSave, order, setSelectedOrder, notesPopup, HoldOrder }) 
 	const [notes, setNotes] = useState([])
 	const [edit, setEdit] = useState(false)
 	useEffect(() => {
-		// console.log(order?.notes);
+		
 		setNotes(order?.notes || [])
 	}, [order])
 	const submitHandler = async () => {
@@ -1838,13 +1838,6 @@ function HoldPopup({
 				const conversion = +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion || 1
 				b = parseInt(+b + (+p + free) / conversion)
 				p = parseInt((+p + free) % conversion)
-				console.log({
-					conversion,
-					b,
-					p,
-					free,
-					item_title: item.item_title
-				})
 				let obj = {
 					...item,
 					free,
@@ -1855,7 +1848,7 @@ function HoldPopup({
 			}
 		}
 
-		console.log(result)
+		
 		result.map(item =>
 			setTempQuantity(prev =>
 				prev?.filter(a => a.item_uuid === item.item_uuid)?.length
@@ -1889,7 +1882,7 @@ function HoldPopup({
 			)
 		)
 
-		console.log({ result })
+		
 		setItems(result)
 
 		const audioElements = []
@@ -1906,7 +1899,7 @@ function HoldPopup({
 					?.filter(i => i.category_uuid === cat.category_uuid)
 					?.forEach((item, index) => {
 						if (item) {
-							console.log(item.pronounce)
+							
 							const handleQty = (value, label, sufix) =>
 								value ? `${value} ${label}${value > 1 ? sufix : ""}` : ""
 							const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(
@@ -1919,10 +1912,10 @@ function HoldPopup({
 								audio.index = item.index
 								audio.category_uuid = item.category_uuid
 								audioElements.push(audio)
-								console.log(`${++progressCount}/${result?.length}`)
+								
 
 								if (progressCount === result?.length) {
-									console.log(audioElements)
+									
 									audiosRef.current = audioElements
 										.sort((a, b) => +a.index - +b.index)
 										.map(i => {
@@ -1967,7 +1960,7 @@ function HoldPopup({
 		onSave()
 	}
 
-	// console.log(tempQuantity);
+	
 	return (
 		<>
 			<div className="overlay">
@@ -2147,7 +2140,7 @@ function HoldPopup({
 																				}}
 																			>
 																				{item?.b || 0} : {+item?.p || 0}
-																				{console.log({ items })}
+																				
 																			</td>
 																			{!window.location.pathname.includes("delivery") ? (
 																				<td colSpan={2}>
@@ -2497,7 +2490,7 @@ function DiliveryPopup({
 	const [outstanding, setOutstanding] = useState({})
 
 	useEffect(() => {
-		console.log({ order })
+		
 		if (firstTime) {
 			setData({
 				replacement: order?.replacement || 0,
@@ -2649,7 +2642,7 @@ function DiliveryPopup({
 				postOrderData()
 				onSave()
 			}
-		} catch (error) {}
+		} catch (error) { console.error(error) }
 		setLoading(false)
 	}
 
@@ -2829,7 +2822,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 		if (!warehouseSelection) {
 			let itemData = items.find(a => a.item_uuid === popupValue.item_uuid)
 			let warehouseData = itemData?.stock?.find(b => b.warehouse_uuid === warehouse_uuid)
-			console.log(itemData, warehouseData, warehouse_uuid)
+			
 			setData(prev => ({
 				...prev,
 				item_title: itemData.item_title,
@@ -2838,7 +2831,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 			if (warehouse_uuid) getMinValue()
 		}
 	}, [warehouse_uuid, warehouseSelection])
-	console.log(data)
+	
 
 	const getMinValue = async () => {
 		const response = await axios({
@@ -3014,7 +3007,7 @@ function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
 	useEffect(() => {
 		setTimeout(() => setDisabled(false), 3000)
 	}, [])
-	console.log("counters", data)
+	
 	return (
 		<div className="overlay">
 			<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
@@ -3095,7 +3088,7 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log("users", response)
+		
 		if (response.data.result.opened_by === "0") onSave()
 		if (response.data.success) setOrderData(response.data.result)
 	}
@@ -3103,7 +3096,7 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 		setTimeout(() => setTimer(true), 2000)
 		getOrders()
 	}, [])
-	console.log("counters", data)
+	
 	return timer ? (
 		<div className="overlay">
 			<div
@@ -3289,7 +3282,7 @@ function NewUserForm({ onSave, popupInfo, tempQuantity, setTempQuantity, order, 
 			onSave(orderData)
 		}
 	}
-	console.log(data)
+	
 	return (
 		<div className="overlay">
 			<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
@@ -3445,7 +3438,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 		var strTime = hours + ":" + minutes + " " + ampm
 		return strTime
 	}
-	console.log("updatedOrders", updateOrders, deleteItemsOrder)
+	
 	const postOrderData = async deleteItems => {
 		let dataArray = deleteItems
 			? updateOrders.map(a => ({
@@ -3462,7 +3455,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 							  }
 							: a
 					)
-		console.log("dataArray", dataArray)
+		
 		let finalData = []
 		for (let orderObject of dataArray) {
 			let data = orderObject
@@ -3498,7 +3491,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 
 			finalData.push({ ...data, opened_by: 0 })
 		}
-		console.log("finalData", finalData)
+		
 
 		const response = await axios({
 			method: "put",
@@ -3695,7 +3688,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 			p: data?.p || 0
 		})
 	}, [])
-	console.log(popupInfo)
+	
 	const submitHandler = async e => {
 		e.preventDefault()
 		let item = itemsData.find(a => a.item_uuid === popupInfo.item_uuid)

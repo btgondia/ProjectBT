@@ -57,10 +57,14 @@ const OrderPrint2 = ({
 		setGstVAlues(arr)
 	}, [defaultOrder])
 	const itemDetails = useMemo(() => {
-		let items = item_details?.map(a => ({
-			...a,
-			...(itemData?.find(b => b.item_uuid === a.item_uuid) || {})
-		}))
+		let items = item_details?.map(a => {
+			const _data = itemData?.find(b => b.item_uuid === a.item_uuid) || {}
+			return {
+				...a,
+				..._data,
+				dms_erp_id: a.dms_erp_id || _data.dms_erp_id
+			}
+		})
 		if (!items?.length) return []
 		else if (items?.length === 1) return items
 		else return items

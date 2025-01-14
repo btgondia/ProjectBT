@@ -61,7 +61,7 @@ const StockAdjustmentReport = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
+   
     if (response.data.success) setItems(response.data.result);
     else setItems([]);
   };

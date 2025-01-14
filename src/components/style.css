@@ -15,7 +15,7 @@ body {
 }
 
 :root {
-	--mainColor: #4ac959;
+	--mainColor: #32bd33;
 	--form-theme-light: #f1f1f6;
 	--form-theme-heavy: #e2e0eb;
 	--form-theme-dark: #9e9ca8;
@@ -2375,7 +2375,7 @@ tr:nth-child(4) {
 .refresh_button {
 	height: 40px;
 	cursor: pointer;
-	background: #4ac959;
+	background: #32bd33;
 	color: #fff;
 	padding: 10px 20px;
 	border-radius: 20px;
@@ -2396,7 +2396,7 @@ tr:nth-child(4) {
 	margin-right: auto;
 	left: 0;
 	right: 0;
-	background: #4ac959;
+	background: #32bd33;
 	color: #fff;
 	padding: 15px 40px;
 	border-radius: 10px;
@@ -2422,7 +2422,7 @@ tr:nth-child(4) {
 	display: flex;
 	align-items: center;
 	justify-content: left;
-	background-color: #4ac959;
+	background-color: #32bd33;
 	color: #fff;
 	padding: 10px 20px;
 	margin: 2px 0px;
@@ -2484,7 +2484,7 @@ tr:nth-child(4) {
 	border: none;
 	width: 80%;
 	margin: 5px 0;
-	background: #4ac959;
+	background: #32bd33;
 	color: #fff;
 	padding: 5px 0;
 	border-radius: 10px;
@@ -2553,7 +2553,7 @@ tr:nth-child(4) {
 	font-size: 20px;
 	border: none;
 	color: white;
-	background: #4ac959;
+	background: #32bd33;
 }
 
 .orderDetailsContainer {
@@ -3031,6 +3031,7 @@ button.counter-save-btn {
 		color: red;
 		border: 1px solid red;
 		position: absolute;
+		padding: 0;
 		right: 2%;
 	}
 	& > #close-btn:hover {
@@ -3041,12 +3042,15 @@ button.counter-save-btn {
 
 #import-invoices #tabs-container {
 	button {
-		background: none;
-		border: none;
+		background: #eaeaea;
+		border: 1px solid #dfdfdf;
 		outline: none;
 		padding: 8px 16px;
 		border-radius: 5px;
 		font-size: 14px;
+	}
+	& > button:not(:first-child) {
+		margin-left: 8px;
 	}
 	button:disabled {
 		opacity: 0.6;
@@ -3087,12 +3091,125 @@ button.counter-save-btn {
 }
 
 #import-invoices #status-results {
-	padding-left: 30px;
 	margin-top: 10px;
 	height: 45vh;
 	overflow: auto;
+	li {
+		padding: 6px 0;
+	}
+	li:has(section > div) {
+		border-bottom: 1px solid #dcdcdc;
+		padding: 16px 0;
+		p:first-child {
+			font-size: 1rem;
+		}
+	}
+	section > * {
+		margin-top: 5px;
+	}
+	section > div {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.map-item-btn {
+		padding: 6px 8px;
+		margin-left: 10px;
+		flex: 1;
+		max-width: 160px;
+	}
+	.map-item-btn:hover {
+		background: black;
+		color: white;
+	}
 	&::-webkit-scrollbar {
 		display: block;
 		width: 8px;
+	}
+}
+
+#import-invoices #map-items {
+	#search-fields-container {
+		display: flex;
+		gap: 0.5rem;
+	}
+	#search-fields-container input {
+		flex: 1;
+	}
+}
+
+#import-invoices #map-items .items_table {
+	height: auto;
+	height: 50vh;
+	overflow: auto;
+	&::-webkit-scrollbar {
+		display: block;
+	}
+	table {
+		color: unset;
+		border: unset;
+		font-weight: unset;
+		letter-spacing: unset;
+		border-spacing: unset;
+	}
+	th,
+	td {
+		text-align: left;
+		height: auto;
+		padding: 0.56rem 0.5rem;
+		white-space: nowrap;
+		border-bottom: 1px solid rgb(215, 215, 215);
+	}
+	th {
+		height: 40px;
+	}
+	td#search-data-user-info {
+		border: none;
+		pointer-events: none;
+		text-align: center;
+		color: gray;
+	}
+	tr > td:first-child:has(> .item-checkmark) {
+		border-left: 5px solid transparent;
+		padding: 0;
+	}
+	tr {
+		cursor: pointer;
+		background: white;
+	}
+	tr .item-checkmark {
+		display: flex;
+		font-size: 1.5rem;
+		margin: auto;
+		color: var(--mainColor);
+		opacity: 0;
+	}
+	tr.selected {
+		cursor: pointer;
+		font-weight: unset;
+		color: unset;
+		position: sticky;
+		top: 40px;
+		bottom: 0;
+		left: 0;
+	}
+	tr:has(+ tr.selected) td {
+		border-bottom: none;
+	}
+	tr.selected td:first-child {
+		border-left-color: var(--mainColor);
+	}
+	tr.selected td {
+		border-top: 1px solid;
+		border-color: var(--mainColor);
+	}
+	tr.selected > td:last-child {
+		border-right: 1px solid var(--mainColor);
+	}
+	tr.selected .item-checkmark {
+		opacity: 1;
+	}
+	tr:not(.selected):hover {
+		background: var(--form-theme-light);
 	}
 }

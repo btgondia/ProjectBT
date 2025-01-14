@@ -28,7 +28,7 @@ const Processing = () => {
 			if (response.data.success) {
 				setTripData(response.data.result)
 			}
-		} catch (error) {}
+		} catch (error) { console.error(error) }
 		setLoading(false)
 	}
 	useEffect(() => {

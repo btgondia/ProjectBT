@@ -29,15 +29,6 @@ const StockAdjustmentMobile = () => {
     setLoading(true);
     let item_details = order.items
       .map((item) => {
-        console.log({
-          stockQty: item.stockQty,
-          p: item.p,
-          b: item.b,
-          final:
-            (+item.b || 0) * (+item.conversion || 0) +
-            (+item.p || 0) -
-            item.stockQty,
-        });
         return {
           ...item,
           b: 0,
@@ -58,7 +49,7 @@ const StockAdjustmentMobile = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
+   
     if (response.data.success) {
       setLoading(false);
       Navigate(-1);
@@ -92,7 +83,7 @@ const StockAdjustmentMobile = () => {
       .transaction("warehouse", "readwrite")
       .objectStore("warehouse");
     let warehouseData = await tx.getAll();
-    console.log({ warehouseData });
+   
     setWarehouse(warehouseData.filter((a) => a.status && a.warehouse_title));
     if (warehouseData.length)
       setWarehouseUuid(warehouseData[0]?.warehouse_uuid);

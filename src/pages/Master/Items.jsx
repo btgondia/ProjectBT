@@ -744,7 +744,7 @@ function NewUserForm({
         exclude_discount: 0,
       });
   }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
-  console.log({ data });
+ 
   const dmsSubmitHandler = async (e) => {
     e.preventDefault();
 
@@ -871,7 +871,7 @@ function NewUserForm({
   //     })),
   //   [codes]
   // );
-  // console.log({ HSNList, codes });
+  
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
       <div
@@ -1674,7 +1674,7 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
         onSave();
       }
     } catch (err) {
-      console.log(err);
+     
       setErrorMassage("Order already exist");
     }
     setLoading(false);
@@ -1774,7 +1774,7 @@ function CounterPrices({ close, item }) {
             : i
         )
       );
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setLoadingState((prev) => ({ ...prev, [counter_uuid]: false }));
   };
 
@@ -1790,7 +1790,7 @@ function CounterPrices({ close, item }) {
       setCountersList((prev) =>
         prev.filter((i) => i.counter_uuid !== counter_uuid)
       );
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setLoadingState((prev) => ({ ...prev, [counter_uuid]: false }));
   };
 

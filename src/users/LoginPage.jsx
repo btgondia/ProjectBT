@@ -96,7 +96,7 @@ const LoginPage = ({ setUserType }) => {
 									? "warehouse_uuid"
 									: ""
 							]
-						console.log({ ...item, IDENTIFIER })
+						
 						await store.put({ ...item, IDENTIFIER })
 					}
 					index = index + 1

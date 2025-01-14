@@ -37,7 +37,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setTags(response.data.result)
 	}
 
@@ -53,7 +53,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	const getOutstanding = async () => {
@@ -65,7 +65,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setOutstanding(response.data.result)
 	}
 	const getCounter = async () => {
@@ -132,7 +132,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("transactions", response)
+		
 		if (response.data.success) setPopupOrder(response.data.result)
 	}
 	return (
@@ -331,7 +331,7 @@ function Table({
 			},
 		})
 
-		console.log(response.data)
+		
 		setNotification(response.data)
 		setTimeout(() => setNotification(null), 3000)
 	}
@@ -523,7 +523,7 @@ function DiliveryPopup({
 				}))
 			)
 	}, [PaymentModes])
-	console.log(order.collection_tag_uuid)
+	
 	const submitHandler = async () => {
 		if (waiting) {
 			return
@@ -1079,7 +1079,7 @@ function TagPopup({ onSave }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 

@@ -67,7 +67,7 @@ const PartyWiseCompanyDiscount = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setCountersData(response.data.result.filter(a => a.counter_title))
 	}
 	const getRoutesData = async () => {
@@ -157,7 +157,7 @@ const PartyWiseCompanyDiscount = () => {
 		}
 		return data
 	}, [filteritem, companies])
-	console.log(sheetData)
+	
 	const downloadHandler = async () => {
 		const ws = XLSX.utils.json_to_sheet(sheetData)
 		const wb = { Sheets: { data: ws }, SheetNames: ["data"] }
@@ -189,7 +189,7 @@ const PartyWiseCompanyDiscount = () => {
 			target: { value },
 		} = event
 
-		console.log(value)
+		
 
 		const filterdValue = value.filter(item => selectedOptions.findIndex(o => o.id === item.id) >= 0)
 
@@ -197,14 +197,13 @@ const PartyWiseCompanyDiscount = () => {
 			value.findIndex((o, oIndex) => o.id === item.id && oIndex !== itemIndex)
 		)
 
-		// console.log(duplicatesRemoved);
+		
 
 		// let map = {};
 
 		// for (let list of value) {
 		//   map[Object.values(list).join('')] = list;
 		// }
-		// console.log('Using Map', Object.values(map));
 
 		let duplicateRemoved = []
 
@@ -564,7 +563,7 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
 				? company_discount || []
 				: [...company_discount, data]
 			: [data]
-		console.log(company_discount)
+		
 		const response = await axios({
 			method: "put",
 			url: "/counters/putCounter",

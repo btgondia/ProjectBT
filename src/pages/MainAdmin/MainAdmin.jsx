@@ -422,17 +422,17 @@ TOTAL: ${amounts}
 			warehouse_uuid = JSON.parse(warehouse_uuid)
 
 			if (warehouse_uuid && +warehouse_uuid !== 0 && warehouse_uuid !== orderData.warehouse_uuid) {
-				console.log(orderData.warehouse_uuid)
+				
 				if (!orderData.warehouse_uuid) {
 					updateWarehouse(warehouse_uuid, orderData)
 				} else {
-					console.log(warehouse_uuid, orderData)
+					
 					data.push({ warehouse_uuid, orderData })
 				}
 			}
 		}
 
-		console.log(data)
+		
 		if (data?.length) {
 			setSelectedWarehouseOrders(data)
 		} else {
@@ -461,7 +461,7 @@ TOTAL: ${amounts}
 				"Content-Type": "application/json"
 			}
 		})
-		console.log(response)
+		
 		if (response.data.success) setTasks(response.data.result)
 		else handlePrint()
 	}
@@ -605,7 +605,7 @@ TOTAL: ${amounts}
 			setOrdersData([])
 		}
 	}
-	// console.log(selectedOrder);
+	
 
 	const postOrderData = async () => {
 		const response = await axios({
@@ -791,7 +791,7 @@ TOTAL: ${amounts}
 				hide_pending_payments: user.hide_pending_payments
 			})
 		} catch (error) {
-			console.log(error)
+			
 		}
 	}
 
@@ -1690,7 +1690,7 @@ TOTAL: ${amounts}
 										type="button"
 										onClick={() => {
 											const stage = selectedOrder?.map(a => +a.status[a.status?.length - 1]?.stage)
-											console.log({ stage })
+											
 											setChangeStatePopup(stage?.sort((a, b) => a - b)?.at(-1))
 										}}
 									>
@@ -2020,7 +2020,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 	const submitHandler = async e => {
 		e.preventDefault()
 		if (popupInfo?.type === "edit") {
-			console.log(data)
+			
 			onSave()
 		} else {
 			if (!data.trip_title) {
@@ -2230,7 +2230,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 			)
 			.filter(a => itemStatus === "all" || +a.status === itemStatus)
 			.map(a => {
-				console.log({ a })
+				
 				let itemDetails = itemsData?.find(b => b.item_uuid === a.item_uuid)
 				return {
 					...a,
@@ -2240,7 +2240,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 				}
 			})
 
-		console.log({ data })
+		
 
 		let result = []
 		for (let item of data) {
@@ -2278,7 +2278,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 				? orderStage.map(a => +a?.order_grandtotal || 0).reduce((a, b) => a + b)
 				: orderStage[0]?.order_grandtotal
 		)
-		console.log(result)
+		
 		setItems(result)
 	}, [stage, itemStatus, orders, itemsData])
 
@@ -2845,7 +2845,7 @@ function SummaryPopup({
 					category_uuid: itemDetails?.category_uuid
 				}
 			})
-		console.log(data)
+		
 		let result = []
 		for (let item of data) {
 			var existing = result.filter(function (v, i) {
@@ -2879,7 +2879,7 @@ function SummaryPopup({
 				? orderStage.map(a => +a?.order_grandtotal || 0).reduce((a, b) => a + b)
 				: orderStage[0]?.order_grandtotal
 		)
-		console.log(result)
+		
 
 		setItems(result)
 	}, [itemsData, orders, setOrdersData, popup])
@@ -2897,7 +2897,6 @@ function SummaryPopup({
 				: itemData?.length
 				? itemData[0]?.p
 				: 0
-		console.log(category.find(a => a.category_uuid === category_uuid)?.category_title, itemData)
 		return box + " : " + pcs
 	}
 	const getTotalItems = company_uuid => {
@@ -3212,11 +3211,6 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 		return strTime
 	}
 
-	console.log({
-		items,
-		data: itemsData.find(b => items.item_uuid === b.item_uuid)
-	})
-
 	const postOrderData = async deleteItems => {
 		let dataArray = deleteItems
 			? updateOrders.map(a => ({
@@ -3234,7 +3228,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 							: a
 					)
 
-		console.log("dataArray", dataArray)
+		
 
 		let finalData = []
 		for (let orderObject of dataArray) {
@@ -3272,7 +3266,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 
 			finalData.push({ ...data, opened_by: 0 })
 		}
-		console.log("finalData", finalData)
+		
 
 		const response = await axios({
 			method: "put",

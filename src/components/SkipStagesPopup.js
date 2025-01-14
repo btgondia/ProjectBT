@@ -43,7 +43,7 @@ const SkipStagesPopup = ({ onClose }) => {
       onClose();
     }
   };
-  console.log(list);
+ 
   return (
     <div
       className="overlay"

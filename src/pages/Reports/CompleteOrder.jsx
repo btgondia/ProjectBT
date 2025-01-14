@@ -45,7 +45,7 @@ const CompleteOrder = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
+   
     if (response.data.success) setItems(response.data.result);
     else setItems([]);
   };
@@ -61,7 +61,7 @@ const CompleteOrder = () => {
       .replace("mm", ("00" + (sTime?.getMonth() + 1)?.toString()).slice(-2))
       .replace("yy", ("0000" + sTime?.getFullYear()?.toString()).slice(-4))
       .replace("dd", ("00" + sTime?.getDate()?.toString()).slice(-2));
-    console.log({ sTime, curTime });
+   
     setSearchData((prev) => ({
       ...prev,
       startDate: sTime,

@@ -364,7 +364,7 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    console.log(data);
+   
     let obj = { user_uuid: popupInfo.user_uuid, ...data };
     const response = await axios({
       method: "post",

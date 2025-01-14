@@ -46,7 +46,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success)
 			setUsers(
 				response.data.result
@@ -93,7 +93,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 			},
 		})
 		if (response.data.success) {
-			console.log(response)
+			
 			setStatementTrip(response.data.result)
 			setStatementcollection_tag_uuid(false)
 			setTimeout(handlePrint, 2000)
@@ -127,7 +127,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 			setBtn(prev => !prev)
 		}
 	}
-	console.log(statementTrip)
+	
 	return (
 		<>
 			<div className="itemavilablelity">
@@ -443,7 +443,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 }
 function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 	const [data, setdata] = useState([])
-	console.log(data)
+	
 	useEffect(() => {
 		setdata(popupInfo?.assigned_to.filter(a => a) || [])
 	}, [popupInfo?.assigned_to])
@@ -630,7 +630,7 @@ function AssignTagPopup({ onSave, selectedOrders }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setTags(response.data.result)
 	}
 
@@ -787,7 +787,7 @@ function TagPopup({ onSave }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 

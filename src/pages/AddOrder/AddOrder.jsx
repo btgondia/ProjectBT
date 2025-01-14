@@ -101,7 +101,6 @@ export default function AddOrder() {
         }
       }
     } catch (error) {
-      console.log(error);
     }
   };
 
@@ -194,7 +193,6 @@ export default function AddOrder() {
   }, []);
 
   useEffect(() => {
-    console.log({ order });
     if (order?.warehouse_uuid) getItemsData();
   }, [order.warehouse_uuid]);
   useEffect(() => {
@@ -207,7 +205,6 @@ export default function AddOrder() {
           let item_rate = counterData?.company_discount?.find(
             (a) => a.company_uuid === item.company_uuid
           )?.item_rate;
-          console.log({ item_rate, item_title: item.item_title });
           let item_price = item.item_price;
           if (item_rate === "a") item_price = item.item_price_a;
           if (item_rate === "b") item_price = item.item_price_b;
@@ -220,7 +217,6 @@ export default function AddOrder() {
   }, [order.counter_uuid]);
 
   const setQuantity = () => {
-    console.count("qty_details");
     setOrder((prev) => ({
       ...prev,
       item_details: prev.item_details.map((a) => ({
@@ -373,7 +369,6 @@ export default function AddOrder() {
     data.time_1 = data.time_1 + Date.now();
     data.time_2 = data.time_2 + Date.now();
 
-    console.log("orderJSon", data);
 
     const response = await axios({
       method: "post",
@@ -383,7 +378,6 @@ export default function AddOrder() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
     if (response.data.success) {
       // window.location.reload();
       setOrder(getInitialValues());
@@ -577,7 +571,6 @@ export default function AddOrder() {
     }
   };
   const chcekIfDecimal = (value) => {
-    console.log({ value, isDecimal: value.toString().includes(".") });
     if (value.toString().includes(".")) {
       return parseFloat(value || 0).toFixed(2);
     } else {
@@ -856,7 +849,7 @@ export default function AddOrder() {
                                       b.data.qty === 0
                                         ? ""
                                         : b.data.qty > 0
-                                        ? "#4ac959"
+                                        ? "#32bd33"
                                         : "red",
                                   };
                                 },
@@ -1152,7 +1145,7 @@ export default function AddOrder() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          {console.log(item)}
+                          
                           <input
                             style={{ width: "100px" }}
                             type="number"
@@ -1261,7 +1254,6 @@ export default function AddOrder() {
                                   (a) => a.uuid !== item.uuid
                                 ),
                               });
-                              //console.log(item);
                             }}
                           />
                         </td>
@@ -1281,7 +1273,7 @@ export default function AddOrder() {
                       >
                         <AddIcon
                           sx={{ fontSize: 40 }}
-                          style={{ color: "#4AC959", cursor: "pointer" }}
+                          style={{ color: "#32bd33", cursor: "pointer" }}
                         />
                       </td>
                     </tr>
@@ -1346,7 +1338,6 @@ export default function AddOrder() {
               <button
                 type="button"
                 onClick={() => {
-                  console.log({ order });
 
                   let empty_item = order.item_details
                     .filter((a) => a.item_uuid)
@@ -1428,7 +1419,6 @@ export default function AddOrder() {
         <NewUserForm
           onClose={() => setPopup(false)}
           onSubmit={(e) => {
-            //console.log(e);
             setAutoAdd(e.autoAdd);
             if (e.stage === 4) setDeliveryPopup(true);
             else {
@@ -1655,7 +1645,6 @@ function DiliveryPopup({
       adjustment_remarks: data?.adjustment_remarks || "",
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    //console.log(
     // Tempdata?.order_grandtotal,
     //   +(+modeTotal + (+outstanding?.amount || 0))
     // );

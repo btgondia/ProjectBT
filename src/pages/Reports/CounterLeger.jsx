@@ -40,7 +40,7 @@ const CounterLeger = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("activity", response)
+		
 		if (response.data.success) setItems(response.data.result)
 	}
 
@@ -242,7 +242,7 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 	let type = useMemo(() => {
 		return counters.find(a => a.counter_uuid === order.counter_uuid)?.outstanding_type || 0
 	}, [counters, order.counter_uuid])
-	console.log(outstanding)
+	
 	const getCounter = async () => {
 		const response = await axios({
 			method: "get",
@@ -268,7 +268,7 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 			  "Content-Type": "application/json",
 			},
 		  });
-		  console.log(response.data.result);
+		 
 		  if (response.data.success) {
 			localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
 			setPaymentModes(response.data.result);
@@ -369,10 +369,7 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 		})
 		setError("")
 		let modeTotal = modes?.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
-		//console.log(
-		// Tempdata?.order_grandtotal,
-		//   +(+modeTotal + (+outstanding?.amount || 0))
-		// );
+
 		if (+order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))) {
 			setError("Invoice Amount and Payment mismatch")
 			setWaiting(false)

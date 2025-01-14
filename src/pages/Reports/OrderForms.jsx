@@ -60,7 +60,7 @@ const OrderForms = () => {
 			  setCompanies(response.data.result);
 			}
 		  } catch (error) {
-			console.log(error);
+			
 		  }
 		}
 	  };
@@ -259,7 +259,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
 	const [Items, setItems] = useState([])
 	const [categoryData, setCategoryData] = useState([])
 	const [errMassage, setErrorMassage] = useState("")
-	console.log(data)
+	
 	useEffect(() => {
 		if (popupInfo?.type === "edit") setdata(popupInfo.data)
 	}, [popupInfo.data, popupInfo?.type])
@@ -363,7 +363,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
 				.sort((a, b) => a?.company_title?.localeCompare(b?.company_title)),
 		[companies, filterCategory, filterCompanyTitle]
 	)
-	console.log(data)
+	
 	return (
 		<div className="overlay" style={{ zIndex: 9999999 }}>
 			<div
@@ -783,7 +783,7 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
 				onSave()
 			}
 		} catch (err) {
-			console.log(err)
+			
 			setErrorMassage("Order already exist")
 		}
 		setLoading(false)

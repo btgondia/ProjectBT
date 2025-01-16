@@ -280,6 +280,22 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   const [pricesListState, setPricesListState] = useState();
+  const [promptState, setPromptState] = useState()
+
+  const flushDMSIDs = async item_uuid=> {
+    setPromptState(prev => ({...prev,loading: true}))
+    try {
+      const response = await axios.put("/items/flush-dms-ids", {item_uuid})
+      if (response.data?.success) setPromptState()
+      else {
+        alert(response.data.error)
+        setPromptState(prev => ({...prev,loading: false}))
+      }
+    } catch (error) {
+      setPromptState(prev => ({...prev,loading: false}))
+    }
+  }
+
   return (
     <>
       <div
@@ -646,6 +662,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                     </div>
                   </td>
                   <td>
+                    <div className="flex">
                     <button
                       type="button"
                       style={{ fontSize: "10px" }}
@@ -657,12 +674,44 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                     >
                       DMS
                     </button>
+                    <button
+                      type="button"
+                      style={{ fontSize: "10px", whiteSpace:'nowrap',margin:0 }}
+                      className="fieldEditButton"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPromptState({
+                          heading:"Flush DMS ERP IDs",
+                          message: <>
+                            <span><b>{item.item_title}</b></span><br />
+                            <span>All mapped DMS ERP IDs will be cleared from this item. Do you wish to continue?</span>
+                          </>,
+                          actions: [
+                            {
+                              label: "Cancel",
+                              classname: "cancel",
+                              action: () => setPromptState(null),
+                            },
+                            {
+                              primary: true,
+                              label: "Yes, flush ids",
+                              classname: "delete",
+                              action: () => flushDMSIDs(item.item_uuid),
+                            },
+                          ],
+                        })
+                      }}
+                    >
+                      Flush DMS IDs
+                    </button>
+                    </div>
                   </td>
                 </tr>
               ))}
           </tbody>
         </table>
       </div>
+      {promptState && <Prompt {...promptState} />}
       {pricesListState?.active && (
         <CounterPrices
           item={pricesListState?.item}

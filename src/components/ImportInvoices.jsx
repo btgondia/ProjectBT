@@ -6,6 +6,7 @@ import { getInitialValues } from "../pages/AddOrder/AddOrder"
 import { IoIosCheckmarkCircleOutline, IoIosClose } from "react-icons/io"
 
 const localErrorTypes = {
+	user: "User",
 	counter: "Counter",
 	item: "Item"
 }
@@ -66,6 +67,14 @@ const ImportInvoices = ({ file, onClose }) => {
 				})
 			}
 
+			const user_uuid = data.users?.find(i => i.dms_erp_id === invoice.dms_erp_user)?.user_uuid
+			if (!user_uuid)
+				errors.push({
+					errorType: localErrorTypes.user,
+					name: invoice.dms_erp_user_name,
+					id: invoice.dms_erp_user
+				})
+
 			if (errors?.length > 0) return { errors, local: true }
 
 			const { items, ...billing_details } = await Billing(billingParams)
@@ -91,11 +100,7 @@ const ImportInvoices = ({ file, onClose }) => {
 					{
 						stage: 1,
 						time: Date.now(),
-						user_uuid:
-							data.users?.length > 0
-								? data.users?.find(i => i.dms_erp_id === invoice.dms_erp_user)?.user_uuid ||
-								  localStorage.getItem("user_uuid")
-								: localStorage.getItem("user_uuid")
+						user_uuid: user_uuid
 					}
 				]
 			}

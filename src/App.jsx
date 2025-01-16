@@ -100,8 +100,8 @@ import PurchaseRate from "./pages/Reports/PurchaseRate"
 import GSTReturnsReport from "./pages/Reports/GSTReturnsReport"
 import HSNCode from "./pages/Master/HsnCode"
 
-// export const server = "http://localhost:9000"
-export const server = "https://api.btgondia.com"
+export const server = "http://localhost:9000"
+// export const server = "https://api.btgondia.com"
 export let Version = 366
 
 function App() {

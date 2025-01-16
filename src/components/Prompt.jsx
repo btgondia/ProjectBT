@@ -8,8 +8,8 @@ const Prompt = ({ message, heading, actions, classes, loading }) => {
 				<p>{message}</p>
 				<div className="prompt-actions">
 					{actions?.map(i => (
-						<button disabled={i.loading || i.disabled} className={i.classname} style={i.style} onClick={i.action}>
-							{i.loading ? (
+						<button disabled={loading || i.loading || i.disabled} className={i.classname} style={i.style} onClick={i.action}>
+							{(i.primary && loading) || i.loading ? (
 								<span
 									className="loader small"
 									style={{
@@ -25,7 +25,7 @@ const Prompt = ({ message, heading, actions, classes, loading }) => {
 						</button>
 					))}
 				</div>
-				{loading && (
+				{loading && !actions.some(i => i.primary) && (
 					<div id="spinner-wrapper" className={classes?.wrapper}>
 						<span
 							className="loader small"

@@ -216,6 +216,14 @@ svg.table-icon {
 	padding: 8px 14px;
 	border-radius: 5px;
 	font-size: 1rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.prompt-actions button:disabled {
+	opacity: .7;
+	cursor: unset;
 }
 
 .prompt-actions button.black {

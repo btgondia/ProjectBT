@@ -463,7 +463,6 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 									<label className="selectLabel" style={{ width: "50%" }}>
 										DMS ERP Id
 										<input
-											type="number"
 											onWheel={e => e.target.blur()}
 											name="dms_erp_id"
 											className="numberInput"

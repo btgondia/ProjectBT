@@ -35,6 +35,7 @@ const ImportInvoices = ({ file, onClose }) => {
 			const billingParams = {
 				creating_new: 1,
 				new_order: 1,
+				add_discounts: true,
 				counter: data.counters.find(i => i.dms_buyer_id === invoice.dms_buyer_id),
 				items: []
 			}

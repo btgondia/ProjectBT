@@ -5,6 +5,7 @@ import { ContentCopy } from "@mui/icons-material"
 import { getInitialValues } from "../pages/AddOrder/AddOrder"
 import { IoIosCheckmarkCircleOutline, IoIosClose } from "react-icons/io"
 
+const IMPORT_INTERVAL_TIME = 15 //seconds
 const localErrorTypes = {
 	user: "User",
 	counter: "Counter",
@@ -12,7 +13,7 @@ const localErrorTypes = {
 }
 
 const ImportInvoices = ({ file, onClose }) => {
-	const [timer, setTimer] = useState(30)
+	const [timer, setTimer] = useState(IMPORT_INTERVAL_TIME)
 	const [existingInvoicesState, setExistingInvoicesState] = useState(null)
 	const [results, setResults] = useState({
 		succeed: [],
@@ -176,7 +177,7 @@ const ImportInvoices = ({ file, onClose }) => {
 			if (result?.local) continue
 
 			setFlags({ posting: false })
-			for (let j = 30; j > 0; j--) {
+			for (let j = IMPORT_INTERVAL_TIME; j > 0; j--) {
 				setTimer(j)
 				await sleep(1000)
 			}

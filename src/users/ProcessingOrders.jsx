@@ -869,9 +869,7 @@ const ProcessingOrders = () => {
 							)}
 							<button
 								className="theme-btn"
-								style={{
-									width: "max-content"
-								}}
+								style={{ width: "max-content" }}
 								onClick={() => {
 									Location.pathname.includes("checking")
 										? checkingQuantity()
@@ -990,7 +988,7 @@ const ProcessingOrders = () => {
 										?.sort(itemsSortFunction)
 										?.map((item, i) => (
 											<tr
-												key={item.item_uuid}
+												key={item.item_uuid+i}
 												style={{
 													height: window.location.pathname.includes("checking") ? "60px" : "35px",
 													backgroundColor:

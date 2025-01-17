@@ -1,5 +1,4 @@
 import QrCode from "react-qr-code"
-import axios from "axios"
 import React, { useEffect, useMemo, useState } from "react"
 
 const OrderPrint2 = ({

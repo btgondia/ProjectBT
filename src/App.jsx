@@ -94,15 +94,18 @@ import CounterNotesPopup from "./pages/AddOrder/CounterNotesPopup"
 import GSTReport from "./pages/Reports/GST"
 import { Tooltip } from "react-tooltip"
 import "./App.css"
-import "react-loading-bar/dist/index.css"
 import "react-tooltip/dist/react-tooltip.css"
 import PurchaseRate from "./pages/Reports/PurchaseRate"
 import GSTReturnsReport from "./pages/Reports/GSTReturnsReport"
 import HSNCode from "./pages/Master/HsnCode"
 
-// export const server = "http://localhost:9000"
-export const server = "https://api.btgondia.com"
-export let Version = 368
+export const server = ["https://api.btgondia.com", "http://localhost:9000"][
+	window.location.origin.includes("btgondia")
+		? 0 // for prod env
+		: 1 // for dev env
+]
+
+export let Version = 370
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
@@ -136,7 +139,7 @@ function App() {
 					"Content-Type": "application/json"
 				}
 			})
-			
+
 			if (response.data.success) setUserType(response.data.result.user_type || false)
 			sessionStorage.setItem("userType", response.data.result.user_type)
 		}

@@ -1292,7 +1292,7 @@ export function OrderDetails({
 		for (let item of item_details) {
 			let itemData = itemsData.find(_item => _item.item_uuid === item.item_uuid)
 			if (!itemData?.dms_erp_id || !itemData?.dms_item_name)
-				return `Item DMS details are missing for ${itemData?.dms_erp_id || itemData?.dms_item_name}`
+				return `Item DMS details are missing for ${item?.item_title}`
 		}
 	}
 

@@ -31,17 +31,17 @@ const ImportInvoices = ({ file, onClose }) => {
 
 	const createOrder = async (invoice, data) => {
 		let order
+		const billingParams = {
+			creating_new: 1,
+			new_order: 1,
+			add_discounts: true,
+			items: []
+		}
+
 		try {
-			const billingParams = {
-				creating_new: 1,
-				new_order: 1,
-				add_discounts: true,
-				counter: data.counters.find(i => i.dms_buyer_id === invoice.dms_buyer_id),
-				items: []
-			}
+			billingParams.counter = data.counters.find(i => i.dms_buyer_id === invoice.dms_buyer_id)
 
 			const errors = []
-
 			if (!billingParams.counter)
 				errors.push({
 					errorType: localErrorTypes.counter,
@@ -123,7 +123,18 @@ const ImportInvoices = ({ file, onClose }) => {
 				}
 			})
 
-			if (response?.data?.success) return { success: true }
+			if (response?.data?.success)
+				return {
+					success: true,
+					details: {
+						success: true,
+						dms_invoice_number: invoice.dms_invoice_number,
+						invoice_number: response.data.result?.invoice_number,
+						counter_title: billingParams.counter?.counter_title,
+						dms_buyer_name: invoice.dms_buyer_name,
+						order_uuid: response.data.result?.order_uuid
+					}
+				}
 			else return { message: "Order not created, please check the invoice details." }
 		} catch (error) {
 			console.error(error)
@@ -153,12 +164,7 @@ const ImportInvoices = ({ file, onClose }) => {
 			if (result.success)
 				setResults(prev => ({
 					...prev,
-					succeed: prev.succeed.concat([
-						{
-							dms_invoice_number: invoice.dms_invoice_number,
-							dms_buyer_name: invoice.dms_buyer_name
-						}
-					]),
+					succeed: prev.succeed.concat([result.details]),
 					count: prev.count + 1
 				}))
 			else
@@ -243,10 +249,12 @@ const ImportInvoices = ({ file, onClose }) => {
 				processJson(json, response.data)
 			}
 
-			setExistingInvoicesState({
-				list: response.data?.existing_invoice_orders,
-				callback
-			})
+			const list = response.data?.existing_invoice_orders?.map(i => ({
+				...i,
+				dms_buyer_name: json.find(_i => _i.dms_invoice_number === i.dms_invoice_number)?.dms_buyer_name
+			}))
+
+			setExistingInvoicesState({ list: list, callback })
 		}
 	}
 
@@ -421,8 +429,8 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 	const handleInsertion = type => {
 		if (selection.length === orders.length)
 			return onComplete({
-				skipped: skip?.concat(type === 1 ? selection : []),
-				reimported: reImport?.concat(type === 2 ? selection : [])
+				skipped: Array.from(new Set(skip?.concat(type === 1 ? selection : []))),
+				reimported: Array.from(new Set(reImport?.concat(type === 2 ? selection : [])))
 			})
 
 		setOrders(prev => prev.filter(i => !selection.includes(i.dms_invoice_number)))
@@ -465,7 +473,7 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 								/>
 							</th>
 							<th>DMS invoice number</th>
-							<th>Order UUID</th>
+							<th>Order</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -489,10 +497,12 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 										style={{ pointerEvents: "none" }}
 									/>
 								</td>
-								<td>{i.dms_invoice_number}</td>
+								<td>
+									{i.dms_invoice_number} ({i.dms_buyer_name})
+								</td>
 								<td>
 									<div style={{ position: "relative", display: "inline" }}>
-										{copied === i.dms_invoice_number && (
+										{copied === i.dms_invoice_number + i.invoice_number && (
 											<div style={{ position: "absolute", top: "100%" }}>
 												<div id="talkbubble" style={{ fontSize: "12px", left: "-2px" }}>
 													COPIED!
@@ -504,12 +514,12 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 											onClick={e => {
 												e.preventDefault()
 												e.stopPropagation()
-												setCopied(i.dms_invoice_number)
+												setCopied(i.dms_invoice_number + i.invoice_number)
 												navigator?.clipboard?.writeText?.(i.order_uuid)
 												setTimeout(() => setCopied(""), 3000)
 											}}
 										/>
-										{i.order_uuid}
+										{i.invoice_number} ({i.counter_title})
 									</div>
 								</td>
 							</tr>
@@ -566,27 +576,46 @@ const ResultStatusTabs = ({ result, onMapped, handleImportResolved }) => {
 					<ol style={{ paddingLeft: "32.33px" }}>
 						{result?.[tabs[tab].keyName]?.map((detail, idx) => (
 							<li key={`${tabs[tab].keyName}:${idx}`}>
-								<p>
-									<b>{detail.dms_buyer_name} :</b> {detail.dms_invoice_number}
-								</p>
-								<section>
-									{typeof detail.message == "string" ? (
-										<p>{detail.message}</p>
-									) : (
-										detail.errors?.map((err, err_idx) => (
-											<div key={["err_message", idx, err_idx].join(":")}>
-												<p>
-													<b>{err.errorType} not found :</b> {err.name} - {err.id}
-												</p>
-												{!err.resolved && err.errorType === localErrorTypes.item && (
-													<button className="map-item-btn" onClick={() => setMapItemState(err)}>
-														Map Item →
-													</button>
-												)}
-											</div>
-										))
-									)}
-								</section>
+								{detail.success ? (
+									<p>
+										<b>{detail.dms_buyer_name}</b> ({detail.dms_invoice_number}) — <b>{detail.invoice_number}</b> (
+										{detail.counter_title})
+										<ContentCopy
+											style={{
+												width: "1.15rem",
+												height: "1.15rem",
+												marginLeft: "8px",
+												opacity: ".9",
+												cursor: "pointer"
+											}}
+											onClick={() => navigator?.clipboard?.writeText?.(detail.order_uuid)}
+										/>
+									</p>
+								) : (
+									<>
+										<p>
+											<b>{detail.dms_buyer_name} :</b> {detail.dms_invoice_number}
+										</p>
+										<section>
+											{typeof detail.message == "string" ? (
+												<p>{detail.message}</p>
+											) : (
+												detail.errors?.map((err, err_idx) => (
+													<div key={["err_message", idx, err_idx].join(":")}>
+														<p>
+															<b>{err.errorType} not found :</b> {err.name} - {err.id}
+														</p>
+														{!err.resolved && err.errorType === localErrorTypes.item && (
+															<button className="map-item-btn" onClick={() => setMapItemState(err)}>
+																Map Item →
+															</button>
+														)}
+													</div>
+												))
+											)}
+										</section>
+									</>
+								)}
 							</li>
 						))}
 					</ol>
@@ -700,7 +729,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 									/**
 										1. show company if
 											company is selected or
-											searched or
+											company is searched or
 											item is searched
 
 										2. show item if

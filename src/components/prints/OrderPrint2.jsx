@@ -813,7 +813,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{item?.mrp || 0}
+											{+(+item?.mrp || 0)?.toFixed(2)}
 										</td>
 
 										<td
@@ -845,7 +845,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{((+item.net_amt || 0) / (+item.itemQty || 1)).toFixed(2)}
+											{+((+item.net_amt || 0) / (+item.itemQty || 1)).toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -855,7 +855,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{item.net_amt}
+											{+(+item.net_amt)?.toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -865,7 +865,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{item.desc_amt_a} ({item.desc_a})
+											{+(+item.desc_amt_a)?.toFixed(2)} ({+(+item.desc_a)?.toFixed(2)})
 										</td>
 										<td
 											style={{
@@ -875,7 +875,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{item.desc_amt_b} ({item.desc_b})
+											{+(+item.desc_amt_b)?.toFixed(2)} ({+(+item.desc_b)?.toFixed(2)})
 										</td>
 										<td
 											style={{
@@ -885,7 +885,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{item.taxable_value}
+											{+(+item.taxable_value)?.toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -895,7 +895,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{(+item.gst_percentage || 0).toFixed(2)}
+											{+(+item.gst_percentage || 0).toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -905,7 +905,7 @@ const OrderPrint2 = ({
 												border: "1px solid black"
 											}}
 										>
-											{item.tex_amt}
+											{+(+item.tex_amt)?.toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -916,7 +916,7 @@ const OrderPrint2 = ({
 												fontWeight: "700"
 											}}
 										>
-											{item.item_total || 0}
+											{+(+item.item_total || 0)?.toFixed(2)}
 										</td>
 									</tr>
 								)
@@ -945,7 +945,7 @@ const OrderPrint2 = ({
 												padding: "0 5px"
 											}}
 										>
-											{totalItemDetailsMemo?.mrp || 0}
+											{+(+totalItemDetailsMemo?.mrp || 0)?.toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -987,7 +987,7 @@ const OrderPrint2 = ({
 												padding: "0 5px"
 											}}
 										>
-											{totalItemDetailsMemo?.desc_amt_a || 0}
+											{+(+totalItemDetailsMemo?.desc_amt_a || 0)?.toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -997,7 +997,7 @@ const OrderPrint2 = ({
 												padding: "0 5px"
 											}}
 										>
-											{(+totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
+											{+(+totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -1008,7 +1008,7 @@ const OrderPrint2 = ({
 												padding: "0 5px"
 											}}
 										>
-											{totalItemDetailsMemo?.taxable_value || 0}
+											{+(+totalItemDetailsMemo?.taxable_value || 0)?.toFixed(2)}
 										</td>
 
 										<td style={{ border: "1px solid black" }}></td>
@@ -1020,7 +1020,7 @@ const OrderPrint2 = ({
 												padding: "0 5px"
 											}}
 										>
-											{(+totalItemDetailsMemo?.tex_amt || 0).toFixed(2)}
+											{+(+totalItemDetailsMemo?.tex_amt || 0).toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -1031,7 +1031,7 @@ const OrderPrint2 = ({
 												padding: "0 5px"
 											}}
 										>
-											{(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
+											{+(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
 										</td>
 									</tr>
 								</>
@@ -1264,7 +1264,7 @@ const OrderPrint2 = ({
 															fontWeight: "700"
 														}}
 													>
-														Round Oﬀ:
+														Round Off:
 													</span>{" "}
 													₹ {(order.order_grandtotal - totalItemDetailsMemo?.item_total || 0)?.toFixed(2)}
 												</td>
@@ -1278,7 +1278,7 @@ const OrderPrint2 = ({
 														fontWeight: "700"
 													}}
 												>
-													Total Value: ₹ {order?.order_grandtotal || 0}
+													Total Value: ₹ {+(+order?.order_grandtotal || 0)?.toFixed(2)}
 												</td>
 												<td></td>
 											</tr>

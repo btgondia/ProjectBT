@@ -35,7 +35,7 @@ const ImportInvoices = ({ file, onClose }) => {
 			creating_new: 1,
 			new_order: 1,
 			add_discounts: true,
-			items: []
+			items: {}
 		}
 
 		try {
@@ -60,14 +60,24 @@ const ImportInvoices = ({ file, onClose }) => {
 					continue
 				}
 
-				billingParams.items.push({
-					...item,
-					...i,
-					b: parseInt(+item?.conversion ? i.p / +item.conversion : 0),
-					p: parseInt(+item?.conversion ? i.p % +item.conversion : i.p),
-					price: item?.item_price || 0
-				})
+				const b = parseInt(+item?.conversion ? i.p / +item.conversion : 0)
+				const p = parseInt(+item?.conversion ? i.p % +item.conversion : i.p)
+
+				if (billingParams.items[item.item_uuid]) {
+					billingParams.items[item.item_uuid].b += b
+					billingParams.items[item.item_uuid].p += p
+				} else {
+					billingParams.items[item.item_uuid] = {
+						...item,
+						...i,
+						b,
+						p,
+						price: item?.item_price || 0
+					}
+				}
 			}
+
+			billingParams.items = Object.values(billingParams.items)
 
 			const user_uuid = data.users?.find(i => i.dms_erp_id === invoice.dms_erp_user)?.user_uuid
 			if (!user_uuid)
@@ -80,16 +90,16 @@ const ImportInvoices = ({ file, onClose }) => {
 			if (errors?.length > 0) return { errors, local: true }
 
 			const { items, ...billing_details } = await Billing(billingParams)
-			const initValues = getInitialValues()
+			const initialValues = getInitialValues()
 			order = {
 				...invoice,
 				...billing_details,
 				opened_by: 0,
 				priority: 0,
 				order_type: "I",
-				warehouse_uuid: initValues.warehouse_uuid,
-				time_1: Date.now() + initValues.time_1,
-				time_2: Date.now() + initValues.time_2,
+				warehouse_uuid: initialValues.warehouse_uuid,
+				time_1: Date.now() + initialValues.time_1,
+				time_2: Date.now() + initialValues.time_2,
 				item_details: items.map(i => ({
 					...i,
 					unit_price: i.item_total / (+(+i.conversion * i.b) + i.p + i.free) || i.item_price || i.price,
@@ -260,7 +270,7 @@ const ImportInvoices = ({ file, onClose }) => {
 
 	/**
 	 * For local errors: if all the errors for a doc have been resolved,
-	 * then move the 'doc.json' to resolved status.
+	 * then move the 'doc->json' to resolved status.
 	 */
 	const onMapped = id => {
 		setResults(prev => {

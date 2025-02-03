@@ -128,7 +128,10 @@ const SelectedCounterOrder = () => {
       },
     });
    
-    if (response.data.success) setUserData(response.data.result);
+    if (response.data.success) {
+      setFilterCompany(response.data.result?.default_company || companies?.[0]?.company_uuid)
+      setUserData(response.data.result);
+    }
   };
 
   useEffect(() => {
@@ -217,7 +220,6 @@ const SelectedCounterOrder = () => {
       .objectStore("companies");
     let company = await store.getAll();
     setCompanies(company);
-    setFilterCompany(company[0]?.company_uuid);
     store = await db
       .transaction("item_category", "readwrite")
       .objectStore("item_category");
@@ -457,6 +459,7 @@ const SelectedCounterOrder = () => {
                 className="searchInput selectInput"
                 value={filterCompany}
                 onChange={(e) => setFilterCompany(e.target.value)}
+                style={{opacity:filterCompany?1:0}}
               >
                 {companies?.map((a) => (
                   <option value={a.company_uuid}>{a.company_title}</option>

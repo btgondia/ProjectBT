@@ -12,11 +12,10 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FaSave } from "react-icons/fa";
 import FreeItems from "../../components/FreeItems";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
-import { get } from "react-scroll/modules/mixins/scroller";
 import { checkDecimalPlaces } from "../../utils/helperFunctions";
+import { MdFileDownloadDone } from "react-icons/md";
 
 const options = {
   priorityOptions: [
@@ -207,10 +206,10 @@ export default function AddOrder() {
           )?.item_rate;
           let item_price = item.item_price;
           if (item_rate === "a") item_price = item.item_price_a;
-          if (item_rate === "b") item_price = item.item_price_b;
-          if (item_rate === "c") item_price = item.item_price_c;
-
-          return { ...item, item_price };
+          else if (item_rate === "b") item_price = item.item_price_b;
+          else if (item_rate === "c") item_price = item.item_price_c;
+          else item_rate = null
+          return { ...item, item_rate, item_price };
         })
       );
     }
@@ -577,6 +576,28 @@ export default function AddOrder() {
       return value;
     }
   };
+  const constructItem = (item_uuid) => {
+		const itemData = itemsData.find(a => a.item_uuid === item_uuid)
+    const p_price = +getSpecialPrice(counters, itemData, order?.counter_uuid)?.price || itemData.item_price
+
+		return {
+			...itemData,
+			p_price,
+			b_price: Math.floor(p_price * itemData.conversion || 0),
+      charges_discount: [
+        { title: "dsc1", value: 0 },
+        { title: "dsc2", value: 0 },
+      ],
+		}
+	}
+  const handleFreeItems = ({item_details, newFreeItems}) => {
+		setOrder(prev => ({
+			...prev,
+			item_details: item_details
+			.concat(newFreeItems.map(i => ({ ...constructItem(i.uuid), ...i  })))
+		}))
+		setHoldPopup(false)
+	}
   return (
     <>
       <Sidebar />
@@ -857,37 +878,12 @@ export default function AddOrder() {
                               onChange={(e) => {
                                 setOrder((prev) => ({
                                   ...prev,
-                                  item_details: prev.item_details.map((a) => {
-                                    if (a.uuid === item.uuid) {
-                                      let item = itemsData.find(
-                                        (b) => b.item_uuid === e.value
-                                      );
-                                      const p_price =
-                                        +getSpecialPrice(
-                                          counters,
-                                          item,
-                                          order?.counter_uuid
-                                        )?.price || item.item_price;
-                                      return {
-                                        ...a,
-                                        ...item,
-                                        p_price,
-                                        charges_discount: [
-                                          {
-                                            title: "dsc1",
-                                            value: 0,
-                                          },
-                                          {
-                                            title: "dsc2",
-                                            value: 0,
-                                          },
-                                        ],
-                                        b_price: Math.floor(
-                                          p_price * item.conversion || 0
-                                        ),
-                                      };
-                                    } else return a;
-                                  }),
+                                  item_details: prev.item_details.map((a) => 
+                                    (a.uuid === item.uuid)
+                                    ? {
+                                      ...a,
+                                      ...constructItem(e.value),
+                                    } : a),
                                 }));
                                 jumpToNextIndex(`selectContainer-${item.uuid}`);
                               }}
@@ -1210,7 +1206,7 @@ export default function AddOrder() {
                               item,
                               order?.counter_uuid
                             )?.price === +item?.p_price ? (
-                              <IoCheckmarkDoneOutline
+                              <MdFileDownloadDone
                                 className="table-icon checkmark"
                                 onClick={() =>
                                   spcPricePrompt(
@@ -1220,7 +1216,9 @@ export default function AddOrder() {
                                   )
                                 }
                               />
-                            ) : (
+                            ) : item.item_rate
+                            ? <span className="table-icon checkmark" style={{margin:'auto',textAlign:'center'}}>{item.item_rate?.toUpperCase()}</span>
+                            : (
                               <FaSave
                                 className="table-icon"
                                 title="Save current price as special item price"
@@ -1406,11 +1404,10 @@ export default function AddOrder() {
       {promptState ? <Prompt {...promptState} /> : ""}
       {holdPopup ? (
         <FreeItems
-          onSave={() => setHoldPopup(false)}
+          close={() => setHoldPopup(false)}
+          updateOrder={handleFreeItems}
           orders={order}
-          holdPopup={holdPopup}
           itemsData={itemsData}
-          setOrder={setOrder}
         />
       ) : (
         ""

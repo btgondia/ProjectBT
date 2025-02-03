@@ -102,7 +102,8 @@ const ImportInvoices = ({ file, onClose }) => {
 				time_2: Date.now() + initialValues.time_2,
 				item_details: items.map(i => ({
 					...i,
-					unit_price: i.item_total / (+(+i.conversion * i.b) + i.p + i.free) || i.item_price || i.price,
+					unit_price:
+						i.item_total / (+(+i.conversion * i.b) + i.p + i.free) || i.item_price || i.price,
 					gst_percentage: i.item_gst,
 					css_percentage: i.item_css,
 					status: 0,
@@ -261,7 +262,8 @@ const ImportInvoices = ({ file, onClose }) => {
 
 			const list = response.data?.existing_invoice_orders?.map(i => ({
 				...i,
-				dms_buyer_name: json.find(_i => _i.dms_invoice_number === i.dms_invoice_number)?.dms_buyer_name
+				dms_buyer_name: json.find(_i => _i.dms_invoice_number === i.dms_invoice_number)
+					?.dms_buyer_name
 			}))
 
 			setExistingInvoicesState({ list: list, callback })
@@ -408,13 +410,19 @@ const ImportInvoices = ({ file, onClose }) => {
 										) : results?.count < results?.total ? (
 											<span>
 												Next order will be created in{" "}
-												<span style={{ background: "#e2e2e2", borderRadius: "0 5px", padding: "0 4px" }}>
+												<span
+													style={{ background: "#e2e2e2", borderRadius: "0 5px", padding: "0 4px" }}
+												>
 													<b>00:{timer.toString().padStart(2, "0")}</b>
 												</span>
 											</span>
 										) : null}
 									</div>
-									<ResultStatusTabs result={results} onMapped={onMapped} handleImportResolved={importResolved} />
+									<ResultStatusTabs
+										result={results}
+										onMapped={onMapped}
+										handleImportResolved={importResolved}
+									/>
 								</>
 							)}
 						</div>
@@ -459,10 +467,18 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 					<span style={{ display: "block" }}>Selected: {selection.length}</span>
 				</div>
 				<div className="flex" style={{ gap: "10px" }}>
-					<button className="theme-btn" onClick={() => handleInsertion(1)} disabled={!selection?.length}>
+					<button
+						className="theme-btn"
+						onClick={() => handleInsertion(1)}
+						disabled={!selection?.length}
+					>
 						Skip Selected
 					</button>
-					<button className="theme-btn" onClick={() => handleInsertion(2)} disabled={!selection?.length}>
+					<button
+						className="theme-btn"
+						onClick={() => handleInsertion(2)}
+						disabled={!selection?.length}
+					>
 						Re-Import Selected
 					</button>
 				</div>
@@ -478,7 +494,9 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 									style={{ marginRight: "5px" }}
 									checked={selection.length === orders.length}
 									onChange={e =>
-										e.target.checked ? setSelection(orders.map(i => i.dms_invoice_number)) : setSelection([])
+										e.target.checked
+											? setSelection(orders.map(i => i.dms_invoice_number))
+											: setSelection([])
 									}
 								/>
 							</th>
@@ -520,7 +538,12 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 											</div>
 										)}
 										<ContentCopy
-											style={{ width: "1.15rem", height: "1.15rem", marginRight: "8px", opacity: ".9" }}
+											style={{
+												width: "1.15rem",
+												height: "1.15rem",
+												marginRight: "8px",
+												opacity: ".9"
+											}}
 											onClick={e => {
 												e.preventDefault()
 												e.stopPropagation()
@@ -588,8 +611,8 @@ const ResultStatusTabs = ({ result, onMapped, handleImportResolved }) => {
 							<li key={`${tabs[tab].keyName}:${idx}`}>
 								{detail.success ? (
 									<p>
-										<b>{detail.dms_buyer_name}</b> ({detail.dms_invoice_number}) — <b>{detail.invoice_number}</b> (
-										{detail.counter_title})
+										<b>{detail.dms_buyer_name}</b> ({detail.dms_invoice_number}) —{" "}
+										<b>{detail.invoice_number}</b> ({detail.counter_title})
 										<ContentCopy
 											style={{
 												width: "1.15rem",
@@ -673,7 +696,11 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 	}
 
 	return (
-		<div id="map-items" className="overlay" style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999 }}>
+		<div
+			id="map-items"
+			className="overlay"
+			style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999 }}
+		>
 			<div className="modal" style={{ height: "fit-content", width: "50vw", padding: 0 }}>
 				{loading && (
 					<div id="spinner-overlay-wrapper" style={{ background: "#00000062", zIndex: 1000 }}>
@@ -749,16 +776,19 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 											(company is searched when itemSearch is empty)
 									*/
 									companyWiseItems?.map(comp => {
-										const isCompanySelected = selectedItem && selectedItem?.company_uuid === comp.company_uuid
+										const isCompanySelected =
+											selectedItem && selectedItem?.company_uuid === comp.company_uuid
 										const isCompanySearched =
 											companySearch.length >= 3 &&
 											comp.company_title.toLowerCase().includes(companySearch.toLowerCase())
 
-										if (!(isCompanySelected || isCompanySearched || itemSearch.length >= 3)) return null
+										if (!(isCompanySelected || isCompanySearched || itemSearch.length >= 3))
+											return null
 										return comp?.items?.map(i => {
 											const isItemSelected = selectedItem && selectedItem?.item_uuid === i.item_uuid
 											const isItemSearched =
-												itemSearch.length >= 3 && i.item_title.toLowerCase().includes(itemSearch.toLowerCase())
+												itemSearch.length >= 3 &&
+												i.item_title.toLowerCase().includes(itemSearch.toLowerCase())
 
 											if (
 												!(

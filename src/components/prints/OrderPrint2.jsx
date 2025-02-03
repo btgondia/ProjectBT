@@ -25,7 +25,8 @@ const OrderPrint2 = ({
 
 		let itemsData = []
 		for (let item of defaultOrder.item_details) {
-			let final_Amount = item.item_total / (1 + ((item?.gst_percentage || 0) + (item?.css_percentage || 0)) / 100)
+			let final_Amount =
+				item.item_total / (1 + ((item?.gst_percentage || 0) + (item?.css_percentage || 0)) / 100)
 			itemsData.push({
 				...item,
 				final_Amount: final_Amount
@@ -61,7 +62,8 @@ const OrderPrint2 = ({
 			return {
 				...a,
 				..._data,
-				dms_erp_id: a.dms_erp_id || _data.dms_erp_id
+				dms_erp_id: a.dms_erp_id || _data.dms_erp_id,
+				dms_item_name: a.dms_item_name || _data.dms_item_name
 			}
 		})
 		if (!items?.length) return []
@@ -74,7 +76,8 @@ const OrderPrint2 = ({
 			const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
 			let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 			let unit_price = (+item.item_total || 0) / (+itemQty || 1)
-			let tex_amt = (+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
+			let tex_amt =
+				(+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
 			let net_amt = item.item_total / (1 + item.gst_percentage / 100)
 			let desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
@@ -109,7 +112,8 @@ const OrderPrint2 = ({
 				const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
 				let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 				let unit_price = (+item.item_total || 0) / (+itemQty || 1)
-				let tex_amt = (+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
+				let tex_amt =
+					(+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
 				let net_amt = item.item_total / (1 + item.gst_percentage / 100)
 				let desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
@@ -1071,7 +1075,8 @@ const OrderPrint2 = ({
 													}}
 												>
 													CGST - {gstValues.length ? gstValues[0].amount / 2 : 0.0} , SGST -{" "}
-													{gstValues.length ? gstValues[0].amount / 2 : 0} , IGST - 0.00 , UTGST - 0.00
+													{gstValues.length ? gstValues[0].amount / 2 : 0} , IGST - 0.00 , UTGST -
+													0.00
 												</td>
 											</tr>
 											<tr>
@@ -1266,7 +1271,10 @@ const OrderPrint2 = ({
 													>
 														Round Off:
 													</span>{" "}
-													₹ {(order.order_grandtotal - totalItemDetailsMemo?.item_total || 0)?.toFixed(2)}
+													₹{" "}
+													{(
+														order.order_grandtotal - totalItemDetailsMemo?.item_total || 0
+													)?.toFixed(2)}
 												</td>
 											</tr>
 											<tr>
@@ -1320,7 +1328,18 @@ function numberToWords(num) {
 		"eighteen",
 		"nineteen"
 	]
-	const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+	const tens = [
+		"",
+		"",
+		"twenty",
+		"thirty",
+		"forty",
+		"fifty",
+		"sixty",
+		"seventy",
+		"eighty",
+		"ninety"
+	]
 	const thousands = ["", "thousand", "million", "billion"]
 
 	function convert(n) {

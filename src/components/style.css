@@ -3049,8 +3049,9 @@ button.counter-save-btn {
 		border-radius: 5px;
 		font-size: 14px;
 	}
-	& > button:not(:first-child) {
-		margin-left: 8px;
+	& > button:not(:last-child) {
+		margin-right: 8px;
+		margin-bottom: 8px;
 	}
 	button:disabled {
 		opacity: 0.6;

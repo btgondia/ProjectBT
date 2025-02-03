@@ -3,6 +3,18 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import axios from "axios"
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid"
+
+const USER_ROLES = [
+	{ value: "1", label: "Order" },
+	{ value: "7", label: "Advance Ordering" },
+	{ value: "2", label: "Processing" },
+	{ value: "3", label: "Checking" },
+	{ value: "4", label: "Delivery" },
+	{ value: "5", label: "Stock Transfer" },
+	{ value: "6", label: "Collection" },
+	{ value: "8", label: "Stock Adjustment" }
+]
+
 const Users = () => {
 	const [users, setUsers] = useState([])
 	const [routes, setRoutes] = useState([])
@@ -22,7 +34,7 @@ const Users = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		
+
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -35,7 +47,11 @@ const Users = () => {
 				users
 					.filter(a => a.user_title)
 					.filter(a => disabledItem || a.status)
-					.filter(a => !usersTitle || a.user_title?.toLocaleLowerCase()?.includes(usersTitle.toLocaleLowerCase()))
+					.filter(
+						a =>
+							!usersTitle ||
+							a.user_title?.toLocaleLowerCase()?.includes(usersTitle.toLocaleLowerCase())
+					)
 			),
 		[disabledItem, users, usersTitle]
 	)
@@ -117,7 +133,11 @@ const Users = () => {
 					</div>
 				</div>
 				<div className="table-container-user item-sales-container">
-					<Table itemsDetails={filterUsers} setPopupForm={setPopupForm} setPayoutPopup={setPayoutPopup} />
+					<Table
+						itemsDetails={filterUsers}
+						setPopupForm={setPopupForm}
+						setPayoutPopup={setPayoutPopup}
+					/>
 				</div>
 			</div>
 			{popupForm ? (
@@ -132,7 +152,11 @@ const Users = () => {
 				""
 			)}
 			{payoutPopup ? (
-				<UserPayouts onSave={() => setPayoutPopup(false)} popupInfo={payoutPopup} getUsers={getUsers} />
+				<UserPayouts
+					onSave={() => setPayoutPopup(false)}
+					popupInfo={payoutPopup}
+					getUsers={getUsers}
+				/>
 			) : (
 				""
 			)}
@@ -145,7 +169,10 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 	const [items, setItems] = useState("user_title")
 	const [order, setOrder] = useState("asc")
 	return (
-		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
+		<table
+			className="user-table"
+			style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
+		>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -308,6 +335,15 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 		status: "1"
 	})
 	const [errMassage, setErrorMassage] = useState("")
+	const [companies, setCompanies] = useState([])
+
+	useEffect(() => {
+		;(async () => {
+			const response = await axios.get("/companies/list")
+			if (response.data.success) setCompanies(response.data.result)
+		})()
+	}, [])
+
 	useEffect(() => {
 		if (popupInfo?.type === "edit") setdata(popupInfo.data)
 	}, [popupInfo.data, popupInfo?.type])
@@ -357,17 +393,17 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
-						width: "fit-content"
+						width: "fit-content",
+						padding: 0
 					}}
 				>
-					<div style={{ overflowY: "scroll" }}>
+					<div>
 						<form className="form" onSubmit={submitHandler}>
-							<div className="row">
+							<div className="row" style={{ margin: "0 0 20px" }}>
 								<h1>{popupInfo.type === "edit" ? "Edit" : "Add"} User </h1>
 							</div>
 
-							<div className="form">
+							<div className="form" style={{ overflowY: "scroll", maxHeight: "60vh" }}>
 								<div className="row">
 									<label className="selectLabel">
 										User Title
@@ -454,7 +490,6 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 													user_type: e.target.value
 												})
 											}
-											// style={{ height: "150px" }}
 										>
 											<option value={0}>Admin</option>
 											<option value={1}>Others</option>
@@ -501,37 +536,71 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 								</div>
 								<div className="row">
 									{+data.user_type ? (
-										<label className="selectLabel" style={{ height: "100px" }}>
-											Roles
-											<select
-												name="user_type"
-												className="select"
-												value={data?.user_role}
-												style={{ height: "100px" }}
-												onChange={e => {
-													let catData = data?.user_role || []
-													let options = Array.from(e.target.selectedOptions, option => option.value)
-													for (let i of options) {
-														if (catData.filter(a => a === i).length) catData = catData.filter(a => a !== i)
-														else catData = [...catData, i]
-													}
-													// data = occasionsData.filter(a => options.filter(b => b === a.occ_uuid).length)
-													
-
-													setdata({ ...data, user_role: catData })
-												}}
-												multiple
-											>
-												<option value="1">Order</option>
-												<option value="7">Advance Ordering</option>
-												<option value="2">Processing</option>
-												<option value="3">Checking</option>
-												<option value="4">Delivery</option>
-												<option value="5">Stock Transfer</option>
-												<option value="6">Collection</option>
-												<option value="8">Stock Adjustment</option>
-											</select>
-										</label>
+										<>
+											<div style={{ display: "block" }}>
+												<span className="inputLabel">Roles</span>
+												<div
+													value={data?.user_role || []}
+													style={{
+														width: "100%",
+														height: "fit-content",
+														borderRadius: "5px",
+														display: "block",
+														marginTop: "10px",
+														border: ".5px solid gray"
+													}}
+												>
+													{USER_ROLES.map(({ value, label }) => (
+														<div
+															key={`user-role:${value}`}
+															value={value}
+															onClick={e =>
+																setdata(prev => {
+																	let curr = prev?.user_role || []
+																	if (curr.includes(value)) curr = curr.filter(i => i !== value)
+																	else curr.push(value)
+																	return { ...prev, user_role: curr }
+																})
+															}
+															style={{
+																padding: "5px 8px",
+																cursor: "pointer",
+																fontWeight: 500,
+																color: "#000000bf",
+																...(data.user_role?.includes(value)
+																	? { background: "#1967d226", color: "#1967d2" }
+																	: {})
+															}}
+														>
+															{label}
+														</div>
+													))}
+												</div>
+											</div>
+											<label className="selectLabel">
+												Default Company
+												<select
+													type="text"
+													name="sort_order"
+													className="numberInput"
+													value={data?.default_company}
+													onChange={e => {
+														setdata(prev => ({
+															...prev,
+															default_company:
+																e.target.selectedIndex === 0
+																	? null
+																	: e.target.selectedOptions[0]?.value
+														}))
+													}}
+												>
+													<option>None</option>
+													{companies?.map(i => (
+														<option value={i.company_uuid}>{i.company_title}</option>
+													))}
+												</select>
+											</label>
+										</>
 									) : (
 										<>
 											<label className="selectLabel" style={{ width: "50%" }}>
@@ -541,7 +610,9 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 														style={{
 															marginBottom: "5px",
 															textAlign: "center",
-															backgroundColor: data.routes?.filter(a => +a === 1).length ? "#caf0f8" : "#fff"
+															backgroundColor: data.routes?.filter(a => +a === 1).length
+																? "#caf0f8"
+																: "#fff"
 														}}
 														onClick={e => {
 															e.stopPropagation()
@@ -557,14 +628,17 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 														style={{
 															marginBottom: "5px",
 															textAlign: "center",
-															backgroundColor: data.routes?.filter(a => a === "none").length ? "#caf0f8" : "#fff"
+															backgroundColor: data.routes?.filter(a => a === "none").length
+																? "#caf0f8"
+																: "#fff"
 														}}
 														onClick={e => {
 															e.stopPropagation()
 															setdata(prev => {
 																let routes = prev?.routes?.find(a => a === "none")
 																	? prev?.routes?.filter(a => a !== "none")
-																	: prev?.routes?.length && !prev.routes.filter(a => +a === 1).length
+																	: prev?.routes?.length &&
+																	  !prev.routes.filter(a => +a === 1).length
 																	? [...prev?.routes, "none"]
 																	: ["none"]
 																return {
@@ -581,7 +655,8 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 															style={{
 																marginBottom: "5px",
 																textAlign: "center",
-																backgroundColor: data.routes?.filter(a => a === occ.route_uuid).length
+																backgroundColor: data.routes?.filter(a => a === occ.route_uuid)
+																	.length
 																	? "#caf0f8"
 																	: "#fff"
 															}}
@@ -591,7 +666,8 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 																	...prev,
 																	routes: prev?.routes?.find(a => a === occ.route_uuid)
 																		? prev?.routes?.filter(a => a !== occ.route_uuid)
-																		: prev?.routes?.length && !prev.routes.filter(a => +a === 1).length
+																		: prev?.routes?.length &&
+																		  !prev.routes.filter(a => +a === 1).length
 																		? [...prev?.routes, occ?.route_uuid]
 																		: [occ?.route_uuid]
 																}))
@@ -658,7 +734,9 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 															style={{
 																marginBottom: "5px",
 																textAlign: "center",
-																backgroundColor: data.warehouse?.filter(a => a === occ.warehouse_uuid).length
+																backgroundColor: data.warehouse?.filter(
+																	a => a === occ.warehouse_uuid
+																).length
 																	? "#caf0f8"
 																	: "#fff"
 															}}
@@ -716,7 +794,6 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
 	const submitHandler = async e => {
 		e.preventDefault()
 
-		
 		let obj = { user_uuid: popupInfo.user_uuid, ...data }
 		const response = await axios({
 			method: "post",

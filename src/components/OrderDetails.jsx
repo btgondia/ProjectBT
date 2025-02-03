@@ -1290,8 +1290,7 @@ export function OrderDetails({
 			return "Counter DMS details are missing"
 
 		for (let item of item_details) {
-			let itemData = itemsData.find(_item => _item.item_uuid === item.item_uuid)
-			if (!itemData?.dms_erp_id || !itemData?.dms_item_name)
+			if (!item?.dms_erp_id || !item?.dms_item_name)
 				return `Item DMS details are missing for ${item?.item_title}`
 		}
 	}
@@ -1330,6 +1329,51 @@ export function OrderDetails({
 
 	const isCancelled = order?.status?.find(i => +i.stage === 5)
 
+	const constructItem = (item_uuid) => {
+		let itemData = itemsData.find(a => a.item_uuid === item_uuid)
+		let counterData = counters.find(a => a.counter_uuid === orderData.counter_uuid)
+
+		let item_rate = counterData?.company_discount?.find(
+			a => a.company_uuid === itemData.company_uuid
+		)?.item_rate
+
+		let item_price = itemData.item_price
+		if (item_rate === "a") item_price = itemData.item_price_a
+		if (item_rate === "b") item_price = itemData.item_price_b
+		if (item_rate === "c") item_price = itemData.item_price_c
+		let p_price =
+			+getSpecialPrice(counters, itemData, orderData?.counter_uuid)?.price ||
+			item_price ||
+			0
+
+		return {
+			...itemData,
+			status: 0,
+			p_price,
+			b_price: Math.floor(p_price * itemData.conversion || 0)
+		}
+	}
+
+	const handleItemSelect = (item_uuid, curr_uuid) => {
+		setOrderData(prev => ({
+			...prev,
+			item_details: prev.item_details?.map(a =>
+				a.uuid === curr_uuid
+					? { ...a, ...constructItem(item_uuid) }
+					: a
+			)
+		}))
+	}
+	
+	const handleFreeItems = ({item_details, newFreeItems}) => {
+		setOrderData(prev => ({
+			...prev,
+			item_details: item_details
+			.concat(newFreeItems.map(i => ({ ...constructItem(i.uuid), ...i  })))
+		}))
+		setHoldPopup(false)
+	}
+	
 	return openDMSInvoicePopup ? (
 		<DMSInvoicePopup
 			order={order}
@@ -2131,35 +2175,7 @@ export function OrderDetails({
 																			qty: a.qty
 																		}))}
 																	onChange={e => {
-																		let itemData = itemsData.find(a => a.item_uuid === e.value)
-																		let counterData = counters.find(a => a.counter_uuid === orderData.counter_uuid)
-
-																		let item_rate = counterData?.company_discount?.find(
-																			a => a.company_uuid === itemData.company_uuid
-																		)?.item_rate
-
-																		let item_price = itemData.item_price
-																		if (item_rate === "a") item_price = itemData.item_price_a
-																		if (item_rate === "b") item_price = itemData.item_price_b
-																		if (item_rate === "c") item_price = itemData.item_price_c
-																		let p_price =
-																			+getSpecialPrice(counters, itemData, orderData?.counter_uuid)?.price ||
-																			item_price ||
-																			0
-																		setOrderData(prev => ({
-																			...prev,
-																			item_details: prev.item_details?.map(a =>
-																				a.uuid === item.uuid
-																					? {
-																							...a,
-																							...itemsData.find(b => b.item_uuid === e.value),
-																							status: 0,
-																							p_price,
-																							b_price: Math.floor(p_price * itemData.conversion || 0)
-																					  }
-																					: a
-																			)
-																		}))
+																		handleItemSelect(e.value, item.uuid)
 																		shiftFocus(item_status_component_id)
 																	}}
 																	value={{
@@ -2675,11 +2691,10 @@ export function OrderDetails({
 			{promptLocalState?.active && <Prompt {...promptLocalState} />}
 			{holdPopup ? (
 				<FreeItems
-					onSave={() => setHoldPopup(false)}
+					close={() => setHoldPopup(false)}
+					updateOrder={handleFreeItems}
 					orders={orderData}
-					holdPopup={holdPopup}
 					itemsData={itemsData}
-					setOrder={setOrderData}
 				/>
 			) : (
 				""

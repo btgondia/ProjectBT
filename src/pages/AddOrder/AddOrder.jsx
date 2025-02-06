@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
-import { useEffect, useRef, useState, useContext, useMemo } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
@@ -15,7 +15,8 @@ import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { checkDecimalPlaces } from "../../utils/helperFunctions";
-import { MdFileDownloadDone } from "react-icons/md";
+import { MdCurrencyRupee } from "react-icons/md";
+import { getInitialOrderValue } from "../../utils/constants";
 
 const options = {
   priorityOptions: [
@@ -44,38 +45,24 @@ const CovertedQty = (qty, conversion) => {
   return b + ":" + p;
 };
 
-export let getInitialValues = () => ({
-  counter_uuid: "",
-  item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
-  item: [],
-  priority: 0,
-  order_type: "I",
-  time_1: 24 * 60 * 60 * 1000,
-  time_2: (24 + 48) * 60 * 60 * 1000,
-  warehouse_uuid: localStorage.getItem("warehouse")
-    ? JSON.parse(localStorage.getItem("warehouse")) || ""
-    : "",
-});
-
 export default function AddOrder() {
   const {
     promptState,
-    setPromptState,
     getSpecialPrice,
     saveSpecialPrice,
     deleteSpecialPrice,
     spcPricePrompt,
     setNotification,
   } = useContext(Context);
-  const [order, setOrder] = useState(getInitialValues());
-  const [deliveryPopup, setDeliveryPopup] = useState(false);
+  const [order, setOrder] = useState(getInitialOrderValue());
+  const [paymentModal, setPaymentModal] = useState(false);
   const [counters, setCounters] = useState([]);
   const [counterFilter] = useState("");
-  const [holdPopup, setHoldPopup] = useState(false);
+  const [freeItemsModal, setFreeItemsModal] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
   const [itemsData, setItemsData] = useState([]);
-  const [popup, setPopup] = useState(false);
+  const [orderPreSave, setOrderPreSave] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
@@ -83,7 +70,8 @@ export default function AddOrder() {
   const [autoAdd, setAutoAdd] = useState(false);
   const [company, setCompanies] = useState([]);
   const [companyFilter, setCompanyFilter] = useState("all");
-  const [remarks, setRemarks] = useState("");
+  const [lockedCounterRemarks, setLockedCounterRemarks] = useState("");
+
   const fetchCompanies = async () => {
     const cachedData = localStorage.getItem("companiesData");
     try {
@@ -163,19 +151,29 @@ export default function AddOrder() {
     const response = await axios({
       method: "get",
       url: "/items/GetItemStockList/" + order.warehouse_uuid,
-
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setItemsData(response.data.result);
+    if (response.data.success) setItemsData(
+        response.data.result
+        ?.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
+        ?.map(i => {
+          const companyJson = company?.find((b) => b.company_uuid === i.company_uuid)
+          return {
+            ...i,
+            company_title: companyJson?.company_title,
+            label: i.item_title + " " + companyJson?.company_title
+          }
+        })
+      )
   };
 
   const getCounter = async () => {
     const response = await axios({
       method: "get",
       url: "/counters/GetCounterList",
-
+      params: {filterHidden:true},
       headers: {
         "Content-Type": "application/json",
       },
@@ -192,8 +190,9 @@ export default function AddOrder() {
   }, []);
 
   useEffect(() => {
-    if (order?.warehouse_uuid) getItemsData();
-  }, [order.warehouse_uuid]);
+    if (order?.warehouse_uuid && company?.length > 0) getItemsData();
+  }, [order.warehouse_uuid, company]);
+
   useEffect(() => {
     if (order?.counter_uuid) {
       const counterData = counters.find(
@@ -215,16 +214,16 @@ export default function AddOrder() {
     }
   }, [order.counter_uuid]);
 
-  const setQuantity = () => {
-    setOrder((prev) => ({
-      ...prev,
-      item_details: prev.item_details.map((a) => ({
-        ...a,
-        b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
-        p: a.p ? +a.p % +a.conversion : 0,
-      })),
-    }));
-  };
+  // const setQuantity = () => {
+  //   setOrder((prev) => ({
+  //     ...prev,
+  //     item_details: prev.item_details.map((a) => ({
+  //       ...a,
+  //       b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
+  //       p: a.p ? +a.p % +a.conversion : 0,
+  //     })),
+  //   }));
+  // };
 
   const onSubmit = async (type) => {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
@@ -379,17 +378,17 @@ export default function AddOrder() {
     });
     if (response.data.success) {
       // window.location.reload();
-      setOrder(getInitialValues());
+      setOrder(getInitialOrderValue());
       getCounter();
       setItemsData([]);
       setEditPrices([]);
       setAutoAdd(false);
-      setPopup(false);
+      setOrderPreSave(false);
       setAutoBills([]);
-      setDeliveryPopup(false);
-      setHoldPopup(false);
+      setPaymentModal(false);
+      setFreeItemsModal(false);
       setFocusedInputId("");
-      setRemarks("");
+      setLockedCounterRemarks("");
       setCompanyFilter("all");
       getItemsData();
       getAutoBill();
@@ -401,9 +400,6 @@ export default function AddOrder() {
   };
 
   const callBilling = async (type = {}) => {
-    const getType = (code, match = true) =>
-      ["Estimate", "Invoice"]?.find((i) => (i[0] === code) === match);
-
     if (!order.item_details.filter((a) => a.item_uuid).length) return;
     else if (
       order?.item_details
@@ -414,13 +410,13 @@ export default function AddOrder() {
         message: "Invoice and Estimate together not allowed",
         success: false,
       });
-    setPopup(true);
+
+    setOrderPreSave(true);
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
       creating_new: 1,
       new_order: 1,
-      order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,
       replacement: order.replacement,
       adjustment: order.adjustment,
@@ -569,6 +565,7 @@ export default function AddOrder() {
       }));
     }
   };
+
   const chcekIfDecimal = (value) => {
     if (value.toString().includes(".")) {
       return parseFloat(value || 0).toFixed(2);
@@ -576,6 +573,7 @@ export default function AddOrder() {
       return value;
     }
   };
+
   const constructItem = (item_uuid) => {
 		const itemData = itemsData.find(a => a.item_uuid === item_uuid)
     const p_price = +getSpecialPrice(counters, itemData, order?.counter_uuid)?.price || itemData.item_price
@@ -590,14 +588,16 @@ export default function AddOrder() {
       ],
 		}
 	}
+
   const handleFreeItems = ({item_details, newFreeItems}) => {
 		setOrder(prev => ({
 			...prev,
 			item_details: item_details
 			.concat(newFreeItems.map(i => ({ ...constructItem(i.uuid), ...i  })))
 		}))
-		setHoldPopup(false)
+		setFreeItemsModal(false)
 	}
+
   return (
     <>
       <Sidebar />
@@ -630,7 +630,7 @@ export default function AddOrder() {
                         isHighlighted: a.status === 2 ? a.remarks : "",
                       }))}
                     onChange={(doc) => {
-                      if (doc?.isHighlighted) setRemarks(doc?.isHighlighted);
+                      if (doc?.isHighlighted) setLockedCounterRemarks(doc?.isHighlighted);
                       else
                         setOrder((prev) => ({
                           ...prev,
@@ -664,7 +664,7 @@ export default function AddOrder() {
                       position: "fixed",
                       right: "100px",
                     }}
-                    onClick={() => setHoldPopup("Summary")}
+                    onClick={() => setFreeItemsModal(true)}
                   >
                     Free
                   </button>
@@ -799,10 +799,8 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20 ">Price (box)</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc1</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc2</th>
-
                     <th className="pa2 tc bb b--black-20 ">Special Price</th>
                     <th className="pa2 tc bb b--black-20 ">Item Total</th>
-
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
                 </thead>
@@ -824,63 +822,23 @@ export default function AddOrder() {
                             style={{ width: "300px" }}
                           >
                             <Select
-                              ref={(ref) =>
-                                (reactInputsRef.current[item.uuid] = ref)
-                              }
+                              ref={(ref) => (reactInputsRef.current[item.uuid] = ref)}
                               id={"item_uuid" + item.uuid}
                               className="order-item-select"
-                              options={itemsData
-                                .filter(
+                              components={{ MenuList: ItemsMenuList, Option: ItemOption }}
+                              options={
+                                itemsData.filter(
                                   (a) =>
-                                    !order?.item_details.filter(
-                                      (b) => a.item_uuid === b.item_uuid
-                                    ).length &&
+                                    !order?.item_details.filter((b) => a.item_uuid === b.item_uuid).length &&
                                     a.status !== 0 &&
-                                    (companyFilter === "all" ||
-                                      a.company_uuid === companyFilter) &&
+                                    (companyFilter === "all" || a.company_uuid === companyFilter) &&
                                     a.billing_type === order?.order_type
                                 )
-                                .sort((a, b) =>
-                                  a?.item_title?.localeCompare(b.item_title)
-                                )
-                                .map((a, j) => ({
-                                  value: a.item_uuid,
-                                  label:
-                                    a.item_title +
-                                    "______" +
-                                    a.mrp +
-                                    `, ${
-                                      company.find(
-                                        (b) => b.company_uuid === a.company_uuid
-                                      )?.company_title
-                                    }` +
-                                    (a.qty > 0
-                                      ? " _______[" +
-                                        CovertedQty(a.qty || 0, a.conversion) +
-                                        "]"
-                                      : ""),
-                                  key: a.item_uuid,
-                                  qty: a.qty,
-                                }))}
-                              styles={{
-                                option: (a, b) => {
-                                  return {
-                                    ...a,
-                                    color:
-                                      b.data.qty === 0
-                                        ? ""
-                                        : b.data.qty > 0
-                                        ? "#32bd33"
-                                        : "red",
-                                  };
-                                },
-                              }}
+                              }
                               onChange={(e) => {
                                 setOrder((prev) => ({
                                   ...prev,
-                                  item_details: prev.item_details.map((a) => 
-                                    (a.uuid === item.uuid)
-                                    ? {
+                                  item_details: prev.item_details.map((a) => (a.uuid === item.uuid) ? {
                                       ...a,
                                       ...constructItem(e.value),
                                     } : a),
@@ -889,29 +847,10 @@ export default function AddOrder() {
                               }}
                               value={
                                 itemsData
-
                                   .filter((a) => a.item_uuid === item.uuid)
                                   .map((a, j) => ({
+                                    label: a.item_title,
                                     value: a.item_uuid,
-                                    label:
-                                      a.item_title +
-                                      "______" +
-                                      a.mrp +
-                                      `, ${
-                                        company.find(
-                                          (b) =>
-                                            b.company_uuid === a.company_uuid
-                                        )?.company_title
-                                      }` +
-                                      (a.qty > 0
-                                        ? "[" +
-                                          CovertedQty(
-                                            a.qty || 0,
-                                            a.conversion
-                                          ) +
-                                          "]"
-                                        : ""),
-                                    key: a.item_uuid,
                                   }))[0]
                               }
                               openMenuOnFocus={true}
@@ -1206,7 +1145,7 @@ export default function AddOrder() {
                               item,
                               order?.counter_uuid
                             )?.price === +item?.p_price ? (
-                              <MdFileDownloadDone
+                              <MdCurrencyRupee 
                                 className="table-icon checkmark"
                                 onClick={() =>
                                   spcPricePrompt(
@@ -1336,7 +1275,6 @@ export default function AddOrder() {
               <button
                 type="button"
                 onClick={() => {
-
                   let empty_item = order.item_details
                     .filter((a) => a.item_uuid)
                     .map((a) => ({
@@ -1354,12 +1292,7 @@ export default function AddOrder() {
                     return;
                   }
                   let empty_price = order.item_details
-                    .filter((a) => a.item_uuid && !a.free && a.state !== 3)
-                    .map((a) => ({
-                      ...a,
-                      is_empty: !+a.p_price,
-                    }))
-                    .find((a) => a.is_empty);
+                    .filter((a) => a.item_uuid && !a.free && a.state !== 3 && !+a.p_price)?.[0]
                   if (empty_price) {
                     setNotification({
                       message: `item ${empty_price?.item_title} has 0 price.`,
@@ -1402,9 +1335,9 @@ export default function AddOrder() {
         </div>
       </div>
       {promptState ? <Prompt {...promptState} /> : ""}
-      {holdPopup ? (
+      {freeItemsModal ? (
         <FreeItems
-          close={() => setHoldPopup(false)}
+          close={() => setFreeItemsModal(false)}
           updateOrder={handleFreeItems}
           orders={order}
           itemsData={itemsData}
@@ -1412,12 +1345,12 @@ export default function AddOrder() {
       ) : (
         ""
       )}
-      {popup ? (
-        <NewUserForm
-          onClose={() => setPopup(false)}
+      {orderPreSave ? (
+        <OrderPreSave
+          onClose={() => setOrderPreSave(false)}
           onSubmit={(e) => {
             setAutoAdd(e.autoAdd);
-            if (e.stage === 4) setDeliveryPopup(true);
+            if (e.stage === 4) setPaymentModal(true);
             else {
               onSubmit(e);
             }
@@ -1426,9 +1359,9 @@ export default function AddOrder() {
       ) : (
         ""
       )}
-      {deliveryPopup ? (
-        <DiliveryPopup
-          onSave={() => setDeliveryPopup(false)}
+      {paymentModal ? (
+        <PaymentModal
+          onSave={() => setPaymentModal(false)}
           postOrderData={(obj) => onSubmit({ stage: 5, autoAdd, obj })}
           setSelectedOrder={setOrder}
           order={order}
@@ -1439,20 +1372,16 @@ export default function AddOrder() {
       ) : (
         ""
       )}
-      {remarks ? (
+      {lockedCounterRemarks ? (
         <div className="overlay">
           <div
             className="modal"
-            style={{
-              height: "fit-content",
-              width: "max-content",
-              padding: "50px",
-              backgroundColor: "red",
-            }}
+            style={{ height: "fit-content", width: "max-content" }}
           >
-            <h3>{remarks}</h3>
-
-            <button onClick={() => setRemarks(false)} className="closeButton">
+            <div style={{padding: "30px", margin:'10px', border:'4px solid red',borderRadius:'14px'}}>
+                <h3>{lockedCounterRemarks}</h3>
+            </div>
+            <button onClick={() => setLockedCounterRemarks(false)} className="closeButton">
               x
             </button>
           </div>
@@ -1464,7 +1393,7 @@ export default function AddOrder() {
   );
 }
 
-function NewUserForm({ onSubmit, onClose }) {
+function OrderPreSave({ onSubmit, onClose }) {
   const [data, setData] = useState({ autoAdd: false, stage: 1 });
   return (
     <div className="overlay">
@@ -1491,7 +1420,7 @@ function NewUserForm({ onSubmit, onClose }) {
             >
               <div className="formGroup">
                 <div className="row">
-                  <h3> Auto Add</h3>
+                  <h3>Auto Add</h3>
                   <div onClick={() => setData({ ...data, autoAdd: true })}>
                     <input type="radio" checked={data.autoAdd} />
                     Yes
@@ -1537,7 +1466,8 @@ function NewUserForm({ onSubmit, onClose }) {
     </div>
   );
 }
-function DiliveryPopup({
+
+function PaymentModal({
   onSave,
   postOrderData,
   credit_allowed,
@@ -1904,3 +1834,53 @@ function DiliveryPopup({
     </>
   );
 }
+
+const ItemsMenuList = ({ children, ...props }) => (
+  <div {...props} style={{maxHeight:'50vh',overflow:'auto'}} onClick={(e) => {
+    const target = e.target.closest("[data-item-uuid]")
+    if (target) {
+      props.setValue({
+        label: target.getAttribute("data-item-title"),
+        value: target.getAttribute("data-item-uuid")
+      })
+    }
+  }}>
+    {children}
+  </div>
+)
+
+const ItemOption = ({ data }) => (
+    <div
+      data-item-title={data.item_title}
+      data-item-uuid={data.item_uuid}
+      style={{
+        padding: "5px 10px 5px 16px ",
+        borderBottom: "0.5px solid #dadada",
+        cursor: "pointer",
+        position:'relative'
+      }}
+    >
+      <div style={{
+        background:data.qty === 0 ? "transparent" : data.qty > 0 ? "var(--mainColor)" : "red",
+        width:'6px',
+        height:'calc(100% + 1px)',
+        position:'absolute',
+        top:"-1px",
+        left:0,
+      }} />
+      <div style={{ marginBottom: "2px" }}>
+        <b>{data.item_title}</b>
+      </div>
+      <div style={{ fontSize: "15px" }}>
+        {data.mrp&&<span style={{ marginRight: "10px" }}>₹{data.mrp}</span>}
+        <span style={{ marginRight: "10px" }}>
+          {data.company_title}
+        </span>
+        {data.qty > 0 && (
+          <span>
+            [{CovertedQty(data.qty, data.conversion)}]
+          </span>
+        )}
+      </div>
+    </div>
+  )

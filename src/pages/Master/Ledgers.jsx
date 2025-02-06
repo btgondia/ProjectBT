@@ -12,10 +12,10 @@ import { v4 as uuid } from "uuid";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import context from "../../context/context";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
 import { getFormateDate } from "../../utils/helperFunctions";
+import { MdCurrencyRupee } from "react-icons/md";
 
 const LedgersPage = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -897,7 +897,7 @@ function CounterPrices({ close, item }) {
                                 {+counter?.special_price ===
                                   +modifiedPrices[counter?.counter_uuid] ||
                                 !modifiedPrices[counter?.counter_uuid] ? (
-                                  <IoCheckmarkDoneOutline
+                                  <MdCurrencyRupee
                                     className="table-icon checkmark"
                                     style={{ margin: 0 }}
                                   />

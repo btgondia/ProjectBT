@@ -250,6 +250,9 @@ export const Billing = async ({
   new_order,
   coin=0,
 }) => {
+  if (counter?.status === 0) throw new Error("Counter inactive")
+  if (counter?.status === 2) throw new Error("Counter locked, " + counter?.remarks)
+
   let counterCharges = [];
   let counter_charges = [];
   try {
@@ -292,12 +295,12 @@ export const Billing = async ({
           new_order
         )
     );
-    let price = +(add_discounts || item.edit
+    let price = +((add_discounts || item.edit)
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
           ?.price || 0
       : 0);
     let special_discount_percentage =
-      add_discounts || item.edit
+      (add_discounts || item.edit)
         ? counter?.item_special_discount?.find(
             (a) => a.item_uuid === item.item_uuid
           )?.discount || 0
@@ -315,6 +318,7 @@ export const Billing = async ({
     };
     if (price) item = { ...item, item_price: price };
 
+    console.log({special_discount_percentage,company_discount_percentage})
     if (special_discount_percentage) {
       charges_discount?.push({
         title: "Special Discount",

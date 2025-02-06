@@ -55,9 +55,6 @@ const Orders = ({ refreshDb }) => {
 				"Content-Type": "application/json"
 			}
 		})
-		if (response.data.success) {
-			
-		}
 	}
 
 	const locationHandler = () => {

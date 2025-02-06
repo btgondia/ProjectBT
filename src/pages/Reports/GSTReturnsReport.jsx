@@ -18,10 +18,7 @@ const GSTReturnsReport = () => {
       url: "/gstReturns/getGSTReturns",
       headers: {
         "Content-Type": "application/json",
-      },
-      headers: {
-        "Content-Type": "application/json",
-      },
+      }
     });
    
     if (response.data.success) setItems(response.data.result);

@@ -8,17 +8,14 @@ import { v4 as uuid } from "uuid"
 import { Billing, CONTROL_AUTO_REFRESH, jumpToNextIndex } from "../Apis/functions"
 import {
 	Add,
-	AddCircle,
 	AddCircleOutline,
 	Cancel,
 	CheckCircle,
 	Comment,
 	ContentCopy,
-	ContentCut,
 	DeleteOutline,
 	DeliveryDiningRounded,
 	Edit,
-	Note,
 	NoteAdd,
 	Print,
 	Refresh,
@@ -35,21 +32,19 @@ import DiliveryReplaceMent from "./DiliveryReplaceMent"
 import TaskPopupMenu from "./TaskPopupMenu"
 import MessagePopup from "./MessagePopup"
 import context from "../context/context"
-import { IoCheckmarkDoneOutline } from "react-icons/io5"
 import { FaSave } from "react-icons/fa"
 import Prompt from "./Prompt"
 import OrderPrintWrapper from "./OrderPrintWrapper"
-import { getInitialValues } from "../pages/AddOrder/AddOrder"
 import NotesPopup from "./popups/NotesPopup"
 import {
 	chcekIfDecimal,
 	checkDecimalPlaces,
 	compareObjects,
-	getFormateDate,
 	truncateDecimals
 } from "../utils/helperFunctions"
 import { useLocation } from "react-router-dom"
-import { MinusCircleIcon } from "@heroicons/react/solid"
+import { getInitialOrderValue } from "../utils/constants"
+import { MdCurrencyRupee } from "react-icons/md"
 
 const default_status = [
 	{ value: 0, label: "Preparing" },
@@ -1194,7 +1189,7 @@ export function OrderDetails({
 	const recreateOrder = async copyStages => {
 		try {
 			setPromptLocalState(null)
-			const { time_1, time_2 } = getInitialValues()
+			const { time_1, time_2 } = getInitialOrderValue()
 			const oldOrder = order
 			const newOrder = {
 				status: copyStages
@@ -2455,7 +2450,7 @@ export function OrderDetails({
 																{+item?.item_price !== +item?.p_price &&
 																	(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price ===
 																	+item?.p_price ? (
-																		<IoCheckmarkDoneOutline
+																		<MdCurrencyRupee
 																			className="table-icon checkmark"
 																			onClick={() => spcPricePrompt(item, orderData?.counter_uuid, setCounters)}
 																		/>

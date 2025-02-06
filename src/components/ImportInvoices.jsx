@@ -2,8 +2,8 @@ import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { Billing } from "../Apis/functions"
 import { ContentCopy } from "@mui/icons-material"
-import { getInitialValues } from "../pages/AddOrder/AddOrder"
 import { IoIosCheckmarkCircleOutline, IoIosClose } from "react-icons/io"
+import { getInitialOrderValue } from "../utils/constants"
 
 const IMPORT_INTERVAL_TIME = 15 //seconds
 const localErrorTypes = {
@@ -72,7 +72,6 @@ const ImportInvoices = ({ file, onClose }) => {
 						...i,
 						b,
 						p,
-						price: item?.item_price || 0
 					}
 				}
 			}
@@ -90,7 +89,7 @@ const ImportInvoices = ({ file, onClose }) => {
 			if (errors?.length > 0) return { errors, local: true }
 
 			const { items, ...billing_details } = await Billing(billingParams)
-			const initialValues = getInitialValues()
+			const initialValues = getInitialOrderValue()
 			order = {
 				...invoice,
 				...billing_details,
@@ -118,9 +117,8 @@ const ImportInvoices = ({ file, onClose }) => {
 				]
 			}
 		} catch (error) {
-			console.error(error)
 			return {
-				message: "Order billing failed, please try again."
+				message: "Order billing failed (" + error?.message +  ")"
 			}
 		}
 

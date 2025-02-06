@@ -12,12 +12,11 @@ import Sidebar from "../../components/Sidebar";
 import noimg from "../../assets/noimg.jpg";
 import context from "../../context/context";
 import { server } from "../../App";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
 import Select from "react-select";
-import CounterSequence from "../../components/CounterSequence";
 import ItemSequence from "../../components/ItemSequence";
+import { MdCurrencyRupee } from "react-icons/md";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
@@ -905,9 +904,9 @@ function NewUserForm({
   const onChangeGroupHandler = (item_group_uuid) => {
     setdata((prev) => ({
       ...prev,
-      item_group_uuid: prev?.item_group_uuid?.find((a) => a === item_group_uuid)
+      item_group_uuid: prev?.item_group_uuid?.includes(item_group_uuid)
         ? prev?.item_group_uuid?.filter((a) => a !== item_group_uuid)
-        : [...(prev.item_group_uuid ?? []), item_group_uuid],
+        : [...(prev.item_group_uuid || []), item_group_uuid],
     }));
   };
   // const HSNList = useMemo(
@@ -1557,51 +1556,38 @@ function NewUserForm({
                       </label>
                     </div>
                     <div className="row">
-                      <label
+                      <div style={{display:'block'}}>
+                      <div style={{marginBottom:'10px'}}><span>Item Group</span></div>
+                      <div
                         className="selectLabel"
                         style={{
                           maxWidth: "400px",
-                          maxHeight: "150px",
+                          maxHeight: "300px",
                           overflowX: "scroll",
                         }}
                       >
-                        Item Group
                         <table className="user-table">
                           <tbody className="tbody">
-                            {itemGroup?.map((item) => {
-                              return (
+                            {itemGroup?.map((item) => (
                                 <tr
                                   key={item.item_group_uuid}
-                                  style={{ height: "30px" }}
+                                  style={{ height: "30px", cursor:'pointer' }}
+                                  onClick={() => onChangeGroupHandler(item.item_group_uuid)}
                                 >
-                                  <td
-                                    className="flex"
-                                    style={{ justifyContent: "flex-start" }}
-                                  >
+                                  <td className="flex" style={{ justifyContent: "flex-start", pointerEvents:'none' }}>
                                     <input
                                       type="checkbox"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onChangeGroupHandler(
-                                          item.item_group_uuid
-                                        );
-                                      }}
-                                      checked={data.item_group_uuid?.find(
-                                        (a) => a === item.item_group_uuid
-                                      )}
-                                      style={{
-                                        transform: "scale(1.3)",
-                                      }}
+                                      checked={data.item_group_uuid?.includes(item.item_group_uuid)}
+                                      style={{ transform: "scale(1.3)" }}
                                     />
-                                    <div style={{ width: "10px" }}></div>
-                                    {item.item_group_title || ""}
+                                    <div style={{ paddingLeft: "10px" }}>{item.item_group_title || ""}</div>
                                   </td>
                                 </tr>
-                              );
-                            })}
+                              ))}
                           </tbody>
                         </table>
-                      </label>
+                      </div>
+                      </div>
                       <div style={{ flexDirection: "column", gap: "10px" }}>
                         <div>
                           Exclude Discount
@@ -1948,7 +1934,7 @@ function CounterPrices({ close, item }) {
                                 {+counter?.special_price ===
                                   +modifiedPrices[counter?.counter_uuid] ||
                                 !modifiedPrices[counter?.counter_uuid] ? (
-                                  <IoCheckmarkDoneOutline
+                                  <MdCurrencyRupee
                                     className="table-icon checkmark"
                                     style={{ margin: 0 }}
                                   />

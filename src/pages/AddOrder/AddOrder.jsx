@@ -7,7 +7,7 @@ import "./index.css";
 import { Billing, AutoAdd } from "../../Apis/functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
-import Select from "react-select";
+import Select, {components} from "react-select";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FaSave } from "react-icons/fa";
 import FreeItems from "../../components/FreeItems";
@@ -57,7 +57,6 @@ export default function AddOrder() {
   const [order, setOrder] = useState(getInitialOrderValue());
   const [paymentModal, setPaymentModal] = useState(false);
   const [counters, setCounters] = useState([]);
-  const [counterFilter] = useState("");
   const [freeItemsModal, setFreeItemsModal] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
@@ -163,7 +162,8 @@ export default function AddOrder() {
           return {
             ...i,
             company_title: companyJson?.company_title,
-            label: i.item_title + " " + companyJson?.company_title
+            label: i.item_title + " " + companyJson?.company_title,
+            value: i.item_uuid
           }
         })
       )
@@ -576,6 +576,7 @@ export default function AddOrder() {
 
   const constructItem = (item_uuid) => {
 		const itemData = itemsData.find(a => a.item_uuid === item_uuid)
+    if (!itemData) return
     const p_price = +getSpecialPrice(counters, itemData, order?.counter_uuid)?.price || itemData.item_price
 
 		return {
@@ -617,13 +618,6 @@ export default function AddOrder() {
                   <Select
                     ref={(ref) => (reactInputsRef.current["0"] = ref)}
                     options={counters
-                      ?.filter(
-                        (a) =>
-                          !counterFilter ||
-                          a.counter_title
-                            ?.toLocaleLowerCase()
-                            ?.includes(counterFilter.toLocaleLowerCase())
-                      )
                       .map((a) => ({
                         value: a.counter_uuid,
                         label: a.counter_title + " , " + a.route_title,
@@ -826,6 +820,12 @@ export default function AddOrder() {
                               id={"item_uuid" + item.uuid}
                               className="order-item-select"
                               components={{ MenuList: ItemsMenuList, Option: ItemOption }}
+                              styles={{
+                                option:styles => ({
+                                  ...styles,
+                                  padding: 0
+                                })
+                              }}
                               options={
                                 itemsData.filter(
                                   (a) =>
@@ -845,14 +845,7 @@ export default function AddOrder() {
                                 }));
                                 jumpToNextIndex(`selectContainer-${item.uuid}`);
                               }}
-                              value={
-                                itemsData
-                                  .filter((a) => a.item_uuid === item.uuid)
-                                  .map((a, j) => ({
-                                    label: a.item_title,
-                                    value: a.item_uuid,
-                                  }))[0]
-                              }
+                              value={itemsData.filter((a) => a.item_uuid === item.uuid)[0]}
                               openMenuOnFocus={true}
                               autoFocus={
                                 focusedInputId ===
@@ -1849,38 +1842,42 @@ const ItemsMenuList = ({ children, ...props }) => (
   </div>
 )
 
-const ItemOption = ({ data }) => (
-    <div
-      data-item-title={data.item_title}
-      data-item-uuid={data.item_uuid}
-      style={{
+const ItemOption = ({ data, isFocused, ...props }) => (
+    <components.Option
+        {...props}
+        data-item-title={data.label}
+        data-item-uuid={data.value}
+      >
+      <div style={{
         padding: "5px 10px 5px 16px ",
         borderBottom: "0.5px solid #dadada",
+        background:isFocused?'#2196f33d':'white',
         cursor: "pointer",
         position:'relative'
-      }}
-    >
-      <div style={{
-        background:data.qty === 0 ? "transparent" : data.qty > 0 ? "var(--mainColor)" : "red",
-        width:'6px',
-        height:'calc(100% + 1px)',
-        position:'absolute',
-        top:"-1px",
-        left:0,
-      }} />
-      <div style={{ marginBottom: "2px" }}>
-        <b>{data.item_title}</b>
-      </div>
-      <div style={{ fontSize: "15px" }}>
-        {data.mrp&&<span style={{ marginRight: "10px" }}>₹{data.mrp}</span>}
-        <span style={{ marginRight: "10px" }}>
-          {data.company_title}
-        </span>
-        {data.qty > 0 && (
-          <span>
-            [{CovertedQty(data.qty, data.conversion)}]
+      }}>
+        <div
+          style={{
+            background:data.qty === 0 ? "transparent" : data.qty > 0 ? "var(--mainColor)" : "red",
+            width:'6px',
+            height:'calc(100% + 1px)',
+            position:'absolute',
+            top:"-1px",
+            left:0,
+          }} />
+        <div style={{ marginBottom: "2px" }}>
+          <b>{data.item_title}</b>
+        </div>
+        <div style={{ fontSize: "15px" }}>
+          {data.mrp&&<span style={{ marginRight: "10px" }}>₹{data.mrp}</span>}
+          <span style={{ marginRight: "10px" }}>
+            {data.company_title}
           </span>
-        )}
+          {data.qty > 0 && (
+            <span>
+              [{CovertedQty(data.qty, data.conversion)}]
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </components.Option>
   )

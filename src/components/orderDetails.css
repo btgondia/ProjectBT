@@ -1,0 +1,121 @@
+.order-details {
+	&#overlay {
+		position: fixed;
+		z-index: 99999999;
+		display: flex;
+        flex-direction: column;
+        justify-content: end;
+		width: 100%;
+		height: 100%;
+		background: #000c;
+	}
+
+	#drawer {
+		background: white;
+		/* max-height: 90vh; */
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		padding: 0;
+		z-index: 999999999;
+		font-size: 14px;
+		border-radius: 1.5rem 1.5rem 0 0;
+		/* overflow: hidden; */
+	}
+
+	#actions-col {
+        display: flex;
+        flex-direction: column;
+		gap: 6px;
+	}
+
+    #actions-col button {
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+        height: 36px;
+        svg {
+            font-size: 20px;
+        }
+    }
+
+    #actions-col button:disabled {
+        opacity: 0;
+        pointer-events: none;
+        &+hr {
+            opacity: 0;
+        }
+    }
+
+    .inputGroup {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-items: flex-start;
+        padding: 0;
+    }
+    .order-basic-details {
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .order-basic-details > div {
+        display: flex;
+        gap: 10px;
+    }
+    .order-basic-details > div > :is(div,label) {
+        padding: 6px 8px;
+        background: #e9e9e9;
+        border: 1px solid #c6c6c6;
+        border-radius: 6px;
+        width: auto;
+        display: flex;
+        flex-direction: row;
+        max-width: unset;
+        gap: 10px;
+    }
+
+    .table-container {
+        height: 60vh;
+        overflow: auto;
+    }
+
+    .items_table {
+        padding: 0;
+        border-radius: 10px;
+        border: 1.5px solid rgb(205, 205, 205);
+        height: fit-content;
+        max-height: 60vh;
+        overflow: auto;
+    }
+
+    .inventory_header {
+        z-index: 9999999;
+    }
+    .items_table table {
+        border: none;
+    }
+    
+    .items_table table tbody {
+        height: 100%;
+    }
+
+    .items_table :is(thead,tfoot) {
+        z-index: 1;
+    }
+    
+    .items_table tfoot td {
+        background: var(--secondary);
+        border-bottom: none;
+        padding: 6px;
+    }
+
+    .items_table :is(td,th) {
+        padding: 3px;
+        font-size: 14px;
+        text-align: right;
+    }
+}

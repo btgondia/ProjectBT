@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react"
 import axios from "axios"
 import Select from "react-select"
-import { LuClipboardEdit } from "react-icons/lu"
+import { LuClipboardEdit, LuFileCog } from "react-icons/lu"
 import { ImScissors } from "react-icons/im"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import { v4 as uuid } from "uuid"
@@ -22,7 +22,7 @@ import {
 	Splitscreen,
 	WhatsApp
 } from "@mui/icons-material"
-import { TbArrowsExchange2 } from "react-icons/tb"
+import { FaCircleMinus } from "react-icons/fa6";
 
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
@@ -32,7 +32,7 @@ import DiliveryReplaceMent from "./DiliveryReplaceMent"
 import TaskPopupMenu from "./TaskPopupMenu"
 import MessagePopup from "./MessagePopup"
 import context from "../context/context"
-import { FaSave } from "react-icons/fa"
+import { FaPercent, FaSave } from "react-icons/fa"
 import Prompt from "./Prompt"
 import OrderPrintWrapper from "./OrderPrintWrapper"
 import NotesPopup from "./popups/NotesPopup"
@@ -44,6 +44,11 @@ import {
 } from "../utils/helperFunctions"
 import { useLocation } from "react-router-dom"
 import { getInitialOrderValue } from "../utils/constants"
+import { MdCancel, MdCurrencyRupee, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff } from "react-icons/md"
+import { RiPercentFill } from "react-icons/ri";
+import { IoMdAddCircle, IoMdCloseCircle } from "react-icons/io";
+
+import "./orderDetails.css"
 
 const default_status = [
 	{ value: 0, label: "Preparing" },
@@ -51,10 +56,32 @@ const default_status = [
 	{ value: 2, label: "Hold" },
 	{ value: 3, label: "Canceled" }
 ]
+
 const priorityOptions = [
 	{ value: 0, label: "Normal" },
 	{ value: 1, label: "High" }
 ]
+
+const selectStyles = {
+	control:(provided) => ({
+		...provided,
+		background:"#fff",
+		borderColor:"#c6c6c6",
+	}),
+	singleValue:(provided) => ({
+		...provided,
+		color: "black",
+	}),
+	indicatorsContainer: (provided, state) => ({
+		...provided,
+		display:state.isDisabled ? "none":provided.display
+	}),
+	menuPortal: (provided) => ({
+		...provided,
+		zIndex:999999
+	})
+}
+
 export function OrderDetails({
 	orderJson,
 	order_uuid,
@@ -221,8 +248,8 @@ export function OrderDetails({
 					"Content-Type": "application/json"
 				},
 				data: {
-					invoice_number: orderData.invoice_number,
-					order_uuid: orderData.order_uuid,
+					invoice_number: orderData?.invoice_number,
+					order_uuid: orderData?.order_uuid,
 					order_type
 				}
 			})
@@ -640,9 +667,9 @@ export function OrderDetails({
 			url: "/orders/sendPdf",
 			data: {
 				caption,
-				counter_uuid: orderData.counter_uuid,
-				order_uuid: orderData.order_uuid,
-				invoice_number: orderData.invoice_number,
+				counter_uuid: orderData?.counter_uuid,
+				order_uuid: orderData?.order_uuid,
+				invoice_number: orderData?.invoice_number,
 				additional_users: userSelection,
 				additional_numbers: Object.values(additionalNumbers?.values),
 				sendCounter
@@ -698,7 +725,7 @@ export function OrderDetails({
 		outstanding,
 		modeTotal
 	}) => {
-		let empty_item = orderData.item_details
+		let empty_item = orderData?.item_details
 			.filter(a => a.item_uuid)
 			.map(a => ({
 				...a,
@@ -715,7 +742,7 @@ export function OrderDetails({
 			setTimeout(() => setNotification(null), 2000)
 			return
 		}
-		let empty_price = orderData.item_details
+		let empty_price = orderData?.item_details
 			.filter(a => a.item_uuid && !a.free && a.state !== 3)
 			.map(a => ({
 				...a,
@@ -730,11 +757,11 @@ export function OrderDetails({
 			setTimeout(() => setNotification(null), 2000)
 			return
 		}
-		if (orderData?.payment_pending && !orderData.notes?.length) return setNotesPoup(true)
+		if (orderData?.payment_pending && !orderData?.notes?.length) return setNotesPoup(true)
 		let counter = counters.find(a => orderData?.counter_uuid === a.counter_uuid)
-		let fulfillment = orderData.fulfillment
+		let fulfillment = orderData?.fulfillment
 
-		for (let item of orderData.item_details) {
+		for (let item of orderData?.item_details) {
 			let itemData = order?.item_details.find(a => a.item_uuid === item.item_uuid)
 			let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0)
 			let bQty = +(itemData?.b || 0) * (+item?.conversion || 0) + (+itemData?.p || 0)
@@ -890,7 +917,7 @@ export function OrderDetails({
 				setMessagePopup(false)
 			}
 			if (completeOrder) {
-				if (setOrders) setOrders(prev => prev?.map(a => (a.order_uuid === orderData.order_uuid ? orderData : a)))
+				if (setOrders) setOrders(prev => prev?.map(a => (a.order_uuid === orderData?.order_uuid ? orderData : a)))
 
 				onSave()
 			}
@@ -914,8 +941,8 @@ export function OrderDetails({
 			setWaiting(false)
 		}, 45000)
 		let counter = counters.find(a => orderData?.counter_uuid === a.counter_uuid)
-		let fulfillment = orderData.fulfillment
-		for (let item of orderData.item_details) {
+		let fulfillment = orderData?.fulfillment
+		for (let item of orderData?.item_details) {
 			let itemData = order?.item_details.find(a => a.item_uuid === item.item_uuid)
 			let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0)
 			let bQty = +(itemData?.b || 0) * (+item?.conversion || 0) + (+itemData?.p || 0)
@@ -1077,8 +1104,8 @@ export function OrderDetails({
 		if (methodType === "complete") {
 			setComplete(true)
 		}
-		if (warehouse_uuid && warehouse_uuid !== orderData.warehouse_uuid) {
-			if (!orderData.warehouse_uuid) {
+		if (warehouse_uuid && warehouse_uuid !== orderData?.warehouse_uuid) {
+			if (!orderData?.warehouse_uuid) {
 				updateWarehouse(warehouse_uuid, methodType)
 			} else {
 				if (methodType === "complete" || complete) {
@@ -1120,6 +1147,7 @@ export function OrderDetails({
 		if (!editOrder) return
 		reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus()
 	}, [editOrder])
+
 	const HoldOrder = async (hold = "Y") => {
 		let data = {
 			...orderData,
@@ -1143,11 +1171,12 @@ export function OrderDetails({
 			onSave()
 		}
 	}
+
 	let listItemIndexCount = 0
 	const handleTaskChecking = async () => {
 		const response = await axios({
 			method: "get",
-			url: "/tasks/getCounterTask/" + orderData.counter_uuid,
+			url: "/tasks/getCounterTask/" + orderData?.counter_uuid,
 			headers: {
 				"Content-Type": "application/json"
 			}
@@ -1314,6 +1343,7 @@ export function OrderDetails({
 			]
 		})
 	}
+
 	const CovertedQty = (qty, conversion) => {
 		let b = qty / +conversion
 		b = Math.sign(b) * Math.floor(Math.sign(b) * b)
@@ -1325,7 +1355,7 @@ export function OrderDetails({
 
 	const constructItem = (item_uuid) => {
 		let itemData = itemsData.find(a => a.item_uuid === item_uuid)
-		let counterData = counters.find(a => a.counter_uuid === orderData.counter_uuid)
+		let counterData = counters.find(a => a.counter_uuid === orderData?.counter_uuid)
 
 		let item_rate = counterData?.company_discount?.find(
 			a => a.company_uuid === itemData.company_uuid
@@ -1411,54 +1441,161 @@ export function OrderDetails({
 		/>
 	) : (
 		<>
-			<div className="overlay flex" style={{ flexDirection: "column" }}>
-				<button
-					onClick={onSave}
-					style={{
-						top: "-5px",
-						border: "none",
-						color: "white",
-						backgroundColor: "red",
-						borderRadius: "100px",
-						padding: "8px 15px",
-						marginBottom: "10px",
-						fontSize: "25px",
-						fontWeight: "400"
-					}}
-				>
-					x
-				</button>
-				<div
-					className="modal"
-					style={{
-						maxHeight: "100vh",
-						height: "max-content",
-						maxWidth: "60vw",
-						padding: "0",
-						zIndex: "999999999",
-						border: "2px solid #000",
-						fontSize: "12px"
-					}}
-				>
-					<div className="inventory" style={{ height: "max-content", maxHeight: "100vh" }}>
-						<div
-							className="accountGroup"
-							id="voucherForm"
-							action=""
-							style={{
-								// height: "400px",
-								height: "max-content",
-								maxHeight: "75vh",
-								overflow: "scroll"
-							}}
+			<div id="overlay" className="order-details">
+				<div style={{background:"red",flex:1,opacity:0,cursor:"pointer"}} onClick={() => onSave()} />
+				<div id="drawer">
+					<div className="inventory_header" style={{position:"relative"}}>
+						<h2
+							className="flex"
+							data-tooltip-id="my-tooltip"
+							data-tooltip-content={`${
+								counters
+									.find(a => a.counter_uuid === orderData?.counter_uuid)
+									?.mobile?.map(a => a.mobile)
+									?.filter(a => a)
+									?.join(", ") || ""
+							}`}
 						>
-							<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000" }}>
-								{editOrder ? (
+							Order Details • {counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""}{", "}
+							{routeData.find(
+								a =>
+									a.route_uuid ===
+									counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.route_uuid
+							)?.route_title || ""} • {orderData?.invoice_number || ""}
+						</h2>
+						<button className="theme-btn" style={{position:"absolute",right:"0px",top:"50%",translate:"0 -50%"}} onClick={() => onSave()}>
+							<IoMdCloseCircle style={{fontSize:"1.5rem"}} />
+						</button>
+					</div>
+					<div style={{display:"flex", padding:'10px',gap:'10px'}}>
+						<div style={{display:"flex", flexDirection:"column",justifyContent:"space-between"}}>
+							<div id="actions-col">
+								{!isCancelled ? (
 									<>
-										<div className="inputGroup order-edit-select">
+										<button
+											className="theme-btn"
+											style={{background:"var(--mainColor)"}}
+											onClick={() => {
+												handleWarehouseChacking(true, "complete")
+												setCompleteOrder(true)
+											}}
+											>
+											<CheckCircle /><span>Complete Order</span>
+										</button>
+										<button
+											style={{ backgroundColor: "red" }}
+											className="theme-btn"
+											onClick={() => setDeletePopup("Delete")}
+										>
+											<Cancel /><span>Cancel Order</span>
+										</button>
+									</>
+								) : null}
+								<hr />
+								<button
+									style={{ backgroundColor: "blue" }}
+									className="theme-btn"
+									onClick={() =>
+										order?.order_type === "E" ? deductionsNotAllowedWarning() : setDeductionsPopup(true)
+									}
+								>
+									<ImScissors /><span>Deductions</span>
+								</button>
+								<button
+									className="theme-btn"
+									onClick={e => {
+										e.target.blur()
+										setCommentPoup(prev => !prev)
+									}}
+									data-tooltip-id="my-tooltip"
+									data-tooltip-content="Comments"
+								>
+									<Comment /><span>Comments</span>
+								</button>
+								<button
+									className="theme-btn"
+									onClick={e => {
+										reactInputsRef.current = {}
+										e.target.blur()
+										setPopupForm(true)
+										setSelectedTrip({
+											trip_uuid: orderData?.trip_uuid || 0,
+											warehouse_uuid: orderData?.warehouse_uuid || ""
+										})
+									}}
+								>
+									<DeliveryDiningRounded /><span>Assign Trip</span>
+								</button>
+								<button
+									className="theme-btn"
+									disabled={editOrder}
+									onClick={() => setSplitHold(true)}
+								>
+									<Splitscreen /><span>Split Order</span>
+								</button>
+							</div>
+							<div id="actions-col">
+								<button
+									className="theme-btn"
+									disabled={!editOrder}
+									onClick={() => setHoldPopup("Summary")}
+									>
+									<MdLocalOffer /> Free
+								</button>
+								<button
+									className="theme-btn"
+									disabled={!editOrder}
+									onClick={() => {
+										setOrderData(prev => ({
+											...prev,
+											item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }]
+										}))
+										setTimeout(() => document.querySelector(".items_table tbody>tr:last-child").scrollIntoView(), 100);
+									}}
+								>
+									<AddIcon />
+									<span>Add Item</span>
+								</button>
+								
+								<hr />
+								
+								<button
+									className="theme-btn"
+									style={{background:editOrder?"red":"var(--main)"}}
+									onClick={e => {
+										reactInputsRef.current = {}
+										e.target.blur()
+										if (!editOrder) {
+											getItemsData([])
+											getCounters([])
+										}
+										setEditOrder(prev => !prev)
+									}}
+									>
+									{
+										editOrder 
+										? <><MdOutlineEditOff /><span>Discard</span></>
+										: <><MdOutlineEdit /><span>Edit Order</span></>
+									}
+								</button>
+							</div>
+						</div>
+						<div style={{flex:1}}>
+							<div id="voucherForm">
+								{true ? (
+									<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000", gap:"10px", marginBottom:"10px" }}>
+										<div className="inputGroup">
 											<label htmlFor="Warehouse">Counter</label>
-											<div className="inputGroup" style={{ maxWidth: "12vw" }}>
+											<div className="inputGroup">
 												<Select
+													isDisabled={!editOrder}
+													styles={{
+														container:(provided) => ({
+															...provided,
+															width:"240px",
+														}),
+														...selectStyles,
+													}}
 													options={counters?.map(a => ({
 														value: a.counter_uuid,
 														label: a.counter_title + ", " + a.route_title
@@ -1473,12 +1610,11 @@ export function OrderDetails({
 														orderData?.counter_uuid
 															? {
 																	value: orderData?.counter_uuid,
-																	label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)
+																	label: counters?.find(j => j.counter_uuid === orderData?.counter_uuid)
 																		?.counter_title
-															  }
+																}
 															: { value: 0, label: "None" }
 													}
-													// autoFocus={!order?.warehouse_uuid}
 													openMenuOnFocus={true}
 													menuPosition="fixed"
 													menuPlacement="auto"
@@ -1486,10 +1622,18 @@ export function OrderDetails({
 												/>
 											</div>
 										</div>
-										<div className="inputGroup order-edit-select">
+										<div className="inputGroup">
 											<label htmlFor="Warehouse">Priority</label>
-											<div className="inputGroup" style={{ maxWidth: "12vw" }}>
+											<div className="inputGroup">
 												<Select
+													isDisabled={!editOrder}
+													styles={{
+														container:(provided) => ({
+															...provided,
+															width:"110px"
+														}),
+														...selectStyles
+													}}
 													options={priorityOptions}
 													onChange={doc =>
 														setOrderData(x => ({
@@ -1497,7 +1641,7 @@ export function OrderDetails({
 															priority: doc?.value
 														}))
 													}
-													value={priorityOptions?.find(j => j.value === orderData.priority)}
+													value={priorityOptions?.find(j => j.value === orderData?.priority)}
 													openMenuOnFocus={true}
 													menuPosition="fixed"
 													menuPlacement="auto"
@@ -1505,28 +1649,173 @@ export function OrderDetails({
 												/>
 											</div>
 										</div>
-
-										<div className="inputGroup order-edit-select">
-											<label htmlFor="Warehouse">Time</label>
-											<div className="inputGroup" style={{ width: "fit-content" }}>
-												{/* <label
-													htmlFor="order-datetime"
-													style={{ margin: "auto", width: "fit-content" }}>
-													{new Date(+orderData?.time_1).toDateString()}
-												</label> */}
-												<input
-													type="datetime-local"
-													id="order-datetime"
-													onChange={handleDateTimeUpdate}
-													disabled={dateTimeUpdating === 1}
-													value={orderData?.time_1 ? new Date(+orderData?.time_1).toJSON().split(".")[0] : ""}
+										<div className="inputGroup">
+											<label htmlFor="Warehouse">Warehouse</label>
+											<div style={{display:"flex"}}>
+												<Select
+													isDisabled={!editOrder}
+													styles={{
+														container:(provided) => ({
+															...provided,
+															width:"180px"
+														}),
+														...selectStyles
+													}}
+													options={[
+														{ value: "", label: "None" },
+														...warehouse?.map((a, j) => ({
+															value: a.warehouse_uuid,
+															label: a.warehouse_title
+														}))
+													]}
+													onChange={e => {
+														setOrderData(prev => ({
+															...prev,
+															warehouse_uuid: e.value
+														}))
+													}}
+													value={{
+														value: orderData?.warehouse_uuid || "",
+														label:
+															warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
+																?.warehouse_title || "None"
+													}}
+													openMenuOnFocus={true}
+													menuPosition="fixed"
+													menuPlacement="auto"
+													placeholder="Item"
 												/>
 											</div>
-
-											{dateTimeUpdating === 2 ? (
-												<span style={{ fontSize: "1.1rem" }}>✓</span>
-											) : (
-												<svg viewBox="0 0 100 100" style={{ width: "20px", opacity: dateTimeUpdating }}>
+										</div>
+										<div className="inputGroup">
+											<label htmlFor="Warehouse">Time</label>
+											<div style={{display:"flex"}}>
+												<div className="inputGroup" style={{ width: "fit-content" }}>
+													{/* <label
+														htmlFor="order-datetime"
+														style={{ margin: "auto", width: "fit-content" }}>
+														{new Date(+orderData?.time_1).toDateString()}
+													</label> */}
+													<input
+														type="datetime-local"
+														id="order-datetime"
+														onChange={handleDateTimeUpdate}
+														disabled={!editOrder || dateTimeUpdating === 1}
+														value={orderData?.time_1 ? new Date(+orderData?.time_1).toJSON().split(".")[0] : ""}
+														/>
+												</div>
+												{/* {dateTimeUpdating === 2 ? (
+													<span style={{ fontSize: "1.1rem" }}>✓</span>
+												) : (
+													<svg viewBox="0 0 100 100" style={{ width: "20px", opacity: dateTimeUpdating }}>
+														<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
+															<animateTransform
+																attributeName="transform"
+																type="rotate"
+																dur="1s"
+																repeatCount="indefinite"
+																keyTimes="0;1"
+																values="0 50 51;360 50 51"
+															></animateTransform>
+														</path>
+													</svg>
+												)} */}
+											</div>
+										</div>
+									</div>
+								) : null}
+								<div className="order-basic-details">
+									<div>
+										<div>
+											<span><b>UUID</b></span>
+											<span
+												onClick={() => {
+													setCopymsg(true)
+													navigator.clipboard.writeText(orderData?.order_uuid)
+													setTimeout(() => setCopymsg(false), 1000)
+												}}
+												style={{
+													cursor: "pointer",
+													position: "relative",
+													width: "12%",
+													display:"flex",
+													alignItems:"center",
+													gap:'10px'
+												}}
+												onMouseOver={() => setUuid(true)}
+												onMouseLeave={() => setUuid(false)}
+											>
+												{orderData?.order_uuid?.substring(0, 7) + "..."}
+												{copymsg && (
+													<div
+														style={{
+															position: "absolute",
+															top: "100%"
+														}}
+													>
+														<div id="talkbubble">COPIED!</div>
+													</div>
+												)}
+												{"   "}
+												<ContentCopy
+													style={
+														uuids
+															? {
+																	fontSize: "12px",
+																	transform: "scale(1.5)"
+																}
+															: { fontSize: "12px" }
+													}
+													onClick={() => {
+														setCopymsg(true)
+														navigator.clipboard.writeText(orderData?.order_uuid)
+														setTimeout(() => setCopymsg(false), 1000)
+													}}
+												/>
+												{uuids && (
+													<div
+														style={{
+															position: "absolute",
+															top: "100%"
+														}}
+													>
+														<div id="talkbubble">{orderData?.order_uuid}</div>
+													</div>
+												)}
+											</span>
+										</div>
+										<div>
+											<span><b>Grand Total</b></span>
+											<span>₹{orderData?.order_grandtotal || 0}</span>
+										</div>
+										<div>
+											<span
+												className={
+													window.location.pathname.includes("completeOrderReport") ||
+													window.location.pathname.includes("signedBills") ||
+													window.location.pathname.includes("pendingEntry") ||
+													window.location.pathname.includes("upiTransactionReport")
+														? "hover_class"
+														: ""
+												}
+												onClick={() =>
+													window.location.pathname.includes("completeOrderReport") ||
+													window.location.pathname.includes("signedBills") ||
+													window.location.pathname.includes("pendingEntry") ||
+													window.location.pathname.includes("upiTransactionReport")
+														? setDeliveryPopup("put")
+														: {}
+												}
+											>
+												<b>Payment Total</b>
+											</span>
+											<span>₹{orderData?.payment_total || 0}</span>
+										</div>
+									</div>
+									<div>
+										{waiting ? (
+											<div style={{ width: "40px" }}>
+												<svg viewBox="0 0 100 100">
 													<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
 														<animateTransform
 															attributeName="transform"
@@ -1538,1145 +1827,732 @@ export function OrderDetails({
 														></animateTransform>
 													</path>
 												</svg>
-											)}
-										</div>
-									</>
-								) : (
-									<h2
-										className="flex"
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content={`${
-											counters
-												.find(a => a.counter_uuid === orderData?.counter_uuid)
-												?.mobile?.map(a => a.mobile)
-												?.filter(a => a)
-												?.join(", ") || ""
-										}`}
-									>
-										<span
-											className="flex"
+											</div>
+										) : (
+											""
+										)}
+
+										<button
+											type="button"
+											onClick={() => {setCaptionPopup(true)}}
 											style={{
-												cursor: "pointer",
-												// backgroundColor: "#000",
-												width: "fit-content"
+												display:"flex",
+												alignItems:"center",
+												background: "none",
+												color: "var(--main)",
+												border: "none"
 											}}
-											onClick={() =>
-												setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData.counter_uuid))
-											}
 										>
-											<NoteAdd />
-											{counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""}
-											{", "}
-											{routeData.find(
-												a =>
-													a.route_uuid ===
-													counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.route_uuid
-											)?.route_title || ""}
-											- {orderData?.invoice_number || ""}
-										</span>
-									</h2>
-								)}
+											<WhatsApp />
+										</button>
+										<button
+											type="button"
+											onClick={() => {setDeductionsCoinPopup(true)}}
+											style={{
+												display:"flex",
+												alignItems:"center",
+												background: "none",
+												color: "var(--main)",
+												border: "none"
+											}}
+										>
+											<AddCircleOutline />
+										</button>
+										<label>
+											{editOrder && (
+												<input
+													type="checkbox"
+													name="payment-pending-status"
+													id="payment-pending-status"
+													checked={Boolean(orderData?.payment_pending)}
+													onChange={e =>
+														setOrderData(x => ({
+															...x,
+															payment_pending: +e.target.checked
+														}))
+													}
+												/>
+											)}
+											<span><b>Payment pending</b></span>
+											{!editOrder && <span>{orderData?.payment_pending ? "Yes" : "No"}</span>}
+										</label>
+										<div>
+											<span><b>Order Total</b></span>
+											<span>₹{orderData?.order_grandtotal || 0}</span>
+										</div>
+									</div>
+								</div>
+
+								<div className="table-container">
+									<div className={"items_table "+(editOrder?"editing":"")}>
+										<table cellSpacing="0">
+											<thead>
+												<tr>
+													{editOrder ? <th /> : null}
+													<th>#</th>
+													<th style={{textAlign:"left"}}>Item Name</th>
+													<th>MRP</th>
+													{editOrder ? <th>Status</th> : ""}
+													<th>Qty(b)</th>
+													<th>Qty(p)</th>
+													<th>Price(p)</th>
+													<th>Price(b)</th>
+													{editOrder ? (
+														<>
+															<th>Sp Disc</th>
+															<th></th>
+															<th></th>
+														</>
+													) : null}
+												</tr>
+											</thead>
+											<tbody className="lh-copy">
+												{orderData?.item_details?.map((item, i) => {
+													const item_title_component_id = `REACT_SELECT_COMPONENT_ITEM_TITLE@${item.uuid}`
+													const item_status_component_id = `REACT_SELECT_COMPONENT_ITEM_STATUS@${item.uuid}`
+													return (
+														<tr
+															key={i}
+															style={{
+																height: "20px",
+																backgroundColor:
+																	item.price_approval === "N"
+																		? "#00edff"
+																		: +item.status === 1
+																		? "green"
+																		: +item.status === 2
+																		? "yellow"
+																		: +item.status === 3
+																		? "red"
+																		: "#fff",
+																color:
+																	item.price_approval === "N"
+																		? "#000"
+																		: +item.status === 1 || +item.status === 3
+																		? "#fff"
+																		: "#000",
+															}}
+														>
+															{editOrder ? (
+																<td style={{width:"fit-content"}}>
+																	{item.price_approval === "N" ? (
+																		<span
+																			onClick={() =>
+																				setOrderData(prev => ({
+																					...prev,
+																					item_details: prev.item_details?.map(a =>
+																						a.uuid === item.uuid
+																							? {
+																									...a,
+																									price_approval: "Y"
+																								}
+																							: a
+																					)
+																				}))
+																			}
+																		>
+																			<CheckCircle
+																				style={{
+																					fontSize: 15,
+																					cursor: "pointer",
+																					color: "blue"
+																				}}
+																			/>
+																		</span>
+																	) : null}
+																	<span
+																		onClick={() =>
+																			setOrderData(prev => {
+																				let exicting = order?.fulfillment?.find(a => a.item_uuid === item.item_uuid)
+																				let difference = 0
+																				if (exicting) {
+																					difference =
+																						+(item.b || 0) * (+item.conversion || 0) +
+																						(+item.p || 0) +
+																						(+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
+																				}
+																				let fulfillment = exicting
+																					? [
+																							...(prev.fulfillment || []),
+
+																							{
+																								item_uuid: item.item_uuid,
+																								b: Math.floor(difference / (+item.conversion || 1)),
+																								p: Math.floor(difference % (+item.conversion || 1))
+																							}
+																						]
+																					: [
+																							...(prev.fulfillment || []),
+																							{
+																								item_uuid: item.item_uuid,
+																								b: item.b,
+																								p: item.p
+																							}
+																						]
+
+																				return {
+																					...prev,
+																					item_details: prev.item_details?.filter(a => !(a.uuid === item.uuid)),
+																					fulfillment
+																				}
+																			})
+																		}
+																		style={{
+																			outline:"1.25px solid",
+																			outlineColor:+item.status === 1 ? "white":"transparent",
+																			background:+item.status === 3 ? "transparent":"white",
+																			display:"flex",
+																			width:"fit-content",
+																			borderRadius:"1rem",
+																		}}
+																	>
+																		<FaCircleMinus
+																			style={{
+																				fontSize: item.price_approval === "N" ? 15 : 20,
+																				cursor: "pointer",
+																				color: +item.status === 3 ? "white": "red"
+																			}}
+																		/>
+																	</span>
+																</td>
+															) : null}
+															<td style={{ textAlign: "center", width: "3ch" }}>
+																{item.sr || i + 1}.
+															</td>
+															<td>
+																<div
+																	className="inputGroup"
+																	index={!item.default ? listItemIndexCount++ : ""}
+																	id={!item.default ? item_title_component_id : ""}
+																>
+																	{editOrder && !item.default ? (
+																		<Select
+																			ref={ref => (reactInputsRef.current[item_title_component_id] = ref)}
+																			styles={{
+																				container: styles => ({
+																					...styles,
+																					width:"220px",
+																					textAlign:'left',
+																					padding: 0,
+																				}),
+																				option: (styles, state) => ({
+																					...styles,
+																					padding: "4px 8px",
+																					color:state.isSelected?"white":"black"
+																				}),
+																			}}
+																			id={"1_item_uuid" + item.uuid}
+																			options={itemsData
+																				?.filter(
+																					a =>
+																						!order?.item_details?.filter(b => a.item_uuid === b.item_uuid)?.length &&
+																						a.status !== 0
+																				)
+																				.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
+																				.map((a, j) => ({
+																					value: a.item_uuid,
+																					label:
+																						a.item_title +
+																						"______" +
+																						a.mrp +
+																						`, ${
+																							company.find(b => b.company_uuid === a.company_uuid)?.company_title
+																						}` +
+																						(a.qty > 0
+																							? " _______[" + CovertedQty(a.qty || 0, a.conversion) + "]"
+																							: ""),
+																					key: a.item_uuid,
+																					qty: a.qty
+																				}))}
+																			onChange={e => {
+																				handleItemSelect(e.value, item.uuid)
+																				shiftFocus(item_status_component_id)
+																			}}
+																			value={{
+																				value: item.item_uuid || "",
+																				label: item.item_title ? item.item_title + "______" + item.mrp : "",
+																				key: item.item_uuid || item.uuid
+																			}}
+																			openMenuOnFocus={true}
+																			autoFocus={
+																				focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)
+																			}
+																			menuPosition="fixed"
+																			menuPlacement="auto"
+																			placeholder="Item"
+																		/>
+																	) : (
+																		itemsData.find(a => a.item_uuid === item.item_uuid)?.item_title || ""
+																	)}
+																</div>
+															</td>
+															<td>
+																₹{item.mrp || ""}
+															</td>
+															{editOrder ? (
+																<td
+																	style={{ textAlign: "left" }}
+																	index={listItemIndexCount++}
+																	id={item_status_component_id}
+																>
+																	<Select
+																		ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
+																		options={default_status}
+																		styles={{
+																			container:(provided)=>({
+																				...provided,
+																				width:"130px",
+																			}),
+																			dropdownIndicator: (styles) => ({
+																				...styles,
+																				padding:"4px"
+																			}),
+																			indicatorSeparator: (styles) => ({
+																				...styles,
+																				display:"none"
+																			}),
+																			option:(provided,state)=>({
+																				...provided,
+																				color:state.isSelected?"white":"black",
+																				padding:"4px"
+																			})
+																		}}
+																		onChange={e => {
+																			setOrderData(prev => ({
+																				...prev,
+																				item_details: prev.item_details?.map(a => {
+																					if (a.uuid === item.uuid) {
+																						const p_price =
+																							+getSpecialPrice(counters, item, order?.counter_uuid)?.price ||
+																							item.p_price
+																						return {
+																							...a,
+																							status: e.value,
+																							p_price: checkDecimalPlaces(p_price),
+																							b_price: chcekIfDecimal(p_price * item.conversion || 0)
+																						}
+																					} else return a
+																				})
+																			}))
+																			shiftFocus(item_status_component_id)
+																		}}
+																		value={+item.status >= 0 ? default_status.find(a => +a.value === +item.status) : 0}
+																		openMenuOnFocus={true}
+																		menuPosition="fixed"
+																		menuPlacement="auto"
+																		placeholder="Status"
+																	/>
+																</td>
+															) : null}
+															<td>
+																{editOrder ? (
+																	<input
+																		id={"q" + item.uuid}
+																		type="number"
+																		className="numberInput"
+																		index={listItemIndexCount++}
+																		style={{
+																			width: "50px",
+																			fontSize: "14px",
+																			padding: 0,
+																			height: "20px"
+																		}}
+																		value={item.b || 0}
+																		onChange={e => {
+																			setOrderData(prev => {
+																				return {
+																					...prev,
+																					item_details: prev.item_details?.map(a =>
+																						a.uuid === item.uuid
+																							? {
+																									...a,
+																									b: e.target.value
+																								}
+																							: a
+																					)
+																				}
+																			})
+																		}}
+																		onFocus={e => {
+																			e.target.onwheel = () => false
+																			e.target.select()
+																		}}
+																		onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																		disabled={!item.item_uuid}
+																		onWheel={e => e.preventDefault()}
+																	/>
+																) : (
+																	item.b || 0
+																)}
+															</td>
+															<td>
+																{editOrder ? (
+																	<input
+																		id={"p" + item.uuid}
+																		style={{
+																			width: "50px",
+																			fontSize: "14px",
+																			padding: 0,
+																			height: "20px"
+																		}}
+																		type="number"
+																		className="numberInput"
+																		onWheel={e => e.preventDefault()}
+																		index={listItemIndexCount++}
+																		value={item.p || 0}
+																		onChange={e => {
+																			setOrderData(prev => {
+																				return {
+																					...prev,
+																					item_details: prev.item_details?.map(a =>
+																						a.uuid === item.uuid
+																							? {
+																									...a,
+																									p: e.target.value
+																								}
+																							: a
+																					)
+																				}
+																			})
+																		}}
+																		onFocus={e => {
+																			e.target.onwheel = () => false
+																			e.target.select()
+																		}}
+																		onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																		disabled={!item.item_uuid}
+																	/>
+																) : (
+																	item.p || 0
+																)}
+															</td>
+															<td>
+																{editOrder ? (
+																	<input
+																		type="number"
+																		style={{
+																			width: "70px",
+																			fontSize: "14px",
+																			padding: 0,
+																			height: "20px"
+																		}}
+																		className="numberInput"
+																		onWheel={e => e.preventDefault()}
+																		index={listItemIndexCount++}
+																		value={item?.p_price || 0}
+																		onChange={e => onItemPriceChange(e, item)}
+																		onFocus={e => {
+																			e.target.onwheel = () => false
+																			e.target.select()
+																		}}
+																		onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																		disabled={!item.item_uuid}
+																	/>
+																) : (
+																	"₹" + chcekIfDecimal(item.p_price || 0)
+																)}
+															</td>
+															<td>
+																{editOrder ? (
+																	<input
+																		type="number"
+																		style={{
+																			width: "70px",
+																			fontSize: "14px",
+																			padding: 0,
+																			height: "20px"
+																		}}
+																		className="numberInput"
+																		onWheel={e => e.preventDefault()}
+																		index={listItemIndexCount++}
+																		value={item?.b_price || ""}
+																		onChange={e => {
+																			setOrderData(prev => {
+																				return {
+																					...prev,
+																					item_details: prev.item_details.map(a =>
+																						a.uuid === item.uuid
+																							? {
+																									...a,
+																									b_price: e.target.value,
+																									p_price: truncateDecimals(e.target.value / item.conversion || 0, 4)
+																								}
+																							: a
+																					)
+																				}
+																			})
+																			setEditPrices(prev =>
+																				prev.filter(a => a.item_uuid === item.item_uuid).length
+																					? prev.map(a =>
+																							a.item_uuid === item.item_uuid
+																								? {
+																										...a,
+																										b_price: e.target.value,
+																										p_price: checkDecimalPlaces(
+																											e.target.value / item.conversion || 0,
+																											4
+																										)
+																									}
+																								: a
+																						)
+																					: prev.length
+																					? [
+																							...prev,
+																							{
+																								...item,
+																								b_price: e.target.value,
+																								p_price: checkDecimalPlaces(e.target.value / item.conversion || 0, 4)
+																							}
+																						]
+																					: [
+																							{
+																								...item,
+
+																								b_price: e.target.value,
+																								p_price: checkDecimalPlaces(e.target.value / item.conversion || 0, 4)
+																							}
+																						]
+																			)
+																		}}
+																		onFocus={e => {
+																			e.target.onwheel = () => false
+																			e.target.select()
+																		}}
+																		onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																		disabled={!item.item_uuid}
+																	/>
+																) : (
+																	"₹" + truncateDecimals(item?.b_price || 0, 2)
+																)}
+															</td>
+															{editOrder ? (
+																<>
+																	<td>
+																		{item?.charges_discount?.find(a => a.title === "Salesperson Discount")?.value ||
+																			"0"}%
+																	</td>
+																	<td>
+																		{+item?.item_price !== +item?.p_price &&
+																			(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price ===
+																			+item?.p_price ? (
+																				<MdCurrencyRupee
+																					className="table-icon checkmark"
+																					onClick={() => spcPricePrompt(item, orderData?.counter_uuid, setCounters)}
+																				/>
+																			) : (
+																				<FaSave
+																					className="table-icon"
+																					title="Save current price as special item price"
+																					onClick={() =>
+																						saveSpecialPrice(
+																							item,
+																							orderData?.counter_uuid,
+																							setCounters,
+																							+item?.p_price
+																						)
+																					}
+																				/>
+																			))}
+																	</td>
+																	<td>
+																		<button
+																			style={{ padding: "6px", minWidth:'auto', borderRadius:"2rem" }}
+																			className="theme-btn"
+																			onClick={() => setPopupDiscount(item)}
+																		>
+																			<RiPercentFill />
+																		</button>
+																	</td>
+																</>
+															) : (
+																""
+															)}
+														</tr>
+													)
+												})}
+											</tbody>
+											<tfoot>
+												<tr style={{borderBottom:'none'}}>
+													{editOrder ? (<td></td>) : null}
+													<td></td>
+													<td>
+														<div style={{textAlign:"right"}}><b>TOTAL</b></div>
+													</td>
+													{editOrder ? (<td></td>) : null}
+													<td></td>
+													<td>
+														<b>
+															{(orderData?.item_details?.length > 1
+															? orderData?.item_details?.map(a => +a?.b || 0).reduce((a, b) => a + b)
+															: orderData?.item_details?.length
+															? orderData?.item_details[0]?.b
+															: 0) || 0}
+														</b>
+													</td>
+													<td>
+														<b>
+															{(orderData?.item_details?.length > 1
+																? orderData?.item_details?.map(a => +a?.p || 0).reduce((a, b) => a + b)
+																: orderData?.item_details?.length
+																? orderData?.item_details[0]?.p
+																: 0) || 0}
+														</b>
+													</td>
+													<td></td>
+													<td></td>
+													{editOrder ? 
+														<>
+															<td></td>
+															<td></td>
+															<td></td>
+														</> 
+													: ""}
+												</tr>
+											</tfoot>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div style={{display:"flex", flexDirection:"column",justifyContent:"space-between"}}>
+							<div id="actions-col">
+								<button className="theme-btn" onClick={() => setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData?.counter_uuid))}>
+									<NoteAdd /><span>Counter Note</span>
+								</button>
+								<button
+									className="theme-btn"
+									onClick={e => {
+										e.target.blur()
+										setNotesPoup(prev => !prev)
+									}}
+								>
+									<LuClipboardEdit /><span>Notes</span>
+								</button>
+								<button
+									style={{ backgroundColor: "black", position: "relative" }}
+									className="theme-btn"
+									onClick={() => {
+										if (
+											!window.location.pathname.includes("completeOrderReport") &&
+											(window.location.pathname.includes("admin") || window.location.pathname.includes("trip"))
+										) handleWarehouseChacking()
+										else handlePrint()
+									}}
+								>
+									{/* <span style={printLoading ? { color: "transparent" } : null}> */}
+										<Print /><span>Print</span>
+									{/* </span> */}
+									{printLoading ? (
+										<span
+											style={{
+												position: "absolute",
+												top: "50%",
+												left: "50%",
+												translate: "-50% -50%",
+												borderColor: "white",
+												borderBottomColor: "transparent",
+												width: "22px",
+												height: "22px",
+												borderWidth: "2px",
+												zIndex: 99999999999999999
+											}}
+											className="loader"
+										/>
+									) : null}
+								</button>
+								<hr />
 								<button className="theme-btn" onClick={checkDMSWrapper}>
 									DMS
 								</button>
 								{order?.order_type === "E" && (
 									<button
 										className="theme-btn"
-										style={{ marginLeft: "5px", width: "fit-Content", padding: "8px" }}
 										onClick={convertConfirmation}
 										data-tooltip-id="my-tooltip"
 										data-tooltip-content="Convert"
 									>
-										<TbArrowsExchange2 style={{ fontSize: "1.45rem" }} />
+										Convert
 									</button>
 								)}
-							</div>
-							<div className="inventory_header">
-								<h2>Order Details</h2>
-							</div>
-
-							<div className="topInputs">
-								<div
-									className="inputGroup flex"
-									style={{
-										width: "100%",
-										flexDirection: "row",
-										justifyContent: "space-between"
-									}}
-								>
-									<button
-										style={{ width: "fit-Content" }}
-										className="theme-btn"
-										onClick={e => {
-											e.target.blur()
-											setCommentPoup(prev => !prev)
-										}}
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content="Comments"
-									>
-										<Comment />
-									</button>
-									{!isCancelled && (
-										<button
-											style={{ width: "fit-Content", backgroundColor: "red" }}
-											className="theme-btn"
-											onClick={() => setDeletePopup("Delete")}
-											data-tooltip-id="my-tooltip"
-											data-tooltip-content="Cancel Order"
-										>
-											<Cancel />
-										</button>
-									)}
-
-									{/* {order?.hold !== "Y" ? (
-                    <button
-                      style={{ width: "fit-Content", backgroundColor: "blue" }}
-                      className="theme-btn"
-                      onClick={() => {
-                        if (orderData.notes?.length) {
-                          setDeletePopup("hold");
-                        } else setNotesPoup("hold");
-                      }}
-                    >
-                      Hold Order
-                    </button>
-                  ) : (
-                    <button
-                      style={{ width: "fit-Content", backgroundColor: "blue" }}
-                      className="theme-btn"
-                      onClick={() => {
-                        HoldOrder("N");
-                      }}
-                    >
-                      Cancel Hold
-                    </button>
-                  )} */}
-									<button
-										style={{ width: "fit-Content", backgroundColor: "blue" }}
-										className="theme-btn"
-										onClick={() =>
-											order?.order_type === "E" ? deductionsNotAllowedWarning() : setDeductionsPopup(true)
-										}
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content="Deductions"
-									>
-										<ImScissors />
-									</button>
-									{!isCancelled ? (
-										<button
-											style={{
-												width: "fit-Content",
-												backgroundColor: "#44cd4a"
-											}}
-											className="theme-btn"
-											data-tooltip-id="my-tooltip"
-											data-tooltip-content="Complete Order"
-											onClick={() => {
-												handleWarehouseChacking(true, "complete")
-												setCompleteOrder(true)
-											}}
-										>
-											<CheckCircle />
-										</button>
-									) : (
-										""
-									)}
-									<button
-										style={{
-											width: "fit-Content",
-											backgroundColor: "black",
-											position: "relative"
-										}}
-										className="theme-btn"
-										onClick={() => {
-											if (
-												!window.location.pathname.includes("completeOrderReport") &&
-												(window.location.pathname.includes("admin") || window.location.pathname.includes("trip"))
-											) {
-												handleWarehouseChacking()
-											} else {
-												
-												handlePrint()
-											}
-										}}
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content="Print"
-									>
-										<span style={printLoading ? { color: "transparent" } : null}>
-											<Print />
-										</span>
-										{printLoading ? (
-											<span
-												style={{
-													position: "absolute",
-													top: "50%",
-													left: "50%",
-													translate: "-50% -50%",
-													borderColor: "white",
-													borderBottomColor: "transparent",
-													width: "22px",
-													height: "22px",
-													borderWidth: "2px",
-													zIndex: 99999999999999999
-												}}
-												className="loader"
-											/>
-										) : (
-											<></>
-										)}
-									</button>
-									{editOrder ? (
-										<button
-											className="theme-btn"
-											style={{
-												width: "max-content"
-											}}
-											onClick={() => setHoldPopup("Summary")}
-										>
-											Free
-										</button>
-									) : (
-										<button
-											className="theme-btn"
-											style={{
-												width: "max-content"
-											}}
-											onClick={() => setSplitHold(true)}
-											data-tooltip-id="my-tooltip"
-											data-tooltip-content="Split Order"
-										>
-											<Splitscreen />
-										</button>
-									)}
-									{!isCancelled ? (
-										<button
-											style={{ width: "fit-Content" }}
-											className="theme-btn"
-											onClick={e => {
-												reactInputsRef.current = {}
-												e.target.blur()
-												
-												if (!editOrder) {
-													getItemsData([])
-													getCounters([])
-												}
-												setEditOrder(prev => !prev)
-											}}
-											data-tooltip-id="my-tooltip"
-											data-tooltip-content="Edit Order"
-										>
-											<Edit />
-										</button>
-									) : (
-										""
-									)}
-									<button
-										style={{ width: "fit-Content" }}
-										className="theme-btn"
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content="Assign Trip"
-										onClick={e => {
-											reactInputsRef.current = {}
-											e.target.blur()
-											setPopupForm(true)
-											setSelectedTrip({
-												trip_uuid: orderData?.trip_uuid || 0,
-												warehouse_uuid: orderData?.warehouse_uuid || ""
-											})
-										}}
-									>
-										<DeliveryDiningRounded />
-									</button>
-									<button
-										style={{ width: "fit-Content" }}
-										className="theme-btn"
-										onClick={e => {
-											e.target.blur()
-											setNotesPoup(prev => !prev)
-										}}
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content="Notes"
-									>
-										<LuClipboardEdit />
-									</button>
-								</div>
-							</div>
-
-							<div className="items_table" style={{ flex: "1", paddingLeft: "10px" }}>
-								<table>
-									<thead className="bb b--green" style={{ position: "sticky", top: 0, zIndex: "100" }}>
-										<>
-											<tr>
-												<th>Warehouse</th>
-												<th>
-													{editOrder ? (
-														<Select
-															options={[
-																{ value: "", label: "None" },
-																...warehouse?.map((a, j) => ({
-																	value: a.warehouse_uuid,
-																	label: a.warehouse_title
-																}))
-															]}
-															onChange={e => {
-																setOrderData(prev => ({
-																	...prev,
-																	warehouse_uuid: e.value
-																}))
-															}}
-															value={{
-																value: orderData.warehouse_uuid || "",
-																label:
-																	warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
-																		?.warehouse_title || "None"
-															}}
-															openMenuOnFocus={true}
-															menuPosition="fixed"
-															menuPlacement="auto"
-															placeholder="Item"
-														/>
-													) : (
-														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title ||
-														"None"
-													)}
-												</th>
-												<th>Grand Total</th>
-												<th>{orderData?.order_grandtotal || 0}</th>
-												<th
-													className={
-														window.location.pathname.includes("completeOrderReport") ||
-														window.location.pathname.includes("signedBills") ||
-														window.location.pathname.includes("pendingEntry") ||
-														window.location.pathname.includes("upiTransactionReport")
-															? "hover_class"
-															: ""
-													}
-													onClick={() =>
-														window.location.pathname.includes("completeOrderReport") ||
-														window.location.pathname.includes("signedBills") ||
-														window.location.pathname.includes("pendingEntry") ||
-														window.location.pathname.includes("upiTransactionReport")
-															? setDeliveryPopup("put")
-															: {}
-													}
-												>
-													Payment Total
-												</th>
-												<th>{orderData?.payment_total || 0}</th>
-												<th style={{ width: "12%" }}>UUID</th>
-												<th
-													onClick={() => {
-														setCopymsg(true)
-														navigator.clipboard.writeText(orderData?.order_uuid)
-														setTimeout(() => setCopymsg(false), 1000)
-													}}
-													style={{
-														cursor: "pointer",
-														position: "relative",
-														width: "12%"
-													}}
-													onMouseOver={() => setUuid(true)}
-													onMouseLeave={() => setUuid(false)}
-												>
-													{orderData?.order_uuid?.substring(0, 7) + "..."}
-													{copymsg && (
-														<div
-															style={{
-																position: "absolute",
-																top: "100%"
-															}}
-														>
-															<div id="talkbubble">COPIED!</div>
-														</div>
-													)}
-													{"   "}
-													<ContentCopy
-														style={
-															uuids
-																? {
-																		fontSize: "12px",
-																		transform: "scale(1.5)"
-																  }
-																: { fontSize: "12px" }
-														}
-														onClick={() => {
-															setCopymsg(true)
-															navigator.clipboard.writeText(orderData?.order_uuid)
-															setTimeout(() => setCopymsg(false), 1000)
-														}}
-													/>
-													{uuids && (
-														<div
-															style={{
-																position: "absolute",
-																top: "100%"
-															}}
-														>
-															<div id="talkbubble">{orderData?.order_uuid}</div>
-														</div>
-													)}
-												</th>
-											</tr>
-											<tr>
-												<th colSpan={2} style={{ textAlign: "center" }}>
-													<button
-														style={{ width: "fit-Content" }}
-														className="theme-btn"
-														onClick={() =>
-															setPopupDetails({
-																type: "Status",
-																data: orderData?.status
-															})
-														}
-													>
-														Status
-													</button>
-												</th>
-												<th colSpan={2} style={{ textAlign: "center" }}>
-													<button
-														style={{ width: "fit-Content" }}
-														className="theme-btn"
-														onClick={() =>
-															setPopupDetails({
-																type: "Delivery Return",
-																data: orderData?.delivery_return
-															})
-														}
-													>
-														Delivery Return
-													</button>
-												</th>
-												<th colSpan={2} style={{ textAlign: "center" }}>
-													<button
-														style={{ width: "fit-Content" }}
-														className="theme-btn"
-														onClick={() =>
-															setPopupDetails({
-																type: "Fulfillment",
-																data: orderData?.fulfillment
-															})
-														}
-													>
-														Fulfillment
-													</button>
-												</th>
-												<th colSpan={2} style={{ textAlign: "center" }}>
-													<button
-														style={{ width: "fit-Content" }}
-														className="theme-btn"
-														onClick={() =>
-															setPopupDetails({
-																type: "Auto Added",
-																data: orderData?.auto_Added
-															})
-														}
-													>
-														Auto Added
-													</button>
-												</th>
-											</tr>
-										</>
-									</thead>
-								</table>
-
-								<table className="f6 w-100 center" cellSpacing="0">
-									<thead className="lh-copy" style={{ position: "static" }}>
-										<tr className="white">
-											{editOrder ? (
-												<>
-													<th style={{ width: "8px" }}></th>
-												</>
-											) : (
-												""
-											)}
-											<th className="pa2 tl bb b--black-20 w-30">Sr.</th>
-											<th className="pa2 tl bb b--black-20 w-30">Item Name</th>
-											<th className="pa2 tl bb b--black-20 w-30">MRP</th>
-											{editOrder ? <th className="pa2 tl bb b--black-20 w-30">Status</th> : ""}
-											<th className="pa2 tc bb b--black-20">Quantity(b)</th>
-											<th className="pa2 tc bb b--black-20">Quantity(p)</th>
-											<th className="pa2 tc bb b--black-20 ">Price(p)</th>
-											<th className="pa2 tc bb b--black-20 ">Price(b)</th>
-											{editOrder ? (
-												<>
-													<th className="pa2 tc bb b--black-20 ">Salesperson Discount</th>
-													<th className="pa2 tc bb b--black-20 "></th>
-													<th className="pa2 tc bb b--black-20 "></th>
-												</>
-											) : (
-												""
-											)}
-										</tr>
-									</thead>
-									<tbody className="lh-copy">
-										{orderData?.item_details?.map((item, i) => {
-											const item_title_component_id = `REACT_SELECT_COMPONENT_ITEM_TITLE@${item.uuid}`
-											const item_status_component_id = `REACT_SELECT_COMPONENT_ITEM_STATUS@${item.uuid}`
-
-											return (
-												<tr
-													key={i}
-													style={{
-														height: "20px",
-														backgroundColor:
-															item.price_approval === "N"
-																? "#00edff"
-																: +item.status === 1
-																? "green"
-																: +item.status === 2
-																? "yellow"
-																: +item.status === 3
-																? "red"
-																: "#fff",
-														color:
-															item.price_approval === "N"
-																? "#000"
-																: +item.status === 1 || +item.status === 3
-																? "#fff"
-																: "#000",
-														borderBottom: "2px solid #fff"
-													}}
-												>
-													{editOrder ? (
-														<>
-															<td style={{ width: "8px" }}>
-																{item.price_approval === "N" ? (
-																	<span
-																		onClick={() =>
-																			setOrderData(prev => ({
-																				...prev,
-																				item_details: prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								price_approval: "Y"
-																						  }
-																						: a
-																				)
-																			}))
-																		}
-																	>
-																		<CheckCircle
-																			sx={{ fontSize: 15 }}
-																			style={{
-																				cursor: "pointer",
-																				color: "blue"
-																			}}
-																		/>
-																	</span>
-																) : (
-																	""
-																)}
-																<span
-																	onClick={() =>
-																		setOrderData(prev => {
-																			let exicting = order?.fulfillment?.find(a => a.item_uuid === item.item_uuid)
-																			let difference = 0
-																			if (exicting) {
-																				difference =
-																					+(item.b || 0) * (+item.conversion || 0) +
-																					(+item.p || 0) +
-																					(+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
-																			}
-																			let fulfillment = exicting
-																				? [
-																						...(prev.fulfillment || []),
-
-																						{
-																							item_uuid: item.item_uuid,
-																							b: Math.floor(difference / (+item.conversion || 1)),
-																							p: Math.floor(difference % (+item.conversion || 1))
-																						}
-																				  ]
-																				: [
-																						...(prev.fulfillment || []),
-																						{
-																							item_uuid: item.item_uuid,
-																							b: item.b,
-																							p: item.p
-																						}
-																				  ]
-
-																			return {
-																				...prev,
-																				item_details: prev.item_details?.filter(a => !(a.uuid === item.uuid)),
-																				fulfillment
-																			}
-																		})
-																	}
-																>
-																	<RemoveCircle
-																		sx={{
-																			fontSize: item.price_approval === "N" ? 15 : 20
-																		}}
-																		style={{
-																			cursor: "pointer",
-																			color: "red"
-																		}}
-																	/>
-																</span>
-															</td>
-														</>
-													) : (
-														""
-													)}
-													<td
-														className="ph2 pv1 tl bb b--black-20 bg-white"
-														style={{ textAlign: "center", width: "3ch" }}
-													>
-														{item.sr || i + 1}
-													</td>
-													<td className="ph2 pv1 tl bb b--black-20 bg-white">
-														<div
-															className="inputGroup"
-															index={!item.default ? listItemIndexCount++ : ""}
-															id={!item.default ? item_title_component_id : ""}
-															// style={{ height: "20px" }}
-														>
-															{editOrder && !item.default ? (
-																<Select
-																	ref={ref => (reactInputsRef.current[item_title_component_id] = ref)}
-																	styles={{
-																		control: styles => ({
-																			...styles,
-																			// minHeight: 20,
-																			// maxHeight: 20,
-																			borderRadius: 2,
-																			padding: 0
-																		})
-																	}}
-																	id={"1_item_uuid" + item.uuid}
-																	options={itemsData
-																		?.filter(
-																			a =>
-																				!order?.item_details?.filter(b => a.item_uuid === b.item_uuid)?.length &&
-																				a.status !== 0
-																		)
-																		.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
-																		.map((a, j) => ({
-																			value: a.item_uuid,
-																			label:
-																				a.item_title +
-																				"______" +
-																				a.mrp +
-																				`, ${
-																					company.find(b => b.company_uuid === a.company_uuid)?.company_title
-																				}` +
-																				(a.qty > 0
-																					? " _______[" + CovertedQty(a.qty || 0, a.conversion) + "]"
-																					: ""),
-																			key: a.item_uuid,
-																			qty: a.qty
-																		}))}
-																	onChange={e => {
-																		handleItemSelect(e.value, item.uuid)
-																		shiftFocus(item_status_component_id)
-																	}}
-																	value={{
-																		value: item.item_uuid || "",
-																		label: item.item_title ? item.item_title + "______" + item.mrp : "",
-																		key: item.item_uuid || item.uuid
-																	}}
-																	openMenuOnFocus={true}
-																	autoFocus={
-																		focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)
-																	}
-																	menuPosition="fixed"
-																	menuPlacement="auto"
-																	placeholder="Item"
-																/>
-															) : (
-																itemsData.find(a => a.item_uuid === item.item_uuid)?.item_title || ""
-															)}
-														</div>
-													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-														{item.mrp || ""}
-													</td>
-													{editOrder ? (
-														<td
-															className="ph2 pv1 tc bb b--black-20 bg-white"
-															style={{
-																textAlign: "center",
-																color: "#000",
-																height: "20px"
-															}}
-															index={listItemIndexCount++}
-															id={item_status_component_id}
-														>
-															<Select
-																ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
-																styles={{
-																	control: styles => {
-																		
-																		return {
-																			...styles,
-																			minHeight: 25,
-																			maxHeight: 25,
-																			borderRadius: 2,
-																			padding: 0,
-																			justifyContent: "flex-start",
-																			alignItems: "start"
-																		}
-																	}
-																}}
-																id={"2_item_uuid" + item.uuid}
-																options={default_status}
-																onChange={e => {
-																	setOrderData(prev => ({
-																		...prev,
-																		item_details: prev.item_details?.map(a => {
-																			if (a.uuid === item.uuid) {
-																				const p_price =
-																					+getSpecialPrice(counters, item, order?.counter_uuid)?.price ||
-																					item.p_price
-																				return {
-																					...a,
-																					status: e.value,
-																					p_price: checkDecimalPlaces(p_price),
-																					b_price: chcekIfDecimal(p_price * item.conversion || 0)
-																				}
-																			} else return a
-																		})
-																	}))
-																	shiftFocus(item_status_component_id)
-																}}
-																value={+item.status >= 0 ? default_status.find(a => +a.value === +item.status) : 0}
-																// autoFocus={
-																// 	focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)
-																// }
-																openMenuOnFocus={true}
-																menuPosition="fixed"
-																menuPlacement="auto"
-																placeholder="Status"
-															/>
-														</td>
-													) : (
-														""
-													)}
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center", height: "20px" }}
-													>
-														{editOrder ? (
-															<input
-																id={"q" + item.uuid}
-																type="number"
-																className="numberInput"
-																index={listItemIndexCount++}
-																style={{
-																	width: "10ch",
-																	fontSize: "12px",
-																	padding: 0,
-																	height: "20px"
-																}}
-																value={item.b || 0}
-																onChange={e => {
-																	setOrderData(prev => {
-																		return {
-																			...prev,
-																			item_details: prev.item_details?.map(a =>
-																				a.uuid === item.uuid
-																					? {
-																							...a,
-																							b: e.target.value
-																					  }
-																					: a
-																			)
-																		}
-																	})
-																}}
-																onFocus={e => {
-																	e.target.onwheel = () => false
-																	e.target.select()
-																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
-																disabled={!item.item_uuid}
-																onWheel={e => e.preventDefault()}
-															/>
-														) : (
-															item.b || 0
-														)}
-													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-														{editOrder ? (
-															<input
-																id={"p" + item.uuid}
-																style={{
-																	width: "10ch",
-																	fontSize: "12px",
-																	padding: 0,
-																	height: "20px"
-																}}
-																type="number"
-																className="numberInput"
-																onWheel={e => e.preventDefault()}
-																index={listItemIndexCount++}
-																value={item.p || 0}
-																onChange={e => {
-																	setOrderData(prev => {
-																		return {
-																			...prev,
-																			item_details: prev.item_details?.map(a =>
-																				a.uuid === item.uuid
-																					? {
-																							...a,
-																							p: e.target.value
-																					  }
-																					: a
-																			)
-																		}
-																	})
-																}}
-																onFocus={e => {
-																	e.target.onwheel = () => false
-																	e.target.select()
-																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
-																disabled={!item.item_uuid}
-															/>
-														) : (
-															item.p || 0
-														)}
-													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-														{editOrder ? (
-															<input
-																type="number"
-																style={{
-																	width: "15ch",
-																	fontSize: "12px",
-																	padding: 0,
-																	height: "20px"
-																}}
-																className="numberInput"
-																onWheel={e => e.preventDefault()}
-																index={listItemIndexCount++}
-																value={item?.p_price || 0}
-																onChange={e => onItemPriceChange(e, item)}
-																onFocus={e => {
-																	e.target.onwheel = () => false
-																	e.target.select()
-																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
-																disabled={!item.item_uuid}
-															/>
-														) : (
-															"Rs:" + chcekIfDecimal(item.p_price || 0)
-														)}
-													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-														{editOrder ? (
-															<input
-																type="number"
-																style={{
-																	width: "15ch",
-																	fontSize: "12px",
-																	padding: 0,
-																	height: "20px"
-																}}
-																className="numberInput"
-																onWheel={e => e.preventDefault()}
-																index={listItemIndexCount++}
-																value={item?.b_price || ""}
-																onChange={e => {
-																	setOrderData(prev => {
-																		return {
-																			...prev,
-																			item_details: prev.item_details.map(a =>
-																				a.uuid === item.uuid
-																					? {
-																							...a,
-																							b_price: e.target.value,
-																							p_price: truncateDecimals(e.target.value / item.conversion || 0, 4)
-																					  }
-																					: a
-																			)
-																		}
-																	})
-																	setEditPrices(prev =>
-																		prev.filter(a => a.item_uuid === item.item_uuid).length
-																			? prev.map(a =>
-																					a.item_uuid === item.item_uuid
-																						? {
-																								...a,
-																								b_price: e.target.value,
-																								p_price: checkDecimalPlaces(
-																									e.target.value / item.conversion || 0,
-																									4
-																								)
-																						  }
-																						: a
-																			  )
-																			: prev.length
-																			? [
-																					...prev,
-																					{
-																						...item,
-																						b_price: e.target.value,
-																						p_price: checkDecimalPlaces(e.target.value / item.conversion || 0, 4)
-																					}
-																			  ]
-																			: [
-																					{
-																						...item,
-
-																						b_price: e.target.value,
-																						p_price: checkDecimalPlaces(e.target.value / item.conversion || 0, 4)
-																					}
-																			  ]
-																	)
-																}}
-																onFocus={e => {
-																	e.target.onwheel = () => false
-																	e.target.select()
-																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
-																disabled={!item.item_uuid}
-															/>
-														) : (
-															"Rs:" + truncateDecimals(item?.b_price || 0, 2)
-														)}
-													</td>
-													{editOrder ? (
-														<>
-															<td style={{ textAlign: "center" }}>
-																{item?.charges_discount?.find(a => a.title === "Salesperson Discount")?.value ||
-																	"0"}{" "}
-																%
-															</td>
-															<td>
-																{+item?.item_price !== +item?.p_price &&
-																	(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price ===
-																	+item?.p_price ? (
-																		<span
-																			className="table-icon checkmark"
-																			onClick={() => spcPricePrompt(item, orderData?.counter_uuid, setCounters)}
-																		>{"S"}</span>
-																	) : (
-																		<FaSave
-																			className="table-icon"
-																			title="Save current price as special item price"
-																			onClick={() =>
-																				saveSpecialPrice(
-																					item,
-																					orderData?.counter_uuid,
-																					setCounters,
-																					+item?.p_price
-																				)
-																			}
-																		/>
-																	))}
-															</td>
-															<td>
-																<button
-																	style={{
-																		width: "fit-Content",
-																		fontSize: "12px",
-																		padding: "5px 10px"
-																	}}
-																	className="theme-btn"
-																	onClick={() => setPopupDiscount(item)}
-																>
-																	Discounts
-																</button>
-															</td>
-														</>
-													) : (
-														""
-													)}
-												</tr>
-											)
-										})}
-										{editOrder ? (
-											<tr>
-												<td
-													onClick={() =>
-														setOrderData(prev => ({
-															...prev,
-															item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }]
-														}))
-													}
-												>
-													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#32bd33", cursor: "pointer" }} />
-												</td>
-											</tr>
-										) : (
-											""
-										)}
-										<tr
-											style={{
-												height: "50px",
-
-												borderBottom: "2px solid #fff"
-											}}
-										>
-											<td></td>
-											<td></td>
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-												<div className="inputGroup">Total</div>
-											</td>
-											{editOrder ? (
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td>
-											) : (
-												""
-											)}
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-												{(orderData?.item_details?.length > 1
-													? orderData?.item_details?.map(a => +a?.b || 0).reduce((a, b) => a + b)
-													: orderData?.item_details?.length
-													? orderData?.item_details[0]?.b
-													: 0) || 0}
-											</td>
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
-												{(orderData?.item_details?.length > 1
-													? orderData?.item_details?.map(a => +a?.p || 0).reduce((a, b) => a + b)
-													: orderData?.item_details?.length
-													? orderData?.item_details[0]?.p
-													: 0) || 0}
-											</td>
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td>
-											{editOrder ? <td></td> : ""}
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-					</div>
-
-					<div
-						className="bottomContent"
-						style={{
-							background: "white",
-							justifyContent: "space-between",
-							alignItems: "center",
-							paddingTop: "20px"
-						}}
-					>
-						<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-							<div id="payment-pending-wrapper">
-								{editOrder ? (
-									<>
-										<input
-											type="checkbox"
-											name="payment-pending-status"
-											id="payment-pending-status"
-											checked={Boolean(orderData?.payment_pending)}
-											onChange={e =>
-												setOrderData(x => ({
-													...x,
-													payment_pending: +e.target.checked
-												}))
-											}
-										/>
-										<label htmlFor="payment-pending-status">Payment pending</label>
-									</>
-								) : (
-									<span>Payment pending: {orderData?.payment_pending ? "Yes" : "No"}</span>
-								)}
-							</div>
-							{isCancelled && order?.item_details?.[0]?.original_qty && (
 								<button
-									type="button"
-									className="order-total recreate-order-btn"
-									onClick={copyStageConfirmation}
-									style={{
-										padding: "10px 14px 10px 10px",
-										display: "flex",
-										alignItems: "center",
-										gap: "5px",
-										whiteSpace: "nowrap"
-									}}
+									className="theme-btn"
+									onClick={() =>
+										setPopupDetails({
+											type: "Status",
+											data: orderData?.status
+										})
+									}
 								>
-									<Refresh className="refresh" />
-									<Add className="add" />
-									<span>Recreate Order</span>
+									Status
 								</button>
-							)}
-						</div>
-
-						{editOrder ? (
-							<button
-								type="button"
-								onClick={
-									window.location.pathname.includes("completeOrderReport") ||
-									window.location.pathname.includes("pendingEntry") ||
-									window.location.pathname.includes("upiTransactionReport")
-										? () =>
-												onSubmit({
-													type: { stage: 0, diliveredUser: "" },
-													completedOrderEdited: 1
-												})
-										: () => onSubmit({ type: { stage: 0, diliveredUser: "" } })
-								}
-							>
-								Save
-							</button>
-						) : (
-							""
-						)}
-
-						<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-							{waiting ? (
-								<div style={{ width: "40px" }}>
-									<svg viewBox="0 0 100 100">
-										<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
-											<animateTransform
-												attributeName="transform"
-												type="rotate"
-												dur="1s"
-												repeatCount="indefinite"
-												keyTimes="0;1"
-												values="0 50 51;360 50 51"
-											></animateTransform>
-										</path>
-									</svg>
-								</div>
-							) : (
-								""
-							)}
-
-							<button
-								type="button"
-								onClick={() => {
-									setCaptionPopup(true)
-								}}
-								style={{
-									width: "max-content",
-									padding: "10px 20px",
-									backgroundColor: "#fff",
-									color: "var(--main)",
-									border: "none"
-								}}
-							>
-								<WhatsApp />
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									setDeductionsCoinPopup(true)
-								}}
-								style={{
-									width: "max-content",
-									padding: "10px 0",
-									backgroundColor: "#fff",
-									color: "var(--main)",
-									border: "none"
-								}}
-							>
-								<AddCircleOutline />
-							</button>
-							<button
-								type="button"
-								className="order-total"
-								style={{
-									width: "max-content",
-									padding: "10px 20px",
-									cursor: "default"
-								}}
-							>
-								Order Total : {orderData?.order_grandtotal || 0}
-							</button>
+								<button
+									className="theme-btn"
+									onClick={() =>
+										setPopupDetails({
+											type: "Delivery Return",
+											data: orderData?.delivery_return
+										})
+									}
+								>
+									Delivery Return
+								</button>
+								<button
+									className="theme-btn"
+									onClick={() =>
+										setPopupDetails({
+											type: "Fulfillment",
+											data: orderData?.fulfillment
+										})
+									}
+								>
+									Fulfillment
+								</button>
+								<button
+									className="theme-btn"
+									onClick={() =>
+										setPopupDetails({
+											type: "Auto Added",
+											data: orderData?.auto_Added
+										})
+									}
+								>
+									Auto Added
+								</button>
+							</div>
+							<div id="actions-col">
+								{isCancelled && order?.item_details?.[0]?.original_qty && (
+									<button
+										type="button"
+										className="order-btn order-total recreate-order-btn"
+										onClick={copyStageConfirmation}
+										style={{ width:"auto", fontSize:"unset", fontWeight:'bold' }}
+									>
+										<Refresh className="refresh" />
+										<Add className="add" />
+										<span>Recreate</span>
+									</button>
+								)}
+								{editOrder ? (
+										<button
+											className="order-total"
+											type="button"
+											style={{ width:"auto",fontSize:'unset',justifyContent:'center',fontWeight:'bold' }}
+											onClick={
+												window.location.pathname.includes("completeOrderReport") ||
+												window.location.pathname.includes("pendingEntry") ||
+												window.location.pathname.includes("upiTransactionReport")
+													? () =>
+															onSubmit({
+																type: { stage: 0, diliveredUser: "" },
+																completedOrderEdited: 1
+															})
+													: () => onSubmit({ type: { stage: 0, diliveredUser: "" } })
+											}
+										>
+											Save
+										</button>
+								) : null}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -2767,7 +2643,7 @@ export function OrderDetails({
 					}}
 					taskData={taskPopup}
 					users={users}
-					counter={counters.find(a => a.counter_uuid === orderData.counter_uuid)}
+					counter={counters.find(a => a.counter_uuid === orderData?.counter_uuid)}
 				/>
 			) : (
 				""
@@ -2969,7 +2845,7 @@ export function OrderDetails({
 				<TripPopup
 					onSave={() => {
 						setPopupForm(false)
-						getOrder(orderData.order_uuid)
+						getOrder(orderData?.order_uuid)
 					}}
 					selectedTrip={selectedTrip}
 					setSelectedTrip={setSelectedTrip}
@@ -3046,7 +2922,7 @@ export function OrderDetails({
 			{deductionsCoinPopup ? (
 				<AddCoinPopup
 					onSave={() => setDeductionsCoinPopup(false)}
-					data={orderData.coin}
+					data={orderData?.coin}
 					updateBilling={result => {
 						callBilling(
 							{
@@ -4539,7 +4415,6 @@ const UserSelection = ({ users, selection, setSelection }) => {
 		</div>
 	)
 }
-
 function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
 	const [add, setAdd] = useState(0)
 	const [sub, setSub] = useState(0)
@@ -4621,7 +4496,6 @@ function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
 		</div>
 	)
 }
-
 function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 	const [data, setData] = useState([])
 
@@ -4674,7 +4548,7 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 
 							<div className="items_table" style={{ flex: "1", height: "75vh", overflow: "scroll" }}>
 								<table className="f6 w-100 center" cellSpacing="0">
-									<thead className="lh-copy" style={{ position: "static" }}>
+									<thead style={{ position: "static" }}>
 										<tr className="white">
 											<th className="pa2 tc bb b--black-20">Notes</th>
 											<th className="pa2 tc bb b--black-20">Created At</th>
@@ -4682,10 +4556,10 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 										</tr>
 									</thead>
 
-									<tbody className="lh-copy">
+									<tbody>
 										{data?.map((item, i) => (
 											<tr key={item.uuid} item-billing-type={item?.billing_type}>
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+												<td>
 													<input
 														id={"p" + item.uuid}
 														style={{

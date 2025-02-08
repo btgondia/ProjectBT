@@ -15,7 +15,6 @@ import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { checkDecimalPlaces } from "../../utils/helperFunctions";
-import { MdCurrencyRupee } from "react-icons/md";
 import { getInitialOrderValue } from "../../utils/constants";
 
 const options = {
@@ -204,9 +203,9 @@ export default function AddOrder() {
             (a) => a.company_uuid === item.company_uuid
           )?.item_rate;
           let item_price = item.item_price;
-          if (item_rate === "a") item_price = item.item_price_a;
-          else if (item_rate === "b") item_price = item.item_price_b;
-          else if (item_rate === "c") item_price = item.item_price_c;
+          if (item_rate === "a") item_price = item.item_price_a || 0;
+          else if (item_rate === "b") item_price = item.item_price_b || 0;
+          else if (item_rate === "c") item_price = item.item_price_c || 0;
           else item_rate = null
           return { ...item, item_rate, item_price };
         })
@@ -579,7 +578,7 @@ export default function AddOrder() {
     if (!itemData) return
     const p_price = +getSpecialPrice(counters, itemData, order?.counter_uuid)?.price || itemData.item_price
 
-		return {
+		const constructedItem = {
 			...itemData,
 			p_price,
 			b_price: Math.floor(p_price * itemData.conversion || 0),
@@ -588,6 +587,7 @@ export default function AddOrder() {
         { title: "dsc2", value: 0 },
       ],
 		}
+		return constructedItem
 	}
 
   const handleFreeItems = ({item_details, newFreeItems}) => {
@@ -649,22 +649,6 @@ export default function AddOrder() {
                     placeholder="Select"
                   />
                 </div>
-
-                {order.counter_uuid ? (
-                  <button
-                    className="theme-btn"
-                    style={{
-                      width: "max-content",
-                      position: "fixed",
-                      right: "100px",
-                    }}
-                    onClick={() => setFreeItemsModal(true)}
-                  >
-                    Free
-                  </button>
-                ) : (
-                  ""
-                )}
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
                 <label htmlFor="Warehouse">Warehouse</label>
@@ -777,6 +761,15 @@ export default function AddOrder() {
                   />
                 </div>
               </div>
+              {order.counter_uuid ? (
+                <button
+                  className="theme-btn order-total"
+                  style={{marginTop:"auto",width:"fit-content"}}
+                  onClick={() => setFreeItemsModal(true)}
+                >
+                  Free
+                </button>
+              ) : null}
             </div>
 
             <div
@@ -793,8 +786,7 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20 ">Price (box)</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc1</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc2</th>
-                    <th className="pa2 tc bb b--black-20 ">Special Price</th>
-                    <th className="pa2 tc bb b--black-20 ">Item Total</th>
+                    <th className="pa2 tc bb b--black-20 ">Special Prc</th>
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
                 </thead>
@@ -947,6 +939,7 @@ export default function AddOrder() {
                             type="text"
                             className="numberInput"
                             min={1}
+                            style={{width:"100px"}}
                             onWheel={(e) => e.preventDefault()}
                             value={item?.b_price}
                             onChange={(e) => {
@@ -1132,25 +1125,20 @@ export default function AddOrder() {
                           />
                         </td>
                         <td className="ph2 pv1 tc bb b--black-20 bg-white">
-                          {+item?.item_price !== +item?.p_price &&
-                            (+getSpecialPrice(
-                              counters,
-                              item,
-                              order?.counter_uuid
-                            )?.price === +item?.p_price ? (
-                              <MdCurrencyRupee 
-                                className="table-icon checkmark"
-                                onClick={() =>
-                                  spcPricePrompt(
-                                    item,
-                                    order?.counter_uuid,
-                                    setCounters
-                                  )
-                                }
-                              />
-                            ) : item.item_rate
-                            ? <span className="table-icon checkmark" style={{margin:'auto',textAlign:'center'}}>{item.item_rate?.toUpperCase()}</span>
-                            : (
+                          {+item?.item_price !== +item?.p_price
+                            ? (+getSpecialPrice(counters,item,order?.counter_uuid)?.price === +item?.p_price ? (
+                                <span
+                                  className="table-icon checkmark"
+                                  style={{margin:'auto',textAlign:'center'}}
+                                  onClick={() =>
+                                    spcPricePrompt(
+                                      item,
+                                      order?.counter_uuid,
+                                      setCounters
+                                    )
+                                  }
+                                >{"S"}</span>
+                            ) : (
                               <FaSave
                                 className="table-icon"
                                 title="Save current price as special item price"
@@ -1162,13 +1150,9 @@ export default function AddOrder() {
                                   )
                                 }
                               />
-                            ))}
-                        </td>
-                        <td
-                          className="ph2 pv1 tc bb b--black-20 bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          {item?.item_total || ""}
+                            )) : item.item_rate
+                            ? <span className="table-icon checkmark" style={{margin:'auto',textAlign:'center'}}>{item.item_rate?.toUpperCase()}</span>
+                            : null}
                         </td>
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1829,7 +1813,7 @@ function PaymentModal({
 }
 
 const ItemsMenuList = ({ children, ...props }) => (
-  <div {...props} style={{maxHeight:'50vh',overflow:'auto'}} onClick={(e) => {
+  <components.MenuList {...props} style={{maxHeight:'50vh',overflow:'auto'}} onClick={(e) => {
     const target = e.target.closest("[data-item-uuid]")
     if (target) {
       props.setValue({
@@ -1839,7 +1823,7 @@ const ItemsMenuList = ({ children, ...props }) => (
     }
   }}>
     {children}
-  </div>
+  </components.MenuList>
 )
 
 const ItemOption = ({ data, isFocused, ...props }) => (

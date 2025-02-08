@@ -15,7 +15,6 @@ import context from "../../context/context";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
 import { getFormateDate } from "../../utils/helperFunctions";
-import { MdCurrencyRupee } from "react-icons/md";
 
 const LedgersPage = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -897,10 +896,10 @@ function CounterPrices({ close, item }) {
                                 {+counter?.special_price ===
                                   +modifiedPrices[counter?.counter_uuid] ||
                                 !modifiedPrices[counter?.counter_uuid] ? (
-                                  <MdCurrencyRupee
-                                    className="table-icon checkmark"
-                                    style={{ margin: 0 }}
-                                  />
+                                  <span
+																			className="table-icon checkmark"
+                                      style={{ margin: 0 }}
+                                  >{"S"}</span>
                                 ) : (
                                   <FaSave
                                     style={{ margin: 0 }}

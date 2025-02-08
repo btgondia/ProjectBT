@@ -143,19 +143,22 @@ svg.table-icon {
 }
 
 .table-icon.checkmark {
-	padding: 8px;
 	background: #32bd33;
 	border-radius: 50%;
-	display: block;
-	width: 36px;
-	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 33px;
+	height: 33px;
 	color: white;
 	cursor: pointer;
+	line-height: 0.9em;
 	transition: all 0.5s ease;
+	border: 1px solid transparent;
 }
 
 .table-icon.checkmark:hover {
-	border: 1px solid #4ac95912;
+	border-color:#4ac95912;
 	scale: 1.2;
 }
 

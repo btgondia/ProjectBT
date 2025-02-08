@@ -14,9 +14,8 @@ import context from "../../context/context";
 import { server } from "../../App";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
-import Select from "react-select";
 import ItemSequence from "../../components/ItemSequence";
-import { MdCurrencyRupee } from "react-icons/md";
+
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
@@ -1934,10 +1933,10 @@ function CounterPrices({ close, item }) {
                                 {+counter?.special_price ===
                                   +modifiedPrices[counter?.counter_uuid] ||
                                 !modifiedPrices[counter?.counter_uuid] ? (
-                                  <MdCurrencyRupee
-                                    className="table-icon checkmark"
-                                    style={{ margin: 0 }}
-                                  />
+                                  <span
+																			className="table-icon checkmark"
+                                      style={{ margin: 0 }}
+                                  >{"S"}</span>
                                 ) : (
                                   <FaSave
                                     style={{ margin: 0 }}

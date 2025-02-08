@@ -72,7 +72,7 @@ const Header = () => {
                   Navigate("/accounting_dashboard");
                 }
               }}
-              checked={view}
+              checked={Boolean(view)}
             />
           </div>
           <ToggleOff

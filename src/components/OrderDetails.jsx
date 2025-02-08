@@ -44,7 +44,6 @@ import {
 } from "../utils/helperFunctions"
 import { useLocation } from "react-router-dom"
 import { getInitialOrderValue } from "../utils/constants"
-import { MdCurrencyRupee } from "react-icons/md"
 
 const default_status = [
 	{ value: 0, label: "Preparing" },
@@ -2450,10 +2449,10 @@ export function OrderDetails({
 																{+item?.item_price !== +item?.p_price &&
 																	(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price ===
 																	+item?.p_price ? (
-																		<MdCurrencyRupee
+																		<span
 																			className="table-icon checkmark"
 																			onClick={() => spcPricePrompt(item, orderData?.counter_uuid, setCounters)}
-																		/>
+																		>{"S"}</span>
 																	) : (
 																		<FaSave
 																			className="table-icon"

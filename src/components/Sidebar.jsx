@@ -94,7 +94,7 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 			<div className="left-panel" style={{ position: "relative", zIndex: "9000000" }}>
 				<button
 					className="submit"
-					style={{ margin: 0, borderRadius: 0 }}
+					style={{ margin: 0, borderRadius: 0, height:'50px' }}
 					onClick={() => {
 						setCounterNotesPopup(true)
 					}}

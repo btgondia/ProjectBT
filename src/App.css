@@ -177,8 +177,8 @@ svg.table-icon {
 	width: 50vw;
 	translate: calc(50vw - 50%) calc(50vh - 50%);
 	background: white;
-	padding: 18px 22px;
-	border-radius: 5px;
+	padding: 22px 28px;
+	border-radius: 16px;
 	min-width: 320px;
 	position: relative;
 	overflow: hidden;
@@ -198,12 +198,12 @@ svg.table-icon {
 }
 
 .prompt h2 {
-	font-size: 20px;
+	font-size: 24px;
 }
 
 .prompt p {
-	font-size: 1rem;
-	margin: 5px 0 30px;
+	font-size: 1.25rem;
+	margin: 8px 0 36px;
 }
 
 .prompt-actions {
@@ -215,12 +215,13 @@ svg.table-icon {
 .prompt-actions button {
 	border: none;
 	background: none;
-	padding: 8px 14px;
-	border-radius: 5px;
-	font-size: 1rem;
+	padding: 12px 20px;
+	border-radius: 8px;
+	font-size: 1.1rem;
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	font-weight: 500;
 }
 
 .prompt-actions button:disabled {
@@ -234,18 +235,20 @@ svg.table-icon {
 }
 
 .prompt-actions button.cancel {
-	border: 1px solid red;
-	color: red;
+	color: white;
+	background: red;
+	font-weight: 600;
 }
 
 .prompt-actions button.confirm {
-	background: #44cd4a;
+	background: var(--mainColor);
 	color: white;
+	font-weight: 600;
 }
 
 .prompt-actions button.backSafely {
-	border: 1px solid #44cd4a;
-	color: #44cd4a;
+	border: 1px solid var(--mainColor);
+	color: var(--mainColor);
 }
 
 .prompt-actions button.delete {

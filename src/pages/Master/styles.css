@@ -874,6 +874,15 @@ input#item-sales-searchbar {
 	gap: 5px;
 }
 
+.theme-btn.simple {
+	background: none;
+	border: none;
+	border-radius: none;
+	color: black;
+	padding: 0;
+	margin: 0;
+}
+
 .theme-btn.round {
 	border-radius: 5rem;
 	font-size: 1rem;

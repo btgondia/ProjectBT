@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react"
 import axios from "axios"
 import Select from "react-select"
-import { LuClipboardEdit, LuFileCog } from "react-icons/lu"
+import { LuCircleDashed, LuClipboardEdit, LuFileCog } from "react-icons/lu"
 import { ImScissors } from "react-icons/im"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import { v4 as uuid } from "uuid"
@@ -19,10 +19,15 @@ import {
 	NoteAdd,
 	Print,
 	Refresh,
+	Replay,
+	ReplayCircleFilledRounded,
 	Splitscreen,
 	WhatsApp
 } from "@mui/icons-material"
-import { FaCircleMinus } from "react-icons/fa6";
+import { PiCircleDashedBold } from "react-icons/pi";
+import { TbArrowsExchange2 } from "react-icons/tb";
+
+import { FaCircleMinus, FaLink } from "react-icons/fa6";
 
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
@@ -44,7 +49,7 @@ import {
 } from "../utils/helperFunctions"
 import { useLocation } from "react-router-dom"
 import { getInitialOrderValue } from "../utils/constants"
-import { MdCancel, MdCurrencyRupee, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff } from "react-icons/md"
+import { MdCancel, MdCurrencyRupee, MdDownloadDone, MdFileDownloadDone, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff, MdReplay } from "react-icons/md"
 import { RiPercentFill } from "react-icons/ri";
 import { IoMdAddCircle, IoMdCloseCircle } from "react-icons/io";
 
@@ -1442,7 +1447,6 @@ export function OrderDetails({
 	) : (
 		<>
 			<div id="overlay" className="order-details">
-				<div style={{background:"red",flex:1,opacity:0,cursor:"pointer"}} onClick={() => onSave()} />
 				<div id="drawer">
 					<div className="inventory_header" style={{position:"relative"}}>
 						<h2
@@ -1463,13 +1467,13 @@ export function OrderDetails({
 									counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.route_uuid
 							)?.route_title || ""} • {orderData?.invoice_number || ""}
 						</h2>
-						<button className="theme-btn" style={{position:"absolute",right:"0px",top:"50%",translate:"0 -50%"}} onClick={() => onSave()}>
-							<IoMdCloseCircle style={{fontSize:"1.5rem"}} />
+						<button style={{padding:0,border:"none",background:"none",color:"white",display:"flex",position:"absolute",right:"10px",top:"50%",translate:"0 -50%"}} onClick={() => onSave()}>
+							<IoMdCloseCircle style={{fontSize:"2rem"}} />
 						</button>
 					</div>
 					<div style={{display:"flex", padding:'10px',gap:'10px'}}>
 						<div style={{display:"flex", flexDirection:"column",justifyContent:"space-between"}}>
-							<div id="actions-col">
+							<div className="action-buttons">
 								{!isCancelled ? (
 									<>
 										<button
@@ -1504,17 +1508,6 @@ export function OrderDetails({
 								<button
 									className="theme-btn"
 									onClick={e => {
-										e.target.blur()
-										setCommentPoup(prev => !prev)
-									}}
-									data-tooltip-id="my-tooltip"
-									data-tooltip-content="Comments"
-								>
-									<Comment /><span>Comments</span>
-								</button>
-								<button
-									className="theme-btn"
-									onClick={e => {
 										reactInputsRef.current = {}
 										e.target.blur()
 										setPopupForm(true)
@@ -1526,6 +1519,16 @@ export function OrderDetails({
 								>
 									<DeliveryDiningRounded /><span>Assign Trip</span>
 								</button>
+								<hr />
+								{order?.order_type === "E" && (
+									<button
+										className="theme-btn"
+										onClick={convertConfirmation}
+									>
+										<TbArrowsExchange2 />
+										<span>Convert</span>
+									</button>
+								)}
 								<button
 									className="theme-btn"
 									disabled={editOrder}
@@ -1534,288 +1537,134 @@ export function OrderDetails({
 									<Splitscreen /><span>Split Order</span>
 								</button>
 							</div>
-							<div id="actions-col">
-								<button
-									className="theme-btn"
-									disabled={!editOrder}
-									onClick={() => setHoldPopup("Summary")}
-									>
-									<MdLocalOffer /> Free
-								</button>
-								<button
-									className="theme-btn"
-									disabled={!editOrder}
-									onClick={() => {
-										setOrderData(prev => ({
-											...prev,
-											item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }]
-										}))
-										setTimeout(() => document.querySelector(".items_table tbody>tr:last-child").scrollIntoView(), 100);
-									}}
-								>
-									<AddIcon />
-									<span>Add Item</span>
-								</button>
-								
-								<hr />
-								
-								<button
-									className="theme-btn"
-									style={{background:editOrder?"red":"var(--main)"}}
-									onClick={e => {
-										reactInputsRef.current = {}
-										e.target.blur()
-										if (!editOrder) {
-											getItemsData([])
-											getCounters([])
-										}
-										setEditOrder(prev => !prev)
-									}}
-									>
-									{
-										editOrder 
-										? <><MdOutlineEditOff /><span>Discard</span></>
-										: <><MdOutlineEdit /><span>Edit Order</span></>
-									}
-								</button>
-							</div>
 						</div>
 						<div style={{flex:1}}>
 							<div id="voucherForm">
-								{true ? (
-									<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000", gap:"10px", marginBottom:"10px" }}>
+								<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000", gap:"10px", marginBottom:"10px" }}>
+									<div className="inputGroup">
+										<label htmlFor="Warehouse">Counter</label>
 										<div className="inputGroup">
-											<label htmlFor="Warehouse">Counter</label>
-											<div className="inputGroup">
-												<Select
-													isDisabled={!editOrder}
-													styles={{
-														container:(provided) => ({
-															...provided,
-															width:"240px",
-														}),
-														...selectStyles,
-													}}
-													options={counters?.map(a => ({
-														value: a.counter_uuid,
-														label: a.counter_title + ", " + a.route_title
-													}))}
-													onChange={doc => {
-														setOrderData(prev => ({
-															...prev,
-															counter_uuid: doc.value
-														}))
-													}}
-													value={
-														orderData?.counter_uuid
-															? {
-																	value: orderData?.counter_uuid,
-																	label: counters?.find(j => j.counter_uuid === orderData?.counter_uuid)
-																		?.counter_title
-																}
-															: { value: 0, label: "None" }
-													}
-													openMenuOnFocus={true}
-													menuPosition="fixed"
-													menuPlacement="auto"
-													placeholder="Select"
-												/>
-											</div>
-										</div>
-										<div className="inputGroup">
-											<label htmlFor="Warehouse">Priority</label>
-											<div className="inputGroup">
-												<Select
-													isDisabled={!editOrder}
-													styles={{
-														container:(provided) => ({
-															...provided,
-															width:"110px"
-														}),
-														...selectStyles
-													}}
-													options={priorityOptions}
-													onChange={doc =>
-														setOrderData(x => ({
-															...x,
-															priority: doc?.value
-														}))
-													}
-													value={priorityOptions?.find(j => j.value === orderData?.priority)}
-													openMenuOnFocus={true}
-													menuPosition="fixed"
-													menuPlacement="auto"
-													placeholder="Select Priority"
-												/>
-											</div>
-										</div>
-										<div className="inputGroup">
-											<label htmlFor="Warehouse">Warehouse</label>
-											<div style={{display:"flex"}}>
-												<Select
-													isDisabled={!editOrder}
-													styles={{
-														container:(provided) => ({
-															...provided,
-															width:"180px"
-														}),
-														...selectStyles
-													}}
-													options={[
-														{ value: "", label: "None" },
-														...warehouse?.map((a, j) => ({
-															value: a.warehouse_uuid,
-															label: a.warehouse_title
-														}))
-													]}
-													onChange={e => {
-														setOrderData(prev => ({
-															...prev,
-															warehouse_uuid: e.value
-														}))
-													}}
-													value={{
-														value: orderData?.warehouse_uuid || "",
-														label:
-															warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
-																?.warehouse_title || "None"
-													}}
-													openMenuOnFocus={true}
-													menuPosition="fixed"
-													menuPlacement="auto"
-													placeholder="Item"
-												/>
-											</div>
-										</div>
-										<div className="inputGroup">
-											<label htmlFor="Warehouse">Time</label>
-											<div style={{display:"flex"}}>
-												<div className="inputGroup" style={{ width: "fit-content" }}>
-													{/* <label
-														htmlFor="order-datetime"
-														style={{ margin: "auto", width: "fit-content" }}>
-														{new Date(+orderData?.time_1).toDateString()}
-													</label> */}
-													<input
-														type="datetime-local"
-														id="order-datetime"
-														onChange={handleDateTimeUpdate}
-														disabled={!editOrder || dateTimeUpdating === 1}
-														value={orderData?.time_1 ? new Date(+orderData?.time_1).toJSON().split(".")[0] : ""}
-														/>
-												</div>
-												{/* {dateTimeUpdating === 2 ? (
-													<span style={{ fontSize: "1.1rem" }}>✓</span>
-												) : (
-													<svg viewBox="0 0 100 100" style={{ width: "20px", opacity: dateTimeUpdating }}>
-														<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
-															<animateTransform
-																attributeName="transform"
-																type="rotate"
-																dur="1s"
-																repeatCount="indefinite"
-																keyTimes="0;1"
-																values="0 50 51;360 50 51"
-															></animateTransform>
-														</path>
-													</svg>
-												)} */}
-											</div>
+											<Select
+												isDisabled={!editOrder}
+												styles={{
+													container:(provided) => ({
+														...provided,
+														width:"240px",
+													}),
+													...selectStyles,
+												}}
+												options={counters?.map(a => ({
+													value: a.counter_uuid,
+													label: a.counter_title + ", " + a.route_title
+												}))}
+												onChange={doc => {
+													setOrderData(prev => ({
+														...prev,
+														counter_uuid: doc.value
+													}))
+												}}
+												value={
+													orderData?.counter_uuid
+														? {
+																value: orderData?.counter_uuid,
+																label: counters?.find(j => j.counter_uuid === orderData?.counter_uuid)
+																	?.counter_title
+															}
+														: { value: 0, label: "None" }
+												}
+												openMenuOnFocus={true}
+												menuPosition="fixed"
+												menuPlacement="auto"
+												placeholder="Select"
+											/>
 										</div>
 									</div>
-								) : null}
-								<div className="order-basic-details">
-									<div>
-										<div>
-											<span><b>UUID</b></span>
-											<span
-												onClick={() => {
-													setCopymsg(true)
-													navigator.clipboard.writeText(orderData?.order_uuid)
-													setTimeout(() => setCopymsg(false), 1000)
+									<div className="inputGroup">
+										<label htmlFor="Warehouse">Priority</label>
+										<div className="inputGroup">
+											<Select
+												isDisabled={!editOrder}
+												styles={{
+													container:(provided) => ({
+														...provided,
+														width:"110px"
+													}),
+													...selectStyles
 												}}
-												style={{
-													cursor: "pointer",
-													position: "relative",
-													width: "12%",
-													display:"flex",
-													alignItems:"center",
-													gap:'10px'
-												}}
-												onMouseOver={() => setUuid(true)}
-												onMouseLeave={() => setUuid(false)}
-											>
-												{orderData?.order_uuid?.substring(0, 7) + "..."}
-												{copymsg && (
-													<div
-														style={{
-															position: "absolute",
-															top: "100%"
-														}}
-													>
-														<div id="talkbubble">COPIED!</div>
-													</div>
-												)}
-												{"   "}
-												<ContentCopy
-													style={
-														uuids
-															? {
-																	fontSize: "12px",
-																	transform: "scale(1.5)"
-																}
-															: { fontSize: "12px" }
-													}
-													onClick={() => {
-														setCopymsg(true)
-														navigator.clipboard.writeText(orderData?.order_uuid)
-														setTimeout(() => setCopymsg(false), 1000)
-													}}
-												/>
-												{uuids && (
-													<div
-														style={{
-															position: "absolute",
-															top: "100%"
-														}}
-													>
-														<div id="talkbubble">{orderData?.order_uuid}</div>
-													</div>
-												)}
-											</span>
-										</div>
-										<div>
-											<span><b>Grand Total</b></span>
-											<span>₹{orderData?.order_grandtotal || 0}</span>
-										</div>
-										<div>
-											<span
-												className={
-													window.location.pathname.includes("completeOrderReport") ||
-													window.location.pathname.includes("signedBills") ||
-													window.location.pathname.includes("pendingEntry") ||
-													window.location.pathname.includes("upiTransactionReport")
-														? "hover_class"
-														: ""
+												options={priorityOptions}
+												onChange={doc =>
+													setOrderData(x => ({
+														...x,
+														priority: doc?.value
+													}))
 												}
-												onClick={() =>
-													window.location.pathname.includes("completeOrderReport") ||
-													window.location.pathname.includes("signedBills") ||
-													window.location.pathname.includes("pendingEntry") ||
-													window.location.pathname.includes("upiTransactionReport")
-														? setDeliveryPopup("put")
-														: {}
-												}
-											>
-												<b>Payment Total</b>
-											</span>
-											<span>₹{orderData?.payment_total || 0}</span>
+												value={priorityOptions?.find(j => j.value === orderData?.priority)}
+												openMenuOnFocus={true}
+												menuPosition="fixed"
+												menuPlacement="auto"
+												placeholder="Select Priority"
+											/>
 										</div>
 									</div>
-									<div>
-										{waiting ? (
-											<div style={{ width: "40px" }}>
-												<svg viewBox="0 0 100 100">
+									<div className="inputGroup">
+										<label htmlFor="Warehouse">Warehouse</label>
+										<div style={{display:"flex"}}>
+											<Select
+												isDisabled={!editOrder}
+												styles={{
+													container:(provided) => ({
+														...provided,
+														width:"180px"
+													}),
+													...selectStyles
+												}}
+												options={[
+													{ value: "", label: "None" },
+													...warehouse?.map((a, j) => ({
+														value: a.warehouse_uuid,
+														label: a.warehouse_title
+													}))
+												]}
+												onChange={e => {
+													setOrderData(prev => ({
+														...prev,
+														warehouse_uuid: e.value
+													}))
+												}}
+												value={{
+													value: orderData?.warehouse_uuid || "",
+													label:
+														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
+															?.warehouse_title || "None"
+												}}
+												openMenuOnFocus={true}
+												menuPosition="fixed"
+												menuPlacement="auto"
+												placeholder="Item"
+											/>
+										</div>
+									</div>
+									<div className="inputGroup">
+										<label htmlFor="Warehouse">Time</label>
+										<div style={{display:"flex"}}>
+											<div className="inputGroup" style={{ width: "fit-content" }}>
+												{/* <label
+													htmlFor="order-datetime"
+													style={{ margin: "auto", width: "fit-content" }}>
+													{new Date(+orderData?.time_1).toDateString()}
+												</label> */}
+												<input
+													type="datetime-local"
+													id="order-datetime"
+													onChange={handleDateTimeUpdate}
+													disabled={!editOrder || dateTimeUpdating === 1}
+													value={orderData?.time_1 ? new Date(+orderData?.time_1).toJSON().split(".")[0] : ""}
+													/>
+											</div>
+											{/* {dateTimeUpdating === 2 ? (
+												<span style={{ fontSize: "1.1rem" }}>✓</span>
+											) : (
+												<svg viewBox="0 0 100 100" style={{ width: "20px", opacity: dateTimeUpdating }}>
 													<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
 														<animateTransform
 															attributeName="transform"
@@ -1827,58 +1676,7 @@ export function OrderDetails({
 														></animateTransform>
 													</path>
 												</svg>
-											</div>
-										) : (
-											""
-										)}
-
-										<button
-											type="button"
-											onClick={() => {setCaptionPopup(true)}}
-											style={{
-												display:"flex",
-												alignItems:"center",
-												background: "none",
-												color: "var(--main)",
-												border: "none"
-											}}
-										>
-											<WhatsApp />
-										</button>
-										<button
-											type="button"
-											onClick={() => {setDeductionsCoinPopup(true)}}
-											style={{
-												display:"flex",
-												alignItems:"center",
-												background: "none",
-												color: "var(--main)",
-												border: "none"
-											}}
-										>
-											<AddCircleOutline />
-										</button>
-										<label>
-											{editOrder && (
-												<input
-													type="checkbox"
-													name="payment-pending-status"
-													id="payment-pending-status"
-													checked={Boolean(orderData?.payment_pending)}
-													onChange={e =>
-														setOrderData(x => ({
-															...x,
-															payment_pending: +e.target.checked
-														}))
-													}
-												/>
-											)}
-											<span><b>Payment pending</b></span>
-											{!editOrder && <span>{orderData?.payment_pending ? "Yes" : "No"}</span>}
-										</label>
-										<div>
-											<span><b>Order Total</b></span>
-											<span>₹{orderData?.order_grandtotal || 0}</span>
+											)} */}
 										</div>
 									</div>
 								</div>
@@ -1892,7 +1690,7 @@ export function OrderDetails({
 													<th>#</th>
 													<th style={{textAlign:"left"}}>Item Name</th>
 													<th>MRP</th>
-													{editOrder ? <th>Status</th> : ""}
+													{editOrder ? <th style={{textAlign:"center"}}>Status</th> : ""}
 													<th>Qty(b)</th>
 													<th>Qty(p)</th>
 													<th>Price(p)</th>
@@ -2102,6 +1900,7 @@ export function OrderDetails({
 																			container:(provided)=>({
 																				...provided,
 																				width:"130px",
+																				margin:"auto"
 																			}),
 																			dropdownIndicator: (styles) => ({
 																				...styles,
@@ -2151,12 +1950,6 @@ export function OrderDetails({
 																		type="number"
 																		className="numberInput"
 																		index={listItemIndexCount++}
-																		style={{
-																			width: "50px",
-																			fontSize: "14px",
-																			padding: 0,
-																			height: "20px"
-																		}}
 																		value={item.b || 0}
 																		onChange={e => {
 																			setOrderData(prev => {
@@ -2189,12 +1982,6 @@ export function OrderDetails({
 																{editOrder ? (
 																	<input
 																		id={"p" + item.uuid}
-																		style={{
-																			width: "50px",
-																			fontSize: "14px",
-																			padding: 0,
-																			height: "20px"
-																		}}
 																		type="number"
 																		className="numberInput"
 																		onWheel={e => e.preventDefault()}
@@ -2230,12 +2017,6 @@ export function OrderDetails({
 																{editOrder ? (
 																	<input
 																		type="number"
-																		style={{
-																			width: "70px",
-																			fontSize: "14px",
-																			padding: 0,
-																			height: "20px"
-																		}}
 																		className="numberInput"
 																		onWheel={e => e.preventDefault()}
 																		index={listItemIndexCount++}
@@ -2256,12 +2037,6 @@ export function OrderDetails({
 																{editOrder ? (
 																	<input
 																		type="number"
-																		style={{
-																			width: "70px",
-																			fontSize: "14px",
-																			padding: 0,
-																			height: "20px"
-																		}}
 																		className="numberInput"
 																		onWheel={e => e.preventDefault()}
 																		index={listItemIndexCount++}
@@ -2333,17 +2108,18 @@ export function OrderDetails({
 																	</td>
 																	<td>
 																		{+item?.item_price !== +item?.p_price &&
-																			(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price ===
-																			+item?.p_price ? (
-																				<MdCurrencyRupee
+																			(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price === +item?.p_price ? (
+																				<span
 																					className="table-icon checkmark"
+																					style={{border:"1px solid white"}}
 																					onClick={() => spcPricePrompt(item, orderData?.counter_uuid, setCounters)}
-																				/>
+																				>S</span>
 																			) : (
 																				<FaSave
+																					style={{fontSize:"1.8rem"}}
 																					className="table-icon"
 																					title="Save current price as special item price"
-																					onClick={() =>
+																					onClick={() =>	
 																						saveSpecialPrice(
 																							item,
 																							orderData?.counter_uuid,
@@ -2355,11 +2131,7 @@ export function OrderDetails({
 																			))}
 																	</td>
 																	<td>
-																		<button
-																			style={{ padding: "6px", minWidth:'auto', borderRadius:"2rem" }}
-																			className="theme-btn"
-																			onClick={() => setPopupDiscount(item)}
-																		>
+																		<button className="table-icon fill" onClick={() => setPopupDiscount(item)}>
 																			<RiPercentFill />
 																		</button>
 																	</td>
@@ -2412,13 +2184,171 @@ export function OrderDetails({
 										</table>
 									</div>
 								</div>
+
+								<div style={{marginTop:"10px", display:"flex", justifyContent:"space-between"}}>
+									<div className="action-buttons center" style={{flexDirection:"row"}}>
+										{
+											editOrder && <>
+												<button
+													className="theme-btn"
+													disabled={!editOrder}
+													onClick={() => {
+														setOrderData(prev => ({
+															...prev,
+															item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }]
+														}))
+														setTimeout(() => document.querySelector(".items_table tbody>tr:last-child").scrollIntoView(), 100);
+													}}
+												>
+													<AddIcon />
+													<span>Add Item</span>
+												</button>
+												<button
+													className="theme-btn"
+													disabled={!editOrder}
+													onClick={() => setHoldPopup("Summary")}
+												>
+													<MdLocalOffer /> Free
+												</button>
+											</>
+										}
+										<button
+											className="theme-btn"
+											style={{background:editOrder?"red":"var(--main)"}}
+											onClick={e => {
+												reactInputsRef.current = {}
+												e.target.blur()
+												// if (!editOrder) {
+													getItemsData([])
+													getCounters([])
+												// }
+												setEditOrder(prev => !prev)
+										}}
+											>
+											{
+												editOrder 
+												? <><MdOutlineEditOff /><span>Discard</span></>
+												: <><MdOutlineEdit /><span>Edit Order</span></>
+											}
+										</button>
+										
+										{isCancelled && order?.item_details?.[0]?.original_qty && (
+											<button
+												type="button"
+												className="order-btn order-total recreate-order-btn"
+												onClick={copyStageConfirmation}
+												style={{ width:"auto", fontSize:"unset", fontWeight:'bold' }}
+											>
+												<Refresh className="refresh" />
+												<MdReplay className="add" />
+												<span>Recreate</span>
+											</button>
+										)}
+										{editOrder ? (
+												<button
+													className="order-total"
+													type="button"
+													style={{ width:"auto",fontSize:'unset',justifyContent:'center',fontWeight:'bold' }}
+													onClick={
+														window.location.pathname.includes("completeOrderReport") ||
+														window.location.pathname.includes("pendingEntry") ||
+														window.location.pathname.includes("upiTransactionReport")
+															? () =>
+																	onSubmit({
+																		type: { stage: 0, diliveredUser: "" },
+																		completedOrderEdited: 1
+																	})
+															: () => onSubmit({ type: { stage: 0, diliveredUser: "" } })
+													}
+												>
+													<MdFileDownloadDone />
+													Save Changes
+												</button>
+										) : null}
+									</div>
+									<div className="order-basic-details">
+										<div>
+											{waiting ? (
+												<div style={{ width: "40px" }}>
+													<svg viewBox="0 0 100 100">
+														<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
+															<animateTransform
+																attributeName="transform"
+																type="rotate"
+																dur="1s"
+																repeatCount="indefinite"
+																keyTimes="0;1"
+																values="0 50 51;360 50 51"
+															></animateTransform>
+														</path>
+													</svg>
+												</div>
+											) : null}
+											<button
+												type="button"
+												onClick={() => {setDeductionsCoinPopup(true)}}
+												style={{
+													display:"flex",
+													alignItems:"center",
+													background: "none",
+													color: "var(--main)",
+													border: "none",
+												}}
+											>
+												<AddCircleOutline style={{fontSize:"32px"}} />
+											</button>
+											<label>
+												{editOrder && (
+													<input
+														type="checkbox"
+														name="payment-pending-status"
+														id="payment-pending-status"
+														checked={Boolean(orderData?.payment_pending)}
+														onChange={e =>
+															setOrderData(x => ({
+																...x,
+																payment_pending: +e.target.checked
+															}))
+														}
+													/>
+												)}
+												<span><b>Payment pending</b></span>
+												{!editOrder && <span>{orderData?.payment_pending ? "Yes" : "No"}</span>}
+											</label>
+											<div>
+												<span
+													className={
+														window.location.pathname.includes("completeOrderReport") ||
+														window.location.pathname.includes("signedBills") ||
+														window.location.pathname.includes("pendingEntry") ||
+														window.location.pathname.includes("upiTransactionReport")
+															? "hover_class"
+															: ""
+													}
+													onClick={() =>
+														window.location.pathname.includes("completeOrderReport") ||
+														window.location.pathname.includes("signedBills") ||
+														window.location.pathname.includes("pendingEntry") ||
+														window.location.pathname.includes("upiTransactionReport")
+															? setDeliveryPopup("put")
+															: {}
+													}
+												>
+													<b>Payment Total</b>
+												</span>
+												<span>₹{orderData?.payment_total || 0}</span>
+											</div>
+											<div>
+												<span><b>Order Total</b></span>
+												<span>₹{orderData?.order_grandtotal || 0}</span>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div style={{display:"flex", flexDirection:"column",justifyContent:"space-between"}}>
-							<div id="actions-col">
-								<button className="theme-btn" onClick={() => setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData?.counter_uuid))}>
-									<NoteAdd /><span>Counter Note</span>
-								</button>
+							<div className="action-buttons">
 								<button
 									className="theme-btn"
 									onClick={e => {
@@ -2462,18 +2392,9 @@ export function OrderDetails({
 								</button>
 								<hr />
 								<button className="theme-btn" onClick={checkDMSWrapper}>
-									DMS
+									<FaLink />
+									<span>DMS INV</span>
 								</button>
-								{order?.order_type === "E" && (
-									<button
-										className="theme-btn"
-										onClick={convertConfirmation}
-										data-tooltip-id="my-tooltip"
-										data-tooltip-content="Convert"
-									>
-										Convert
-									</button>
-								)}
 								<button
 									className="theme-btn"
 									onClick={() =>
@@ -2483,75 +2404,24 @@ export function OrderDetails({
 										})
 									}
 								>
-									Status
+									<PiCircleDashedBold />
+									<span>Status</span>
+								</button>
+								<hr />
+								<button className="theme-btn" onClick={() => setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData?.counter_uuid))}>
+									<NoteAdd /><span>Counter Note</span>
 								</button>
 								<button
 									className="theme-btn"
-									onClick={() =>
-										setPopupDetails({
-											type: "Delivery Return",
-											data: orderData?.delivery_return
-										})
-									}
+									onClick={e => {
+										e.target.blur()
+										setCommentPoup(prev => !prev)
+									}}
+									data-tooltip-id="my-tooltip"
+									data-tooltip-content="Comments"
 								>
-									Delivery Return
+									<Comment /><span>Comments</span>
 								</button>
-								<button
-									className="theme-btn"
-									onClick={() =>
-										setPopupDetails({
-											type: "Fulfillment",
-											data: orderData?.fulfillment
-										})
-									}
-								>
-									Fulfillment
-								</button>
-								<button
-									className="theme-btn"
-									onClick={() =>
-										setPopupDetails({
-											type: "Auto Added",
-											data: orderData?.auto_Added
-										})
-									}
-								>
-									Auto Added
-								</button>
-							</div>
-							<div id="actions-col">
-								{isCancelled && order?.item_details?.[0]?.original_qty && (
-									<button
-										type="button"
-										className="order-btn order-total recreate-order-btn"
-										onClick={copyStageConfirmation}
-										style={{ width:"auto", fontSize:"unset", fontWeight:'bold' }}
-									>
-										<Refresh className="refresh" />
-										<Add className="add" />
-										<span>Recreate</span>
-									</button>
-								)}
-								{editOrder ? (
-										<button
-											className="order-total"
-											type="button"
-											style={{ width:"auto",fontSize:'unset',justifyContent:'center',fontWeight:'bold' }}
-											onClick={
-												window.location.pathname.includes("completeOrderReport") ||
-												window.location.pathname.includes("pendingEntry") ||
-												window.location.pathname.includes("upiTransactionReport")
-													? () =>
-															onSubmit({
-																type: { stage: 0, diliveredUser: "" },
-																completedOrderEdited: 1
-															})
-													: () => onSubmit({ type: { stage: 0, diliveredUser: "" } })
-											}
-										>
-											Save
-										</button>
-								) : null}
 							</div>
 						</div>
 					</div>
@@ -2576,11 +2446,6 @@ export function OrderDetails({
 					message2={"Rs. " + messagePopup?.data?.order_grandtotal}
 					button1="Save"
 					button2="Cancel"
-					button={{
-						label: "Save & Send WhatsApp Notification",
-						action: () => updateOrder({ sendPaymentReminder: true, ...messagePopup }),
-						visible: true
-					}}
 					onSave={() => setMessagePopup(false)}
 				/>
 			) : (
@@ -3150,7 +3015,7 @@ const DeleteOrderPopup = ({
 						<button
 							type="button"
 							className="submit"
-							style={{ width: "50px", padding: "8px" }}
+							style={{  padding: "8px" }}
 							onClick={postMessageTemplate}
 						>
 							<AddIcon />
@@ -3190,7 +3055,6 @@ const DeleteOrderPopup = ({
 											padding: "0",
 											background: "transparent",
 											color: "red",
-											height: "20px",
 											marginTop: "0"
 										}}
 										onClick={e => {
@@ -3206,7 +3070,6 @@ const DeleteOrderPopup = ({
 					</div>
 					<div
 						style={{
-							fontSize: "14px",
 							margin: "10px 0",
 							display: "flex",
 							alignItems: "center",
@@ -3486,9 +3349,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 																type="text"
 																className="numberInput"
 																style={{
-																	width: "-webkit-fill-available",
-
-																	padding: "10px"
+																	
 																}}
 																value={item.title || ""}
 																onChange={e => {
@@ -3517,8 +3378,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 															type="number"
 															className="numberInput"
 															style={{
-																width: "-webkit-fill-available",
-																padding: "10px"
+																
 															}}
 															placeholder="0"
 															value={item.value}

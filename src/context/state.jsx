@@ -10,7 +10,7 @@ const State = (props) => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [openingBalanceDatePopup, setOpeningBalanceDatePopup] = useState(false);
   const [bankStatementImport, setBankStatementImport] = useState(false);
-  const [view, setView] = useState(sessionStorage.getItem("view") || 0);
+  const [view, setView] = useState(parseInt(sessionStorage.getItem("view")) || 0);
   const [skipStages, setSkipStages] = useState(false);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(null);

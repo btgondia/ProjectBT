@@ -6,7 +6,6 @@ import "./style.css"
 import CloseIcon from "@mui/icons-material/Close"
 import { AiOutlineSearch } from "react-icons/ai"
 import Card from "../../components/Card"
-import { AiOutlineReload } from "react-icons/ai"
 import VerticalTabs from "../../components/VerticalTabs"
 import { OrderDetails } from "../../components/OrderDetails"
 import { ArrowDropDown, Print } from "@mui/icons-material"
@@ -25,10 +24,10 @@ import { IoCloseCircle } from "react-icons/io5"
 import OrderPrintWrapper from "../../components/OrderPrintWrapper"
 import PendingPaymentsSummary from "../../components/prints/PendingPaymentsSummary"
 import NotesPopup from "../../components/popups/NotesPopup"
-import Loader from "../../components/Loader"
 import { getOrderStage, getStageName } from "../../utils/helperFunctions"
 import SkipStagesPopup from "../../components/SkipStagesPopup"
 import PrintTypePopup from "../../components/PrintTypePopup"
+import { GrRefresh } from "react-icons/gr"
 
 const MainAdmin = () => {
 	const [isCollectionTags, setCollectionTags] = useState(false)
@@ -880,69 +879,55 @@ TOTAL: ${amounts}
 					setSelectedOrder([])
 				}}
 			>
-				<Header />
-				<AiOutlineReload
-					style={{
-						position: "fixed",
-						fontSize: "20px",
-						zIndex: "99999",
-						top: "10px",
-						right: "280px",
-						cursor: isCooldown ? "not-allowed" : "pointer",
-						color: isCooldown ? "grey" : "inherit" // Optional: change color during cooldown
-					}}
-					className={ordersSpinner ? "rotating" : ""}
-					onClick={handleRefresh}
-				/>
-				{selectedPrintOrder.length ? (
-					<div
-						style={{
-							position: "fixed",
-
-							zIndex: "99999",
-							top: "10px",
-							right: "320px",
-							cursor: "pointer"
-						}}
-						onClick={() => {
-							setSelectOrder(false)
-							handlePrint()
-							axios({
-								method: "put",
-								url: "/orders/putOrders",
-								data: selectedPrintOrder.map(a => ({ ...a, to_print: 0 })),
-								headers: {
-									"Content-Type": "application/json"
-								}
-							}).then(response => {
-								if (response.data.success) {
-									setBtn(prev => !prev)
-								}
-							})
-						}}
-					>
-						<div style={{ position: "relative" }}>
-							<span
-								className="flex"
-								style={{
-									position: "absolute",
-									color: "#fff",
-									backgroundColor: "red",
-									borderRadius: "50%",
-									width: "10px",
-									height: "10px",
-									fontSize: "10px",
-									right: "1px"
+				<Header headerActions={
+					<>
+						<button className="theme-btn simple" onClick={handleRefresh}>
+							<GrRefresh
+								style={{fontSize:'18px'}}
+								className={ordersSpinner ? "rotating" : ""}
+							/>
+						</button>
+						{selectedPrintOrder.length ? (
+							<div
+								onClick={() => {
+									setSelectOrder(false)
+									handlePrint()
+									axios({
+										method: "put",
+										url: "/orders/putOrders",
+										data: selectedPrintOrder.map(a => ({ ...a, to_print: 0 })),
+										headers: {
+											"Content-Type": "application/json"
+										}
+									}).then(response => {
+										if (response.data.success) {
+											setBtn(prev => !prev)
+										}
+									})
 								}}
 							>
-								{selectedPrintOrder?.length}
-							</span>
-							<Print />
-						</div>
-					</div>
-				) : (
-					""
-				)}
+								<div style={{ position: "relative" }}>
+									<span
+										className="flex"
+										style={{
+											position: "absolute",
+											color: "#fff",
+											backgroundColor: "red",
+											borderRadius: "50%",
+											width: "10px",
+											height: "10px",
+											fontSize: "10px",
+											right: "1px"
+										}}
+									>
+										{selectedPrintOrder?.length}
+									</span>
+									<Print />
+								</div>
+							</div>
+						) : null}
+					</>
+				} />
 				<div
 					style={
 						holdOrders

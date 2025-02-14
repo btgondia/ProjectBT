@@ -96,7 +96,7 @@
     }
 
     .inventory_header {
-        z-index: 9999999;
+        z-index: 1;
     }
     .items_table table {
         border: none;

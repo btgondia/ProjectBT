@@ -1732,7 +1732,7 @@ export function OrderDetails({
 															}}
 														>
 															{editOrder ? (
-																<td style={{width:"fit-content"}}>
+																<td>
 																	{item.price_approval === "N" ? (
 																		<span
 																			onClick={() =>

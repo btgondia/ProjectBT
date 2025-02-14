@@ -1416,6 +1416,7 @@ function NewUserForm({
 												<label className="selectLabel">
 													Remarks
 													<input
+														required
 														type="text"
 														name="route_title"
 														className="numberInput"

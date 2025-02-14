@@ -250,8 +250,10 @@ export const Billing = async ({
   new_order,
   coin=0,
 }) => {
-  if (counter?.status === 0) throw new Error("Counter inactive")
-  if (counter?.status === 2) throw new Error("Counter locked, " + counter?.remarks)
+  if (creating_new || new_order) {
+    if (counter?.status === 0) throw new Error("Counter inactive")
+    if (counter?.status === 2) throw new Error("Counter locked, " + counter?.remarks)
+  }
 
   let counterCharges = [];
   let counter_charges = [];

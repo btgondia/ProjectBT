@@ -394,10 +394,6 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 											link: "/admin/RetailerMarginReport"
 										},
 										{
-											name: "Campaigns",
-											link: "/admin/Campaigns"
-										},
-										{
 											name: "OrderForm",
 											link: "/admin/OrderForm"
 										},
@@ -471,10 +467,6 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
 										{
 											name: "Calculate Lines",
 											link: "#"
-										},
-										{
-											name: "WhatsApp Notifications",
-											link: "/admin/WhatsAppNotifications"
 										},
 										{
 											name: "Skip Stage",

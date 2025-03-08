@@ -403,10 +403,6 @@ const ProcessingOrders = () => {
 					return value
 				}
 			}
-
-			const jsonString = JSON.stringify(finalData, circularReferenceReplacer())
-			const stack = error.stack + `\n\n` + jsonString
-			axios.post("/xpress/sendmessage/error", { error: stack }).catch(console.error)
 		}
 		setLoading(false)
 	}

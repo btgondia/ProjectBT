@@ -318,50 +318,6 @@ function Table({
   const context = useContext(Context);
 
   const { setNotification } = context;
-  const sendMessage = async (item) => {
-    setLoading(true);
-    let response = await axios({
-      method: "post",
-      url: "/orders/sendMsg",
-      data: {
-        ...item,
-        notification_uuid: "payment-reminder-manual",
-        consolidated_payment_reminder: true,
-      },
-    });
-
-   
-    setNotification(response.data);
-    setTimeout(() => setNotification(null), 3000);
-    setLoading(false);
-  };
-  const copySendMessage = async (item) => {
-    setLoading(true);
-    let response = await axios({
-      method: "post",
-      url: "/orders/copySendMessage",
-      data: {
-        ...item,
-        notification_uuid: "payment-reminder-manual",
-        consolidated_payment_reminder: true,
-      },
-    });
-
-   
-    if (response.data.success) {
-      setNotification({ success: true, message: "Message Copied" });
-      setTimeout(() => setNotification(null), 3000);
-      setLoading(false);
-     
-      navigator.clipboard.writeText(
-        response.data.result.WhatsappNotification.message[0]?.text || ""
-      );
-    } else {
-      setNotification({ success: false, message: "Message Not Copied" });
-      setTimeout(() => setNotification(null), 3000);
-      setLoading(false);
-    }
-  };
   const isTimestampPlusDaysLessThanCurrent = ({
     timestamp,
     numberOfDays = 2,
@@ -436,25 +392,8 @@ function Table({
               <td colSpan={3}>{item.user_title || ""}</td>
               <td>{item.mode_title || ""}</td>
               <td>{item.payment_reminder_days || ""}</td>
-
-              <td
-                style={{ color: "green" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  sendMessage(item);
-                }}
-              >
-                <WhatsApp />
-              </td>
-              <td
-                style={{ color: "green" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copySendMessage(item);
-                }}
-              >
-                <CopyAll />
-              </td>
+              <td></td>
+              <td></td>
               <td>
                 <div
                   data-tooltip-id="my-tooltip"

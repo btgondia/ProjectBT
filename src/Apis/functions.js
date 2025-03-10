@@ -320,7 +320,6 @@ export const Billing = async ({
     };
     if (price) item = { ...item, item_price: price };
 
-    console.log({special_discount_percentage,company_discount_percentage})
     if (special_discount_percentage) {
       charges_discount?.push({
         title: "Special Discount",

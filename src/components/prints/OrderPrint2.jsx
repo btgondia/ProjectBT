@@ -16,7 +16,7 @@ const OrderPrint2 = ({
 	defaultOrder = { item_details: [] },
 	hsn_code = [],
 	total_page = 0,
-	current_page = 0
+	current_page = 0,
 }) => {
 	const [gstValues, setGstVAlues] = useState([])
 	useEffect(() => {
@@ -29,17 +29,17 @@ const OrderPrint2 = ({
 				item.item_total / (1 + ((item?.gst_percentage || 0) + (item?.css_percentage || 0)) / 100)
 			itemsData.push({
 				...item,
-				final_Amount: final_Amount
+				final_Amount: final_Amount,
 			})
 		}
 
-		const gst_value = Array.from(new Set(itemsData.map(a => +a.gst_percentage)))
+		const gst_value = Array.from(new Set(itemsData.map((a) => +a.gst_percentage)))
 
 		for (let a of gst_value) {
-			const data = itemsData.filter(b => +b.gst_percentage === a)
+			const data = itemsData.filter((b) => +b.gst_percentage === a)
 			const amt =
 				data.length > 1
-					? data.map(b => +b?.final_Amount).reduce((a, b) => a + b, 0)
+					? data.map((b) => +b?.final_Amount).reduce((a, b) => a + b, 0)
 					: data.length
 					? +data[0].final_Amount
 					: 0
@@ -50,20 +50,20 @@ const OrderPrint2 = ({
 				arr.push({
 					value: a,
 					tex_amt: amt.toFixed(2),
-					amount: value.toFixed(2)
+					amount: value.toFixed(2),
 				})
 		}
 
 		setGstVAlues(arr)
 	}, [defaultOrder])
 	const itemDetails = useMemo(() => {
-		let items = item_details?.map(a => {
-			const _data = itemData?.find(b => b.item_uuid === a.item_uuid) || {}
+		let items = item_details?.map((a) => {
+			const _data = itemData?.find((b) => b.item_uuid === a.item_uuid) || {}
 			return {
 				...a,
 				..._data,
 				dms_erp_id: a.dms_erp_id || _data.dms_erp_id,
-				dms_item_name: a.dms_item_name || _data.dms_item_name
+				dms_item_name: a.dms_item_name || _data.dms_item_name,
 			}
 		})
 		if (!items?.length) return []
@@ -72,8 +72,8 @@ const OrderPrint2 = ({
 	}, [item_details, itemData])
 
 	const itemDetailsMemo = useMemo(() => {
-		return itemDetails?.map(item => {
-			const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
+		return itemDetails?.map((item) => {
+			const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
 			let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 			let unit_price = (+item.item_total || 0) / (+itemQty || 1)
 			let tex_amt =
@@ -96,7 +96,7 @@ const OrderPrint2 = ({
 				desc_a,
 				desc_b,
 				itemQty,
-				taxable_value: taxable_value?.toFixed(2)
+				taxable_value: taxable_value?.toFixed(2),
 			}
 		})
 	}, [itemDetails, itemData])
@@ -104,12 +104,12 @@ const OrderPrint2 = ({
 	const totalItemDetailsMemo = useMemo(() => {
 		if (!footer) return []
 		let allData = allOrderItems
-			?.map(a => ({
+			?.map((a) => ({
 				...a,
-				...(itemData?.find(b => b.item_uuid === a.item_uuid) || {})
+				...(itemData?.find((b) => b.item_uuid === a.item_uuid) || {}),
 			}))
-			.map(item => {
-				const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
+			.map((item) => {
+				const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
 				let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 				let unit_price = (+item.item_total || 0) / (+itemQty || 1)
 				let tex_amt =
@@ -132,7 +132,7 @@ const OrderPrint2 = ({
 					desc_a,
 					desc_b,
 					itemQty,
-					taxable_value: taxable_value?.toFixed(2)
+					taxable_value: taxable_value?.toFixed(2),
 				}
 			})
 		let totalData = allData.reduce((acc, item) => {
@@ -144,14 +144,14 @@ const OrderPrint2 = ({
 				tex_amt: (+acc.tex_amt || 0) + (+item.tex_amt || 0),
 				taxable_value: ((+acc.taxable_value || 0) + (+item.taxable_value || 0) || 0)?.toFixed(2),
 				itemQty: (+acc.itemQty || 0) + (+item.itemQty || 0),
-				mrp: (+acc.mrp || 0) + (+item.mrp || 0)
+				mrp: (+acc.mrp || 0) + (+item.mrp || 0),
 			}
 		}, {})
 
 		return totalData
 	}, [footer, allOrderItems, itemData])
 
-	const getFormateDate = dateStamp => {
+	const getFormateDate = (dateStamp) => {
 		const date = new Date(dateStamp)
 
 		const day = date.getDate()
@@ -174,7 +174,7 @@ const OrderPrint2 = ({
 				pageBreakAfter: "always",
 				display: "flex",
 				flexDirection: "column",
-				justifyContent: "start"
+				justifyContent: "start",
 			}}
 		>
 			<style>
@@ -212,7 +212,7 @@ const OrderPrint2 = ({
 											borderSpacing: "0px",
 											height: "14mm",
 											padding: "1mm",
-											borderBottom: "none"
+											borderBottom: "none",
 										}}
 									>
 										<tr>
@@ -220,7 +220,7 @@ const OrderPrint2 = ({
 												style={{
 													fontWeight: "700",
 													fontSize: "2.3mm",
-													width: ""
+													width: "",
 												}}
 											>
 												FROM:- BHARAT TRADERS
@@ -229,12 +229,12 @@ const OrderPrint2 = ({
 												style={{
 													// fontWeight: "700",
 													fontSize: "2.3mm",
-													width: "30%"
+													width: "30%",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													GST No:-
@@ -245,24 +245,24 @@ const OrderPrint2 = ({
 												style={{
 													// fontWeight: "700",
 													fontSize: "2.3mm",
-													width: "40%"
+													width: "40%",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Invoice No:-
 												</span>{" "}
-												{order.dms_invoice_number || ""}
+												{order.dms_details?.invoice_number || ""}
 											</td>
 										</tr>
 										<tr>
 											<td
 												style={{
 													fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												Seller Address:- BEHIND SALES TAX OFFICE,
@@ -270,12 +270,12 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													PAN No:-
@@ -285,24 +285,24 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Date :-
 												</span>{" "}
-												{getFormateDate(date)}
+												{order?.dms_details?.date || getFormateDate(date)}
 											</td>
 										</tr>
 										<tr>
 											<td
 												style={{
 													fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												SHASTRI WARD GONDIA
@@ -310,12 +310,12 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Phone No:-
@@ -325,12 +325,12 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Phone No:-
@@ -341,13 +341,13 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
 														fontWeight: "700",
-														fontSize: "2.3mm"
+														fontSize: "2.3mm",
 													}}
 												>
 													Fssai Number:-{" "}
@@ -368,7 +368,7 @@ const OrderPrint2 = ({
 											width: "100%",
 											borderSpacing: "0px",
 											height: "17mm",
-											padding: "1mm"
+											padding: "1mm",
 										}}
 									>
 										<tr>
@@ -376,21 +376,20 @@ const OrderPrint2 = ({
 												style={{
 													fontWeight: "700",
 													fontSize: "2.3mm",
-													width: "30%"
+													width: "30%",
 												}}
 											>
-												To:- {counter?.dms_buyer_name}
+												To:- {order?.dms_details?.buyer_name || counter?.dms_buyer_name}
 											</td>
 											<td
 												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
 														fontWeight: "700",
-														width: "40%"
+														width: "40%",
 													}}
 												>
 													GST No:-
@@ -402,37 +401,37 @@ const OrderPrint2 = ({
 												style={{
 													// fontWeight: "700",
 													fontSize: "2.3mm",
-													width: "30%"
+													width: "30%",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Buyer Erp Id:-
 												</span>{" "}
-												{counter?.dms_buyer_id || ""}
+												{order?.dms_details?.buyer_id || counter?.dms_buyer_id || ""}
 											</td>
 										</tr>
 										<tr>
 											<td
 												style={{
 													fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
-												Seller Address:- {counter?.dms_buyer_address || ""}
+												Seller Address:-{" "}
+												{order?.dms_details?.seller_address || counter?.dms_buyer_address || ""}
 											</td>
 											<td
 												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													PAN No:-
@@ -441,25 +440,24 @@ const OrderPrint2 = ({
 
 											<td
 												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Salesman Name:-
 												</span>{" "}
-												{user?.user_title}
+												{order?.dms_details?.salesman_name || user?.user_title}
 											</td>
 										</tr>
 										<tr>
 											<td
 												style={{
 													fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												Fssai Number:-
@@ -467,12 +465,12 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Phone No:-
@@ -483,37 +481,35 @@ const OrderPrint2 = ({
 											<td
 												style={{
 													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Beat Name:-
 												</span>{" "}
-												{counter?.dms_beat_name || ""}
+												{order?.dms_details?.beat_name || counter?.dms_beat_name || ""}
 											</td>
 										</tr>
 										<tr>
 											<td
 												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											></td>
 											<td></td>
 
 											<td
 												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
+													fontSize: "2.3mm",
 												}}
 											>
 												<span
 													style={{
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Employee Contact No:-
@@ -535,14 +531,14 @@ const OrderPrint2 = ({
 								marginLeft: "3mm",
 								width: "28mm",
 
-								padding: "1mm"
+								padding: "1mm",
 							}}
 						>
 							<tr>
 								<th
 									style={{
 										fontWeight: "700",
-										fontSize: "2.3mm"
+										fontSize: "2.3mm",
 									}}
 								>
 									Company QR Code:
@@ -560,7 +556,7 @@ const OrderPrint2 = ({
 										style={{
 											width: "22.3mm",
 											height: "22.3mm",
-											paddingLeft: "1mm"
+											paddingLeft: "1mm",
 										}}
 										level="H"
 									/>
@@ -577,7 +573,7 @@ const OrderPrint2 = ({
 								borderCollapse: "collapse",
 								width: "100%",
 								margin: 0,
-								borderSpacing: "0px"
+								borderSpacing: "0px",
 							}}
 						>
 							<tr
@@ -585,7 +581,7 @@ const OrderPrint2 = ({
 									border: "1px solid black",
 									borderTop: "none",
 									width: "100%",
-									backgroundColor: "#e0e0e0"
+									backgroundColor: "#e0e0e0",
 								}}
 							>
 								<th
@@ -596,7 +592,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "3%"
+										width: "3%",
 									}}
 								>
 									S No.
@@ -609,7 +605,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "10%"
+										width: "10%",
 									}}
 								>
 									Item ERP id
@@ -622,7 +618,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "30%"
+										width: "30%",
 									}}
 									colSpan={3}
 								>
@@ -636,7 +632,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "3%"
+										width: "3%",
 									}}
 								>
 									MRP (₹)
@@ -649,7 +645,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "7%"
+										width: "7%",
 									}}
 								>
 									Free Qty
@@ -662,7 +658,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Invoice/Delivery Qty
@@ -675,7 +671,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Price/Piece
@@ -688,7 +684,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Net Amt. (₹)
@@ -701,7 +697,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "7%"
+										width: "7%",
 									}}
 								>
 									Secondary Dis. ₹(%)
@@ -714,7 +710,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "10%"
+										width: "10%",
 									}}
 								>
 									Cash Dis. ₹(%)
@@ -727,7 +723,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Taxable Value (₹)
@@ -740,7 +736,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									GST (%)
@@ -753,7 +749,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									GST Amt. (₹)
@@ -766,7 +762,7 @@ const OrderPrint2 = ({
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Total Value (₹)
@@ -781,7 +777,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontWeight: "700",
 												fontSize: "2.3mm",
-												textAlign: "right"
+												textAlign: "right",
 											}}
 										>
 											{item?.sr || i + 1}
@@ -791,7 +787,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "center",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{item?.dms_erp_id}
@@ -802,7 +798,7 @@ const OrderPrint2 = ({
 												fontWeight: "700",
 												border: "1px solid #000",
 												fontSize: "2.3mm",
-												width: "100mm"
+												width: "100mm",
 											}}
 											colSpan={3}
 										>
@@ -814,7 +810,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item?.mrp || 0)?.toFixed(2)}
@@ -825,7 +821,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											0 Cs, {item.free} Pcs
@@ -836,7 +832,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												fontWeight: "700"
+												fontWeight: "700",
 											}}
 										>
 											{item.itemQty}
@@ -846,7 +842,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+((+item.net_amt || 0) / (+item.itemQty || 1)).toFixed(2)}
@@ -856,7 +852,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item.net_amt)?.toFixed(2)}
@@ -866,7 +862,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item.desc_amt_a)?.toFixed(2)} ({+(+item.desc_a)?.toFixed(2)})
@@ -876,7 +872,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item.desc_amt_b)?.toFixed(2)} ({+(+item.desc_b)?.toFixed(2)})
@@ -886,7 +882,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item.taxable_value)?.toFixed(2)}
@@ -896,7 +892,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item.gst_percentage || 0).toFixed(2)}
@@ -906,7 +902,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												border: "1px solid black",
 											}}
 										>
 											{+(+item.tex_amt)?.toFixed(2)}
@@ -917,7 +913,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												fontWeight: "700"
+												fontWeight: "700",
 											}}
 										>
 											{+(+item.item_total || 0)?.toFixed(2)}
@@ -934,7 +930,7 @@ const OrderPrint2 = ({
 												fontWeight: "700",
 												fontSize: "2.3mm",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											Total
@@ -946,7 +942,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{+(+totalItemDetailsMemo?.mrp || 0)?.toFixed(2)}
@@ -956,7 +952,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											0 Cs {totalItemDetailsMemo?.free || 0} Pcs
@@ -967,7 +963,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{totalItemDetailsMemo?.itemQty || 0}
@@ -978,7 +974,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{(+totalItemDetailsMemo?.net_amt || 0).toFixed(2)}
@@ -988,7 +984,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{+(+totalItemDetailsMemo?.desc_amt_a || 0)?.toFixed(2)}
@@ -998,7 +994,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{+(+totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
@@ -1009,7 +1005,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{+(+totalItemDetailsMemo?.taxable_value || 0)?.toFixed(2)}
@@ -1021,7 +1017,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{+(+totalItemDetailsMemo?.tex_amt || 0).toFixed(2)}
@@ -1032,7 +1028,7 @@ const OrderPrint2 = ({
 												fontSize: "2.3mm",
 												textAlign: "right",
 												border: "1px solid black",
-												padding: "0 5px"
+												padding: "0 5px",
 											}}
 										>
 											{+(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
@@ -1051,7 +1047,7 @@ const OrderPrint2 = ({
 						<td colSpan={6}>
 							<table
 								style={{
-									borderSpacing: "0px"
+									borderSpacing: "0px",
 								}}
 							>
 								<tr>
@@ -1064,14 +1060,14 @@ const OrderPrint2 = ({
 												height: "25mm",
 												borderSpacing: "0px",
 												padding: "1mm",
-												borderTop: "none"
+												borderTop: "none",
 											}}
 										>
 											<tr>
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													CGST - {gstValues.length ? gstValues[0].amount / 2 : 0.0} , SGST -{" "}
@@ -1083,7 +1079,7 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													CREDIT NOTE Remarks: --
@@ -1093,7 +1089,7 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													DEBIT NOTE Remarks: --
@@ -1103,12 +1099,12 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													<span
 														style={{
-															fontWeight: "700"
+															fontWeight: "700",
 														}}
 													>
 														Amount in words:
@@ -1120,12 +1116,12 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													<span
 														style={{
-															fontWeight: "700"
+															fontWeight: "700",
 														}}
 													>
 														Remarks:
@@ -1145,7 +1141,7 @@ const OrderPrint2 = ({
 												padding: "1mm",
 												borderLeft: "none",
 												borderRight: "none",
-												borderTop: "none"
+												borderTop: "none",
 											}}
 										>
 											<tr>
@@ -1153,7 +1149,7 @@ const OrderPrint2 = ({
 													style={{
 														fontWeight: "700",
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													Additional Information:
@@ -1165,7 +1161,7 @@ const OrderPrint2 = ({
 														fontWeight: "700",
 														fontSize: "2.3mm",
 														width: "30%",
-														fontStyle: "italic"
+														fontStyle: "italic",
 													}}
 												>
 													1.
@@ -1177,7 +1173,7 @@ const OrderPrint2 = ({
 														fontWeight: "700",
 														fontSize: "2.3mm",
 														width: "30%",
-														color: "transparent"
+														color: "transparent",
 													}}
 												>
 													1.
@@ -1189,7 +1185,7 @@ const OrderPrint2 = ({
 														fontWeight: "700",
 														fontSize: "2.3mm",
 														width: "30%",
-														color: "transparent"
+														color: "transparent",
 													}}
 												>
 													1.
@@ -1201,7 +1197,7 @@ const OrderPrint2 = ({
 														fontWeight: "700",
 														fontSize: "2.3mm",
 														width: "30%",
-														color: "transparent"
+														color: "transparent",
 													}}
 												>
 													1.
@@ -1218,19 +1214,19 @@ const OrderPrint2 = ({
 												height: "25mm",
 												borderSpacing: "0px",
 												padding: "1mm",
-												borderTop: "none"
+												borderTop: "none",
 											}}
 										>
 											<tr>
 												<td
 													style={{
 														fontSize: "2.3mm",
-														textAlign: "right"
+														textAlign: "right",
 													}}
 												>
 													<span
 														style={{
-															fontWeight: "700"
+															fontWeight: "700",
 														}}
 													>
 														CREDIT NOTE Adjustment:
@@ -1243,13 +1239,13 @@ const OrderPrint2 = ({
 													style={{
 														fontSize: "2.3mm",
 
-														textAlign: "right"
+														textAlign: "right",
 													}}
 												>
 													<span
 														style={{
 															fontWeight: "700",
-															textAlign: "right"
+															textAlign: "right",
 														}}
 													>
 														DEBIT NOTE Adjustment:
@@ -1261,12 +1257,12 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														textAlign: "right"
+														textAlign: "right",
 													}}
 												>
 													<span
 														style={{
-															fontWeight: "700"
+															fontWeight: "700",
 														}}
 													>
 														Round Off:
@@ -1283,7 +1279,7 @@ const OrderPrint2 = ({
 														fontSize: "10px",
 														textAlign: "right",
 
-														fontWeight: "700"
+														fontWeight: "700",
 													}}
 												>
 													Total Value: ₹ {+(+order?.order_grandtotal || 0)?.toFixed(2)}
@@ -1326,7 +1322,7 @@ function numberToWords(num) {
 		"sixteen",
 		"seventeen",
 		"eighteen",
-		"nineteen"
+		"nineteen",
 	]
 	const tens = [
 		"",
@@ -1338,7 +1334,7 @@ function numberToWords(num) {
 		"sixty",
 		"seventy",
 		"eighty",
-		"ninety"
+		"ninety",
 	]
 	const thousands = ["", "thousand", "million", "billion"]
 

@@ -19,9 +19,9 @@ const OrderPrintWrapper = ({
 	...props
 }) => {
 	const getPrintData = order => {
-		const max_count = order.dms_invoice_number ? 9 : order?.order_type !== "E" ? 15 : 19
-		const min_count = order.dms_invoice_number ? 9 : max_count - 7
-		const sourceArray = order.dms_invoice_number
+		const max_count = order?.dms_details?.invoice_number ? 9 : order?.order_type !== "E" ? 15 : 19
+		const min_count = order?.dms_details?.invoice_number ? 9 : max_count - 7
+		const sourceArray = order?.dms_details?.invoice_number
 			? order?.item_details
 					?.sort((a, b) => {
 						let item_a_title = items.find(c => c.item_uuid === a.item_uuid)?.dms_item_name || ""
@@ -124,7 +124,7 @@ const OrderPrintWrapper = ({
 					?.map(__order => {
 						let order_hsn = hsn_code(__order?.item_details)
 						return getPrintData(__order)?.map((order, i, array) =>
-							order.dms_invoice_number ? (
+							order?.dms_details?.invoice_number ? (
 								<OrderPrint2
 									counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
 									reminderDate={reminderDate}

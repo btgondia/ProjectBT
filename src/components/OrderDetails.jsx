@@ -1471,7 +1471,7 @@ export function OrderDetails({
 							<IoMdCloseCircle style={{fontSize:"2rem"}} />
 						</button>
 					</div>
-					<div style={{display:"flex", padding:'10px',gap:'10px'}}>
+					<div style={{display:"flex", padding:'10px',gap:'10px',paddingBottom: "20px"}}>
 						<div style={{display:"flex", flexDirection:"column",justifyContent:"space-between"}}>
 							<div className="action-buttons">
 								{!isCancelled ? (
@@ -3971,11 +3971,11 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 	)
 }
 function DMSInvoicePopup({ onSave, order, setNotification }) {
-	const [invoiceNumber, setInvoiceNumber] = useState(order?.dms_invoice_number)
+	const [invoiceNumber, setInvoiceNumber] = useState(order?.dms_details?.invoice_number)
 	const [edit, setEdit] = useState(false)
 	useEffect(() => {
-		setInvoiceNumber(order?.dms_invoice_number)
-	}, [order?.dms_invoice_number])
+		setInvoiceNumber(order?.dms_details?.invoice_number)
+	}, [order?.dms_details?.invoice_number])
 
 	const submitHandler = async () => {
 		const response = await axios({

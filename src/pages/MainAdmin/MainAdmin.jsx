@@ -1239,28 +1239,21 @@ TOTAL: ${amounts}
 														flexWrap: "wrap",
 														gap: "0px",
 														marginBottom: "10px",
-														paddingBottom: "20px"
+														paddingBottom: "20px",
+														height: "fit-content"
 													}}
 													id="seats_container"
 												>
 													{orders_data?.map(item => {
 														return (
 															<div
-																className={`
-																		seatSearchTarget ${
-																			!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
-																				? "shaking-cards"
-																				: ""
-																		}
-																	`}
+																className={"seatSearchTarget " + (
+																	(!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1)
+																		? "shaking-cards"
+																		: ""
+																)}
 																style={{ height: "fit-content" }}
 																key={Math.random()}
-																seat-name={item.seat_name}
-																seat-code={item.seat_uuid}
-																seat={item.seat_uuid}
-																// section={section.section_uuid}
-																// section-name={section?.section_name}
-																// outlet={outletIdState}
 																onClick={e =>
 																	selectOrder
 																		? setSelectedOrder(prev =>
@@ -1277,9 +1270,6 @@ TOTAL: ${amounts}
 																<span
 																	className="dblClickTrigger"
 																	style={{ display: "none" }}
-																	// onClick={() =>
-																	//   menuOpenHandler(item)
-																	// }
 																/>
 																<Card
 																	details={details}
@@ -1290,8 +1280,6 @@ TOTAL: ${amounts}
 																		else getRunningOrders()
 																	}}
 																	setSelectOrder={setSelectOrder}
-																	// on_order={on_order && on_order}
-																	// key={item.seat_uuid}
 																	dateTime={item?.status[0]?.time}
 																	title1={item?.invoice_number || ""}
 																	selectedOrder={
@@ -1304,11 +1292,6 @@ TOTAL: ${amounts}
 																	}
 																	title2={item?.counter_title || ""}
 																	status={getStageName(getOrderStage(item?.status))}
-																	// price={item.price}
-																	// visibleContext={visibleContext}
-																	// setVisibleContext={setVisibleContext}
-																	// isMouseInsideContext={isMouseInsideContext}
-																	// seats={seatsState.filter(s => +s.seat_status === 1)}
 																	rounded
 																/>
 															</div>
@@ -1390,7 +1373,8 @@ TOTAL: ${amounts}
 														flexDirection: "row",
 														flexWrap: "wrap",
 														gap: "0",
-														marginBottom: "10px"
+														marginBottom: "10px",
+														height: "fit-content"
 													}}
 													id="seats_container"
 												>
@@ -1408,12 +1392,6 @@ TOTAL: ${amounts}
 																	}`}
 																	style={{ height: "fit-content" }}
 																	key={Math.random()}
-																	seat-name={item.seat_name}
-																	seat-code={item.seat_uuid}
-																	seat={item.seat_uuid}
-																	// section={section.section_uuid}
-																	// section-name={section?.section_name}
-																	// outlet={outletIdState}
 																	onClick={e =>
 																		selectOrder
 																			? setSelectedOrder(prev =>
@@ -1553,7 +1531,8 @@ TOTAL: ${amounts}
 														flexWrap: "wrap",
 														gap: "0px",
 														marginBottom: "10px",
-														paddingBottom: "20px"
+														paddingBottom: "20px",
+														height: "fit-content"
 													}}
 													id="seats_container"
 												>
@@ -1566,13 +1545,7 @@ TOTAL: ${amounts}
 																		: ""
 																}`}
 																style={{ height: "fit-content" }}
-																key={Math.random()}
-																seat-name={item.seat_name}
-																seat-code={item.seat_uuid}
-																seat={item.seat_uuid}
-																// section={section.section_uuid}
-																// section-name={section?.section_name}
-																// outlet={outletIdState}
+																key={item.order_uuid}
 																onClick={e =>
 																	selectOrder
 																		? setSelectedOrder(prev =>
@@ -1588,9 +1561,6 @@ TOTAL: ${amounts}
 																<span
 																	className="dblClickTrigger"
 																	style={{ display: "none" }}
-																	// onClick={() =>
-																	//   menuOpenHandler(item)
-																	// }
 																/>
 																<Card
 																	details={details}
@@ -1601,8 +1571,6 @@ TOTAL: ${amounts}
 																		else getRunningOrders()
 																	}}
 																	setSelectOrder={setSelectOrder}
-																	// on_order={on_order && on_order}
-																	// key={item.seat_uuid}
 																	dateTime={item?.status[0]?.time}
 																	title1={item?.invoice_number || ""}
 																	selectedOrder={
@@ -1615,11 +1583,6 @@ TOTAL: ${amounts}
 																	}
 																	title2={item?.counter_title || ""}
 																	status={getStageName(getOrderStage(item?.status))}
-																	// price={item.price}
-																	// visibleContext={visibleContext}
-																	// setVisibleContext={setVisibleContext}
-																	// isMouseInsideContext={isMouseInsideContext}
-																	// seats={seatsState.filter(s => +s.seat_status === 1)}
 																	rounded
 																/>
 															</div>

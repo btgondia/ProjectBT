@@ -4,7 +4,6 @@ const Card = ({
 	title2,
 	title1,
 	selectedOrder,
-	details,
 	status,
 	dateTime,
 	rounded,
@@ -12,18 +11,18 @@ const Card = ({
 	selectedCounter,
 	setSelectOrder,
 	order,
-	getOrders = () => {}
+	getOrders = () => {},
 }) => {
 	const PutOrder = async (deleteOrder = false) => {
 		let data = {
 			...order,
 			counter_order: 0,
-			accept_notification: deleteOrder ? "0" : "1"
+			accept_notification: deleteOrder ? "0" : "1",
 		}
 		if (deleteOrder) {
 			let time = new Date()
 			let stage = order?.status?.length
-				? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
+				? order?.status?.map((a) => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
 				: order?.status[0]?.stage || 0
 			data = {
 				...data,
@@ -32,11 +31,13 @@ const Card = ({
 					{
 						stage: 5,
 						user_uuid: localStorage.getItem("user_uuid"),
-						time: time.getTime()
-					}
+						time: time.getTime(),
+					},
 				],
-				fulfillment: order.fulfillment?.length ? [...order.fulfillment, ...order.item_details] : order.item_details,
-				item_details: order.item_details?.map(a => ({ ...a, b: 0, p: 0 }))
+				fulfillment: order.fulfillment?.length
+					? [...order.fulfillment, ...order.item_details]
+					: order.item_details,
+				item_details: order.item_details?.map((a) => ({ ...a, b: 0, p: 0 })),
 			}
 		}
 
@@ -45,8 +46,8 @@ const Card = ({
 			url: "/orders/putOrders",
 			data: [data],
 			headers: {
-				"Content-Type": "application/json"
-			}
+				"Content-Type": "application/json",
+			},
 		})
 		if (response.data.success) {
 			getOrders()
@@ -56,14 +57,27 @@ const Card = ({
 	const getQty = () => {
 		let data = order.item_details
 		let result =
-			(data.length > 1 ? data.map(a => +a.b || 0).reduce((a, b) => a + b) : data[0].b || 0) +
+			(data.length > 1 ? data.map((a) => +a.b || 0).reduce((a, b) => a + b) : data[0].b || 0) +
 			":" +
-			(data.length > 1 ? data.map(a => +a.p || 0).reduce((a, b) => a + b) : data[0].p || 0)
+			(data.length > 1 ? data.map((a) => +a.p || 0).reduce((a, b) => a + b) : data[0].p || 0)
 		return result + " (" + order.order_grandtotal + ")"
 	}
 
 	var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-	const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+	const monthNames = [
+		"Jan",
+		"Feb",
+		"Mar",
+		"Apr",
+		"May",
+		"Jun",
+		"Jul",
+		"Aug",
+		"Sep",
+		"Oct",
+		"Nov",
+		"Dec",
+	]
 
 	function formatAMPM(date) {
 		var hours = date.getHours()
@@ -98,36 +112,43 @@ const Card = ({
 		if (order.order_status === "A" || order.counter_order) cardColor1Height = 0
 		else cardColor1Height = ((curr - dateTime) * 100) / (order?.time_1 - dateTime)
 
+	if (cardColor1Height) cardColor1Height = Math.min(cardColor1Height, 100)
+
 	let cardColor2Height = 0
 	if (!order?.payment_pending)
 		if (order.order_status === "A" || order.counter_order) cardColor2Height = 0
 		else cardColor2Height = ((curr - dateTime) * 100) / (order?.time_2 - dateTime)
 
+	if (cardColor2Height) cardColor2Height = Math.min(cardColor2Height, 100)
+
 	return (
 		<>
 			<div
 				onDoubleClick={onDoubleClick}
-				onContextMenu={e => {
+				onContextMenu={(e) => {
 					e.preventDefault()
 					e.stopPropagation()
 					setSelectOrder(true)
 				}}
 			>
 				<button
-					className={`card-focus 
-						${rounded ? "rounded" : ""} 
-						${selectedOrder ? "selected-seat" : selectedCounter ? "blinking-seat" : ""}
-					`}
+					className={
+						"card-focus" +
+						(rounded ? " rounded" : "") +
+						(selectedOrder ? " selected-seat" : selectedCounter ? " blinking-seat" : "")
+					}
 					style={{ margin: "5px" }}
 				>
 					<div
-						className={`card 
-							${rounded ? "rounded" : ""}
-							${order?.payment_pending ? "payment-pending" : ""}
-						`}
+						className={
+							"card" +
+							(rounded ? " rounded" : "") +
+							(order?.payment_pending ? " payment-pending" : "")
+						}
 						style={{
 							gap: "2px",
-							backgroundColor: order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff"
+							backgroundColor:
+								order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff",
 						}}
 					>
 						<p
@@ -137,7 +158,7 @@ const Card = ({
 								whiteSpace: "nowrap",
 								overflow: "hidden",
 								textOverflow: "ellipsis",
-								maxWidth: "15ch"
+								maxWidth: "15ch",
 							}}
 						>
 							{title1 ? title1 : title2}
@@ -150,18 +171,17 @@ const Card = ({
 								whiteSpace: "nowrap",
 								overflow: "hidden",
 								textOverflow: "ellipsis",
-								maxWidth: "15ch"
+								maxWidth: "15ch",
 							}}
 						>
 							{title1 ? title2 : ""}
 						</p>
 						<p className="title2">{daysCount} Days</p>
-						{/* <p className="title2">{calculateAge(curr - dateTime)}</p> */}
 						{order.counter_order ? (
 							<div className="flex" style={{ justifyContent: "space-between", width: "100px" }}>
 								<button
 									className="acceptrejectButton"
-									onClick={e => {
+									onClick={(e) => {
 										e.stopPropagation()
 										PutOrder(true)
 									}}
@@ -170,7 +190,7 @@ const Card = ({
 								</button>
 								<button
 									className="acceptrejectButton green"
-									onClick={e => {
+									onClick={(e) => {
 										e.stopPropagation()
 										PutOrder(false)
 									}}
@@ -181,19 +201,23 @@ const Card = ({
 						) : (
 							<div>{status}</div>
 						)}
-						<div style={{ fontSize: "10px" }}>
+						<div style={{ fontSize: "10px", fontWeight: 600 }}>
 							{`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""} ${
 								monthNames[new Date().getMonth()] || ""
 							}`}{" "}
 							{formatAMPM(new Date(dateTime)) || ""}
 						</div>
-						<div style={{ fontSize: "10px" }}>{getQty()}</div>
-						<div className="card-color-sheet" id="sheet1" style={{ height: `calc(${cardColor1Height}% + 2px)` }} />
+						<div style={{ fontSize: "10px", fontWeight: 600 }}>{getQty()}</div>
+						<div
+							className="card-color-sheet"
+							id="sheet1"
+							style={{ height: `calc(${cardColor1Height}% + 2px)` }}
+						/>
 						<div
 							className="card-color-sheet"
 							id="sheet2"
 							style={{
-								height: cardColor1Height >= 100 ? `calc(${cardColor2Height}% + 2px)` : 0
+								height: cardColor1Height >= 100 ? `calc(${cardColor2Height}% + 2px)` : 0,
 							}}
 						/>
 					</div>

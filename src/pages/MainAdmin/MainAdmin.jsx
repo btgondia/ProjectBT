@@ -183,7 +183,7 @@ const MainAdmin = () => {
 					numbers: counterOrders[a]?.numbers || []
 				}
 			})
-			.filter(Boolean) // Remove any null values
+			.filter(Boolean)
 			.sort((a, b) => a?.sort_order - b?.sort_order)
 			.map(({ route_title, counter_title, credit_rating, address, orders, numbers, dms_buyer_name }) => {
 				const orderDetails = orders
@@ -222,8 +222,6 @@ TOTAL: ${amounts}
                 `
 			})
 			.join("\n")
-
-		///copy on clipboard
 
 		navigator.clipboard.writeText(copyData)
 		setNotification({
@@ -1045,13 +1043,7 @@ TOTAL: ${amounts}
 											<button
 												className="simple_Logout_button"
 												type="button"
-												onClick={() => {
-													// setSelectedOrder((prev) =>
-													//   prev.filter((i) => !i.payment_pending)
-													// );
-													// setNotesState({ active: true, index: 0 });
-													setConfirmMarkPaymentPendingDialogue(true)
-												}}
+												onClick={() => setConfirmMarkPaymentPendingDialogue(true)}
 											>
 												Mark As Pending Payment
 											</button>
@@ -1096,7 +1088,7 @@ TOTAL: ${amounts}
 
 									if (orders_data?.length)
 										return (
-											<div key={Math.random()} className="sectionDiv">
+											<div key={route.route_uuid} className="sectionDiv">
 												<h1>
 													<span
 														style={{ cursor: "pointer" }}
@@ -1253,7 +1245,7 @@ TOTAL: ${amounts}
 																		: ""
 																)}
 																style={{ height: "fit-content" }}
-																key={Math.random()}
+																key={item.order_uuid}
 																onClick={e =>
 																	selectOrder
 																		? setSelectedOrder(prev =>
@@ -1300,14 +1292,15 @@ TOTAL: ${amounts}
 												</div>
 											</div>
 										)
-									else return ""
+									else return null
 								})}
 							</>
 						) : (
 							<>
-								{[0].map(_ => {
-									const ordersData = orders.filter(a => !a?.trip_uuid)
-									if (ordersData?.length)
+								{
+									(() => {
+										const ordersData = orders.filter(a => !a?.trip_uuid)
+										if (!ordersData?.length) return null
 										return (
 											<div key={Math.random()} className="sectionDiv">
 												<h2>
@@ -1348,7 +1341,7 @@ TOTAL: ${amounts}
 																					!orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)
 																						?.length
 																			)
-																	  )
+																		)
 																	: setSelectedOrder(
 																			selectedOrder?.length
 																				? [
@@ -1358,9 +1351,9 @@ TOTAL: ${amounts}
 																									?.length
 																						),
 																						...orders.filter(a => !a?.trip_uuid)
-																				  ]
+																					]
 																				: orders?.filter(a => !a?.trip_uuid)
-																	  )
+																		)
 															}
 														/>
 													) : (
@@ -1391,7 +1384,7 @@ TOTAL: ${amounts}
 																			: ""
 																	}`}
 																	style={{ height: "fit-content" }}
-																	key={Math.random()}
+																	key={item.order_uuid}
 																	onClick={e =>
 																		selectOrder
 																			? setSelectedOrder(prev =>
@@ -1400,7 +1393,7 @@ TOTAL: ${amounts}
 																						: prev?.length
 																						? [...prev, item]
 																						: [item]
-																			  )
+																				)
 																			: setSelectedRouteOrder(item.order_uuid)
 																	}
 																>
@@ -1448,13 +1441,13 @@ TOTAL: ${amounts}
 												</div>
 											</div>
 										)
-									else return ""
-								})}
+									})()
+								}
 								{TripsOrderLength?.map(trip => {
 									const orders_data = orders?.filter(a => a.trip_uuid === trip.trip_uuid)
 									if (orders_data?.length)
 										return (
-											<div key={Math.random()} className="sectionDiv">
+											<div key={trip.trip_uuid} className="sectionDiv">
 												<h1>
 													<span
 														style={{ cursor: "pointer" }}
@@ -1536,58 +1529,56 @@ TOTAL: ${amounts}
 													}}
 													id="seats_container"
 												>
-													{orders_data?.map(item => {
-														return (
-															<div
-																className={`seatSearchTarget ${
-																	!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
-																		? "shaking-cards"
-																		: ""
-																}`}
-																style={{ height: "fit-content" }}
-																key={item.order_uuid}
-																onClick={e =>
+													{orders_data?.map(item => (
+														<div
+															className={"seatSearchTarget " + (
+																(!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1)
+																	? "shaking-cards"
+																	: ""
+															)}
+															style={{ height: "fit-content" }}
+															key={item.order_uuid}
+															onClick={e =>
+																selectOrder
+																	? setSelectedOrder(prev =>
+																			prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																				? prev.filter(a => a.order_uuid !== item.order_uuid)
+																				: prev?.length
+																				? [...prev, item]
+																				: [item]
+																		)
+																	: setSelectedRouteOrder(item.order_uuid)
+															}
+														>
+															<span
+																className="dblClickTrigger"
+																style={{ display: "none" }}
+															/>
+															<Card
+																details={details}
+																order={item}
+																onDoubleClick={() => setPopupOrder(item)}
+																getOrders={() => {
+																	if (holdOrders) getRunningHoldOrders()
+																	else getRunningOrders()
+																}}
+																setSelectOrder={setSelectOrder}
+																dateTime={item?.status[0]?.time}
+																title1={item?.invoice_number || ""}
+																selectedOrder={
 																	selectOrder
-																		? setSelectedOrder(prev =>
-																				prev.filter(a => a.order_uuid === item.order_uuid)?.length
-																					? prev.filter(a => a.order_uuid !== item.order_uuid)
-																					: prev?.length
-																					? [...prev, item]
-																					: [item]
-																		  )
-																		: setSelectedRouteOrder(item.order_uuid)
+																		? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
+																		: selectedRouteOrder === item.order_uuid
 																}
-															>
-																<span
-																	className="dblClickTrigger"
-																	style={{ display: "none" }}
-																/>
-																<Card
-																	details={details}
-																	order={item}
-																	onDoubleClick={() => setPopupOrder(item)}
-																	getOrders={() => {
-																		if (holdOrders) getRunningHoldOrders()
-																		else getRunningOrders()
-																	}}
-																	setSelectOrder={setSelectOrder}
-																	dateTime={item?.status[0]?.time}
-																	title1={item?.invoice_number || ""}
-																	selectedOrder={
-																		selectOrder
-																			? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
-																			: selectedRouteOrder === item.order_uuid
-																	}
-																	selectedCounter={
-																		selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
-																	}
-																	title2={item?.counter_title || ""}
-																	status={getStageName(getOrderStage(item?.status))}
-																	rounded
-																/>
-															</div>
-														)
-													})}
+																selectedCounter={
+																	selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
+																}
+																title2={item?.counter_title || ""}
+																status={getStageName(getOrderStage(item?.status))}
+																rounded
+															/>
+														</div>
+													))}
 												</div>
 											</div>
 										)
@@ -2037,7 +2028,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 																JSON.parse(localStorage.getItem("warehouse") || "") === a.warehouse_uuid)
 													)
 													.map(a => (
-														<option value={a.trip_uuid}>{a.trip_title}</option>
+														<option key={a.trip_uuid} value={a.trip_uuid}>{a.trip_title}</option>
 													))}
 											</select>
 										</label>
@@ -2354,7 +2345,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 															)?.length
 													)
 													.map(a => (
-														<>
+														<React.Fragment key={a.category_uuid}>
 															<tr>
 																<td colSpan={8}>{a.category_title}</td>
 															</tr>
@@ -2402,7 +2393,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 																		<td colSpan={2}>{item.order_count || 0}</td>
 																	</tr>
 																))}
-														</>
+														</React.Fragment>
 													))}
 												<tr
 													style={{
@@ -2572,7 +2563,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									.filter(a => items?.filter(b => a.category_uuid === b.category_uuid)?.length)
 									.sort((a, b) => a?.category_title?.localeCompare(b?.category_title))
 									.map(a => (
-										<>
+										<React.Fragment key={a.category_uuid}>
 											<tr
 												style={{
 													// pageBreakAfter: "auto",
@@ -2613,7 +2604,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 														</td>
 													</tr>
 												))}
-										</>
+										</React.Fragment>
 									))}
 								<tr
 									style={{
@@ -2678,7 +2669,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									.filter(a => items?.filter(b => a.category_uuid === b.category_uuid && b.b)?.length)
 									.sort((a, b) => a?.category_title?.localeCompare(b?.category_title))
 									.map(a => (
-										<>
+										<React.Fragment key={a.category_uuid}>
 											<tr
 												style={{
 													width: "100%",
@@ -2717,7 +2708,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 														</td>
 													</tr>
 												))}
-										</>
+										</React.Fragment>
 									))}
 								<tr
 									style={{
@@ -2948,7 +2939,7 @@ function SummaryPopup({
 														)?.length
 												)
 												.map(c => (
-													<>
+													<React.Fragment key={c.company_uuid}>
 														{category
 															.filter(
 																a =>
@@ -2956,7 +2947,7 @@ function SummaryPopup({
 																	c.company_uuid === a.company_uuid
 															)
 															.map((a, i) => (
-																<>
+																<React.Fragment key={a.category_uuid}>
 																	<tr
 																		style={{
 																			height: "30px"
@@ -2967,7 +2958,7 @@ function SummaryPopup({
 
 																		<td colSpan={2}>{GetItemsQty(a.category_uuid)}</td>
 																	</tr>
-																</>
+																</React.Fragment>
 															))}
 														<tr
 															style={{
@@ -2991,7 +2982,7 @@ function SummaryPopup({
 
 															<td colSpan={2}></td>
 														</tr>
-													</>
+													</React.Fragment>
 												))}
 										</tbody>
 									</table>
@@ -3086,7 +3077,7 @@ function SummaryPopup({
 									.sort((a, b) => a?.category_title?.localeCompare(b?.category_title))
 									.filter(a => items?.filter(b => a.category_uuid === b.category_uuid)?.length)
 									.map(a => (
-										<>
+										<React.Fragment key={a.category_uuid}>
 											<tr style={{ pageBreakAfter: "always", width: "100%" }}>
 												<td colSpan={11}>{a.category_title}</td>
 											</tr>
@@ -3112,7 +3103,7 @@ function SummaryPopup({
 														</td>
 													</tr>
 												))}
-										</>
+										</React.Fragment>
 									))}
 								<tr
 									style={{

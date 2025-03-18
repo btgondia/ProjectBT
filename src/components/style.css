@@ -833,7 +833,7 @@ div.unsync-count-container {
 }
 
 .card-color-sheet#sheet2 {
-	background-color: #ff2727;
+	background-color: rgb(231, 0, 0);
 }
 
 .card > .seatTimer {

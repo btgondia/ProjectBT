@@ -378,7 +378,6 @@ const SelectedCounterOrder = () => {
 
   const getLoadRate = (item) => {
     const loadRate = companies[filterCompany].load_rate
-    console.log(loadRate,companies[filterCompany],filterCompany)
     if (loadRate === companyLoadRates[2].value) return `${item.item_price * +item.one_pack}/pack`
     if (loadRate === companyLoadRates[1].value) return `${item.item_price * +item.conversion}/box`
     return `${item.item_price}/unit`
@@ -639,9 +638,9 @@ const SelectedCounterOrder = () => {
                                           ) : (
                                             <><b>Price:</b> {getLoadRate(item)}</>
                                           )}
-                                          <span style={{ marginLeft: "20px" }}>
+                                          {/* <span style={{ marginLeft: "20px" }}>
                                             Stock {getStock(item)}
-                                          </span>
+                                          </span> */}
                                         </div>
                                         <h3 className={`item-price`}>
                                           MRP: {item?.mrp || ""}

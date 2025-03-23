@@ -28,6 +28,7 @@ let ValutionOptions = [
   { value: "item_price_a", label: "Price A" },
   { value: "item_price_b", label: "Price B" },
   { value: "item_price_c", label: "Price C" },
+  { value: "item_price_d", label: "Price D" },
 ];
 
 const StockValuationReport = () => {

@@ -777,6 +777,7 @@ function NewUserForm({
         item_price_a: popupInfo.data.item_price_a || 0,
         item_price_b: popupInfo.data.item_price_b || 0,
         item_price_c: popupInfo.data.item_price_c || 0,
+        item_price_d: popupInfo.data.item_price_d || 0,
       });
     else
       setdata({
@@ -1047,7 +1048,7 @@ function NewUserForm({
                         />
                       </label>
                     </div>
-                    <sdiv className="row">
+                    <div className="row">
                       <label className="selectLabel">
                         Item Price C
                         <input
@@ -1066,7 +1067,27 @@ function NewUserForm({
                           maxLength={5}
                         />
                       </label>
-                    </sdiv>
+                    </div>
+                    <div className="row">
+                      <label className="selectLabel">
+                        Item Price D
+                        <input
+                          type="number"
+                          onWheel={(e) => e.target.blur()}
+                          name="route_title"
+                          className="numberInput"
+                          step="0.001"
+                          value={data?.item_price_d}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              item_price_d: e.target.value,
+                            })
+                          }
+                          maxLength={5}
+                        />
+                      </label>
+                    </div>
                   </div>
                 ) : (
                   <div className="formGroup">

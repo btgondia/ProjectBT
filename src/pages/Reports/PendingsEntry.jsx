@@ -323,6 +323,7 @@ const PendingsEntry = () => {
             selectedOrders={selectedOrders}
             setSelectedOrders={setSelectedOrders}
             getOrders={getOrders}
+            hasMore={hasMore}
           />
           {orders.length ? (
             <div
@@ -592,6 +593,7 @@ function Table({
   selectedOrders,
   setSelectedOrders,
   getOrders,
+  hasMore
 }) {
  
   return (
@@ -616,8 +618,8 @@ function Table({
         {itemsDetails
           ?.sort((a, b) => +a.invoice_number - +b.invoice_number)
           ?.map((item, i, array) => (
+            <React.Fragment key={i.invoice_number}>
             <tr
-              key={Math.random()}
               style={{ height: "30px" }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -680,6 +682,22 @@ function Table({
                 </button>
               </td>
             </tr>
+            {i === array.length - 1 && hasMore ? <tr style={{ border:"none", cursor:"progress", pointerEvents:"none" }}>
+              <td colSpan={17}>
+                <div className="flex" style={{paddingBlock:"12px"}}>
+                  <span className="loader" style={{
+                    display: "block",
+                    width: "28px",
+                    height: "28px",
+                    marginRight:"10px",
+                    aspectRatio: 1,
+                  }} />
+                  <span>Loading...</span>
+                </div>
+              </td>
+            </tr>
+            : null}
+            </React.Fragment>
           ))}
       </tbody>
     </table>

@@ -223,6 +223,7 @@ export default function PurchaseInvoice() {
           if (item_rate === "a") item_price = item.item_price_a;
           if (item_rate === "b") item_price = item.item_price_b;
           if (item_rate === "c") item_price = item.item_price_c;
+          if (item_rate === "d") item_price = item.item_price_d;
 
           return { ...item, item_price };
         })

@@ -206,6 +206,7 @@ export default function AddOrder() {
           if (item_rate === "a") item_price = item.item_price_a || 0;
           else if (item_rate === "b") item_price = item.item_price_b || 0;
           else if (item_rate === "c") item_price = item.item_price_c || 0;
+          else if (item_rate === "d") item_price = item.item_price_d || 0;
           else item_rate = null
           return { ...item, item_rate, item_price };
         })

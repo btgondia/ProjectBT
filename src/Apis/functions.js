@@ -403,9 +403,11 @@ export const Billing = async ({
               : 1),
       edit_price,
     };
+
     let item_special_price =
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
+
     let item_total =
       item.status !== 3
         ? truncateDecimals(
@@ -454,6 +456,7 @@ export const Billing = async ({
         adjustment
       : 0)- coin
   );
+
   let chargesTotal = 0;
   if (counterCharges?.length) {
     counter_charges = counterCharges.map((i) => i.charge_uuid);

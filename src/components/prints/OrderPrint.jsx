@@ -181,7 +181,7 @@ const OrderPrint = ({
 										</td>
 									</tr>
 									<tr>
-										<td style={{ fontWeight: "600", fontSize: "x-small" }}>Phone: 9422551074</td>
+										<td style={{ fontWeight: "600", fontSize: "x-small" }}>Call: 9403061071 / UPI: 9422551074</td>
 									</tr>
 									<tr>
 										<td style={{ fontWeight: "600", fontSize: "x-small" }}>

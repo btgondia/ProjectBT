@@ -27,7 +27,7 @@ import {
 import { PiCircleDashedBold } from "react-icons/pi";
 import { TbArrowsExchange2 } from "react-icons/tb";
 
-import { FaCircleMinus, FaLink } from "react-icons/fa6";
+import { FaAngleRight, FaCircleMinus, FaLink } from "react-icons/fa6";
 
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
@@ -278,7 +278,7 @@ export function OrderDetails({
 				<>
 					On confirm, the order{" "}
 					<b>
-						{orderData?.order_type === "E" ? "E-" : null}
+						{orderData?.order_type === "E" && !isNaN(orderData?.invoice_number[0]) ? "E-" : null}
 						{orderData?.invoice_number}
 					</b>{" "}
 					will be converted to <b>{orderData?.order_type === "E" ? "invoice" : "estimate"}</b> order.
@@ -1216,6 +1216,7 @@ export function OrderDetails({
 		count: 0,
 		values: []
 	})
+	
 	const [sendCounter, setSendCounter] = useState(true)
 	const [userSelection, setUserSelection] = useState([])
 
@@ -1370,6 +1371,7 @@ export function OrderDetails({
 		if (item_rate === "a") item_price = itemData.item_price_a
 		if (item_rate === "b") item_price = itemData.item_price_b
 		if (item_rate === "c") item_price = itemData.item_price_c
+		if (item_rate === "d") item_price = itemData.item_price_d
 		let p_price =
 			+getSpecialPrice(counters, itemData, orderData?.counter_uuid)?.price ||
 			item_price ||
@@ -1403,6 +1405,53 @@ export function OrderDetails({
 		setHoldPopup(false)
 	}
 	
+	const updateItemRate = async (item_rate) => {
+		const updatedItems = orderData?.item_details?.map(i => {
+
+			const itemData = itemsData.find(a => a.item_uuid === i.item_uuid)
+			let item_price = itemData.item_price
+
+			if (item_rate === "a") item_price = itemData.item_price_a
+			else if (item_rate === "b") item_price = itemData.item_price_b
+			else if (item_rate === "c") item_price = itemData.item_price_c
+			else if (item_rate === "d") item_price = itemData.item_price_d
+			
+			const p_price =
+				+getSpecialPrice(counters, itemData, orderData?.counter_uuid)?.price ||
+				+item_price ||
+				0
+			
+			return {
+				...i,
+				...itemData,
+				price: item_price,
+				item_price,
+				p_price,
+				b_price: Math.floor((p_price * +itemData.conversion) || 0)
+			}
+		})
+
+		const billingResponse = await Billing({
+			order_edit: true,
+			order_uuid: orderData?.order_uuid,
+			invoice_number: `${orderData?.order_type ?? ""}${orderData?.invoice_number}`,
+			counter,
+			items: updatedItems,
+			replacement: orderData.replacement,
+			adjustment: orderData.adjustment,
+			shortage: orderData.shortage,
+			others: {}
+		})
+
+		const data = {
+			...orderData,
+			...billingResponse,
+			item_details: billingResponse.items
+		}
+
+		return data
+	}
+
 	return openDMSInvoicePopup ? (
 		<DMSInvoicePopup
 			order={order}
@@ -1413,7 +1462,7 @@ export function OrderDetails({
 			setNotification={setNotification}
 		/>
 	) : deliveryPopup ? (
-		<DiliveryPopup
+		<PaymentPopup
 			onSave={({ modes, outstanding, modeTotal }) => {
 				if (order?.receipt_number) {
 					onSave()
@@ -1536,6 +1585,16 @@ export function OrderDetails({
 								>
 									<Splitscreen /><span>Split Order</span>
 								</button>
+								<UpdateRate 
+									updateItemRate={updateItemRate}
+									disabled={editOrder}
+									onConfirm={(data) => updateOrder({
+										sendPaymentReminder: false,
+										data,
+										completeOrder,
+										location: window.location.pathname
+									})}
+								/>
 							</div>
 						</div>
 						<div style={{flex:1}}>
@@ -3431,7 +3490,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 		</div>
 	)
 }
-function DiliveryPopup({
+function PaymentPopup({
 	onSave,
 	postOrderData,
 	credit_allowed,
@@ -3544,6 +3603,7 @@ function DiliveryPopup({
 			})
 		}
 	}
+	
 	useEffect(() => {
 		if (deliveryPopup === "put" || deliveryPopup === "edit" || deliveryPopup === "adjustment") {
 			GetOutstanding()
@@ -3563,8 +3623,6 @@ function DiliveryPopup({
 		}
 		GetPaymentModes()
 		if (order.trip_uuid) getTripData(order.trip_uuid)
-	}, [deliveryPopup, order, reminder, type])
-	useEffect(() => {
 		if (deliveryPopup === "adjustment") {
 			updateBilling({
 				order_edit: true,
@@ -3577,7 +3635,8 @@ function DiliveryPopup({
 				adjustment_remarks: order?.adjustment_remarks || ""
 			})
 		}
-	}, [deliveryPopup])
+	}, [deliveryPopup, order, reminder, type])
+	
 	useEffect(() => {
 		if (PaymentModes?.length)
 			setModes(
@@ -3636,10 +3695,12 @@ function DiliveryPopup({
 		setWaiting(false)
 	}
 
+	const remainingAmount = (order?.order_grandtotal || 0) -	(modes?.reduce((sum, i) => sum + (i.amt || 0), 0) || 0)
+
 	return (
 		<>
 			<div className="overlay" style={{ zIndex: 9999999999 }}>
-				<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
+				<div className="modal" style={{ height: "fit-content", width: "max-content" }} onContextMenu={e => e.preventDefault()}>
 					<div className="flex" style={{ justifyContent: "space-between" }}>
 						<h3>Payments</h3>
 						<h3>Rs. {order?.order_grandtotal}</h3>
@@ -3673,30 +3734,28 @@ function DiliveryPopup({
 													onContextMenu={e => {
 														e.preventDefault()
 														e.stopPropagation()
-														if (e.target.disabled) return
+														if (e.target.disabled || !remainingAmount) return
+														setModes(prev => 
+															prev?.map(a =>
+																a.mode_uuid === item.mode_uuid
+																	? ({ ...a, amt: remainingAmount })
+																	: a
+															)
+														)
+													}}
+													onChange={e => {
+														if (+e.target.value && +e.target.value > remainingAmount) return
 														setModes(prev =>
 															prev?.map(a =>
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: order.order_grandtotal || 0
+																			amt: (+e.target.value || undefined)
 																	  }
 																	: a
 															)
 														)
 													}}
-													onChange={e =>
-														setModes(prev =>
-															prev?.map(a =>
-																a.mode_uuid === item.mode_uuid
-																	? {
-																			...a,
-																			amt: e.target.value
-																	  }
-																	: a
-															)
-														)
-													}
 													maxLength={42}
 													onWheel={e => e.preventDefault()}
 													autocomplete="off"
@@ -3719,7 +3778,7 @@ function DiliveryPopup({
 														onChange={e =>
 															setModes(prev =>
 																prev?.map(a =>
-																	a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a
+																	a.mode_uuid === item.mode_uuid ? ({ ...a, remarks: e.target.value }) : a
 																)
 															)
 														}
@@ -3754,20 +3813,21 @@ function DiliveryPopup({
 														: { width: "80px" }
 												}
 												onContextMenu={e => {
-													if (e.target.disabled) return
+													if (e.target.disabled || !remainingAmount) return
 													e.preventDefault()
 													e.stopPropagation()
 													setOutstanding(prev => ({
 														...prev,
-														amount: order.order_grandtotal || 0
+														amount: remainingAmount
 													}))
 												}}
-												onChange={e =>
+												onChange={e => {
+													if (+e.target.value && +e.target.value > remainingAmount) return
 													setOutstanding(prev => ({
 														...prev,
-														amount: e.target.value
+														amount: (+e.target.value || undefined)
 													}))
-												}
+												}}
 												maxLength={42}
 												onWheel={e => e.preventDefault()}
 												autocomplete="off"
@@ -3803,6 +3863,12 @@ function DiliveryPopup({
 											""
 										)}
 									</div>
+									<div>
+										<span>Remaining</span>
+										<span>
+											<b> ₹{+remainingAmount.toFixed(2)}</b>
+										</span>
+									</div>
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										{deliveryPopup === "put" ? (
 											""
@@ -3818,7 +3884,7 @@ function DiliveryPopup({
 										)}
 									</div>
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
-										<div style={{ width: "100px" }}>Delivered By</div>
+										<div style={{ width: "100px" }}>	Delivered By</div>
 										<label className="selectLabel flex" style={{ width: "120px" }}>
 											<select
 												className="numberInput"
@@ -4509,4 +4575,64 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 			</div>
 		</div>
 	)
+}
+
+const UpdateRate = ({ disabled, updateItemRate, onConfirm }) => {
+	const [visible, setVisible] = useState(false)
+	const [promptState, setPromptState] = useState({})
+
+	const onRateSelect = async (rate) => {
+		const updatedOrderData = await updateItemRate(rate)
+		setPromptState({
+			active: true,
+			heading: `Update items rate to ${rate.toUpperCase()}`,
+			message: <span style={{fontSize: "20px!important" }}>
+				On confirm, all the items will be updated to use item rate <b>{rate.toUpperCase()}</b>.
+				<br />
+				<b>Order Grand Total: ₹{updatedOrderData.order_grandtotal}</b>
+			</span>,
+			actions: [
+				{
+					label: "Cancel",
+					classname: "cancel",
+					action: () => setPromptState(null)
+				},
+				{
+					label: `Confirm`,
+					classname: "confirm",
+					action: async () => {
+						try {
+							await onConfirm(updatedOrderData)
+						} catch (error) {
+							console.error(error)
+						}
+						setPromptState(null)
+						setVisible(false)
+					}
+				}
+			]
+		})
+	}
+
+	return (<div style={{position:"relative"}}>
+		<button
+			className="theme-btn"
+			disabled={disabled}
+			onClick={() => setVisible(i => !i)}
+		>
+			<MdCurrencyRupee />
+			<span>Update Rate</span>
+			<FaAngleRight size={16} />
+		</button>
+		{visible &&
+			<div id="update-rate-popover">
+				<button onClick={() => onRateSelect("")}>Default</button>
+				<button onClick={() => onRateSelect("a")}>Item Rate A</button>
+				<button onClick={() => onRateSelect("b")}>Item Rate B</button>
+				<button onClick={() => onRateSelect("c")}>Item Rate C</button>
+				<button onClick={() => onRateSelect("d")}>Item Rate D</button>
+			</div>
+		}
+		{promptState?.active && <Prompt {...promptState} />}
+	</div>)
 }

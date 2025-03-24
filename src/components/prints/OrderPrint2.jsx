@@ -56,6 +56,7 @@ const OrderPrint2 = ({
 
 		setGstVAlues(arr)
 	}, [defaultOrder])
+
 	const itemDetails = useMemo(() => {
 		let items = item_details?.map((a) => {
 			const _data = itemData?.find((b) => b.item_uuid === a.item_uuid) || {}

@@ -355,7 +355,7 @@ function Table({
           ?.flat()
           ?.join("")
       )
-      .replace(/{counter_title}/g, counter_title) + `\n*TOTAL: Rs.${totalAmt}*`
+      ?.replace(/{counter_title}/g, counter_title) + `\n*TOTAL: Rs.${totalAmt}*`
 
       setNotification({ success: true, message: "Message Copied" });
       navigator.clipboard.writeText(message || "");
@@ -390,7 +390,7 @@ function Table({
         {data
           ?.map((item, i, array) => (
             <tr
-              key={Math.random()}
+              key={item._id + item.mode_title + i}
               style={{
                 height: "30px",
                 color: isTimestampPlusDaysLessThanCurrent({

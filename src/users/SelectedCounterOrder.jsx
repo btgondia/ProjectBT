@@ -378,23 +378,13 @@ const SelectedCounterOrder = () => {
 
   const getLoadRate = (item) => {
     const loadRate = companies[filterCompany].load_rate
-    if (loadRate === companyLoadRates[2].value) return `${item.item_price * +item.one_pack}/pack`
-    if (loadRate === companyLoadRates[1].value) return `${item.item_price * +item.conversion}/box`
+    if (loadRate === companyLoadRates[2].value) return `${+(item.item_price * +item.one_pack).toFixed(2)}/pack`
+    if (loadRate === companyLoadRates[1].value) return `${+(item.item_price * +item.conversion).toFixed(2)}/box`
     return `${item.item_price}/unit`
   }
 
   return (
     <>
-      {/* {number ? (
-        <MobileNumberPopup
-          counter={counter}
-          getCounter={getCounter}
-          onSave={() => setNumber(false)}
-        />
-      ) : (
-        ""
-      )} */}
-
       <nav
         className="user_nav nav_styling"
         style={

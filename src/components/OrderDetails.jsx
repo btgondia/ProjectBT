@@ -3695,7 +3695,8 @@ function PaymentPopup({
 		setWaiting(false)
 	}
 
-	const remainingAmount = (order?.order_grandtotal || 0) -	(modes?.reduce((sum, i) => sum + (i.amt || 0), 0) || 0)
+	const entryTotal = (modes?.reduce((sum, i) => sum + (i.amt || 0), 0) + (+outstanding?.amount || 0)) || 0
+	const remainingAmount = (order?.order_grandtotal || 0) - entryTotal
 
 	return (
 		<>
@@ -3716,82 +3717,85 @@ function PaymentPopup({
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
-									{PaymentModes?.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}
-										>
-											<div style={{ width: "50px" }}>{item.mode_title}</div>
-											<label className="selectLabel flex" style={{ width: "80px" }}>
-												<input
-													type="number"
-													name="route_title"
-													className="numberInput"
-													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
-													style={{ width: "80px" }}
-													disabled={order?.order_type === "E" && item?.mode_title !== "Cash"}
-													onContextMenu={e => {
-														e.preventDefault()
-														e.stopPropagation()
-														if (e.target.disabled || !remainingAmount) return
-														setModes(prev => 
-															prev?.map(a =>
-																a.mode_uuid === item.mode_uuid
-																	? ({ ...a, amt: remainingAmount })
-																	: a
-															)
-														)
-													}}
-													onChange={e => {
-														if (+e.target.value && +e.target.value > remainingAmount) return
-														setModes(prev =>
-															prev?.map(a =>
-																a.mode_uuid === item.mode_uuid
-																	? {
-																			...a,
-																			amt: (+e.target.value || undefined)
-																	  }
-																	: a
-															)
-														)
-													}}
-													maxLength={42}
-													onWheel={e => e.preventDefault()}
-													autocomplete="off"
-												/>
-											</label>
-											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
-											modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
-												<label className="selectLabel flex" style={{ width: "200px" }}>
+									{PaymentModes?.map(item => {
+										const modeAmt = modes.find(a => a.mode_uuid === item.mode_uuid)?.amt
+										return (
+											<div
+												className="row"
+												style={{ flexDirection: "row", alignItems: "center" }}
+												key={item.mode_uuid}
+											>
+												<div style={{ width: "50px" }}>{item.mode_title}</div>
+												<label className="selectLabel flex" style={{ width: "80px" }}>
 													<input
-														type="text"
+														type="number"
 														name="route_title"
 														className="numberInput"
-														value={modes.find(a => a.mode_uuid === item.mode_uuid)?.remarks}
-														placeholder={"Cheque Number"}
-														style={{
-															width: "100%",
-															backgroundColor: "light",
-															fontSize: "12px"
-														}}
-														onChange={e =>
-															setModes(prev =>
+														value={+modeAmt || ""}
+														style={{ width: "80px" }}
+														disabled={order?.order_type === "E" && item?.mode_title !== "Cash"}
+														onContextMenu={e => {
+															e.preventDefault()
+															e.stopPropagation()
+															if (e.target.disabled || !remainingAmount) return
+															setModes(prev => 
 																prev?.map(a =>
-																	a.mode_uuid === item.mode_uuid ? ({ ...a, remarks: e.target.value }) : a
+																	a.mode_uuid === item.mode_uuid
+																		? ({ ...a, amt: remainingAmount })
+																		: a
 																)
 															)
-														}
+														}}
+														onChange={e => {
+															if (+e.target.value && ((entryTotal - (+modeAmt || 0) + (+e.target.value || 0)) > +order?.order_grandtotal)) return
+															if (e.target.value === "" || !isNaN(e.target.value))
+																setModes(prev =>
+																	prev?.map(a =>
+																		a.mode_uuid === item.mode_uuid
+																			? {
+																					...a,
+																					amt: (+e.target.value || undefined)
+																				}
+																			: a
+																	)
+																)
+														}}
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
 														autocomplete="off"
 													/>
 												</label>
-											) : (
-												""
-											)}
-										</div>
-									))}
+												{
+													item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+													modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
+														<label className="selectLabel flex" style={{ width: "200px" }}>
+															<input
+																type="text"
+																name="route_title"
+																className="numberInput"
+																value={modes.find(a => a.mode_uuid === item.mode_uuid)?.remarks}
+																placeholder={"Cheque Number"}
+																style={{
+																	width: "100%",
+																	backgroundColor: "light",
+																	fontSize: "12px"
+																}}
+																onChange={e =>
+																	setModes(prev =>
+																		prev?.map(a =>
+																			a.mode_uuid === item.mode_uuid ? ({ ...a, remarks: e.target.value }) : a
+																		)
+																	)
+																}
+																maxLength={42}
+																onWheel={e => e.preventDefault()}
+																autocomplete="off"
+															/>
+														</label>
+													) : null
+												}
+											</div>
+									)})}
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										<div style={{ width: "50px" }}>UnPaid</div>
 										<label className="selectLabel flex" style={{ width: "80px" }}>
@@ -3799,7 +3803,7 @@ function PaymentPopup({
 												type="number"
 												name="route_title"
 												className="numberInput"
-												value={outstanding?.amount}
+												value={+outstanding?.amount || 0}
 												placeholder={""}
 												disabled={order?.order_type === "E"}
 												style={
@@ -3822,11 +3826,12 @@ function PaymentPopup({
 													}))
 												}}
 												onChange={e => {
-													if (+e.target.value && +e.target.value > remainingAmount) return
-													setOutstanding(prev => ({
-														...prev,
-														amount: (+e.target.value || undefined)
-													}))
+													if (+e.target.value && ((entryTotal - (+outstanding?.amount || 0) + (+e.target.value || 0)) > +order?.order_grandtotal)) return
+													else if (e.target.value === "" || !isNaN(e.target.value))
+														setOutstanding(prev => ({
+															...prev,
+															amount: (+e.target.value || undefined)
+														}))
 												}}
 												maxLength={42}
 												onWheel={e => e.preventDefault()}

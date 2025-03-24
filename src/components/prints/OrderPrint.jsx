@@ -16,7 +16,7 @@ const OrderPrint = ({
 	defaultOrder = { item_details: [] },
 	hsn_code = []
 }) => {
-	const isEstimate = order?.order_type === "E"
+	const isEstimate = order?.order_type === "E" || order?.invoice_number?.startsWith("E")
 	const [gstValues, setGstVAlues] = useState([])
 	const [cessValues, setCESSVAlues] = useState([])
 	const [appliedCounterCharges, setAppliedCounterCharges] = useState(null)

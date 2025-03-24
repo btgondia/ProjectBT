@@ -3563,7 +3563,7 @@ function PaymentPopup({
 	const GetReciptsModes = async () => {
 		const response = await axios({
 			method: "post",
-			url: "/receipts/getRecipt",
+			url: "/receipts/getReceipt",
 			data: {
 				order_uuid: order?.order_uuid,
 				invoice_number: order?.invoice_number

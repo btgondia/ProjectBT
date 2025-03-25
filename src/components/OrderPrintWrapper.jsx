@@ -21,7 +21,7 @@ const OrderPrintWrapper = ({
 		const itemsWithFreeRows = []
 
 		for (const item of order.item_details) {
-			if (+item.p || +item.q) itemsWithFreeRows.push({...item, free: 0 })
+			if (+item.p || +item.b) itemsWithFreeRows.push({...item, free: 0 })
 			if (+item.free > 0) itemsWithFreeRows.push({
 				...item,
 				p: 0,

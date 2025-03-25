@@ -1504,9 +1504,8 @@ export function OrderDetails({
 							data-tooltip-content={`${
 								counters
 									.find(a => a.counter_uuid === orderData?.counter_uuid)
-									?.mobile?.map(a => a.mobile)
-									?.filter(a => a)
-									?.join(", ") || ""
+									?.mobile?.filter(a => a.mobile)?.map(a => [a.title?.trim?.()?.toUpperCase(), a.mobile].filter(Boolean).join(": "))
+									?.join(" | ") || ""
 							}`}
 						>
 							Order Details • {counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""}{", "}

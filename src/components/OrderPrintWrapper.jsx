@@ -10,7 +10,6 @@ const OrderPrintWrapper = ({
 	reminderDate,
 	users,
 	items,
-
 	pendingPayments,
 	counterOrders,
 	print,
@@ -22,7 +21,7 @@ const OrderPrintWrapper = ({
 		const itemsWithFreeRows = []
 
 		for (const item of order.item_details) {
-			itemsWithFreeRows.push({...item, free:0 })
+			if (+item.p || +item.q) itemsWithFreeRows.push({...item, free: 0 })
 			if (+item.free > 0) itemsWithFreeRows.push({
 				...item,
 				p: 0,

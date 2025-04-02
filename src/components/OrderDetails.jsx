@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react"
 import axios from "axios"
 import Select from "react-select"
-import { LuCircleDashed, LuClipboardEdit, LuFileCog } from "react-icons/lu"
+import { LuClipboardEdit } from "react-icons/lu"
 import { ImScissors } from "react-icons/im"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import { v4 as uuid } from "uuid"
@@ -12,15 +12,11 @@ import {
 	Cancel,
 	CheckCircle,
 	Comment,
-	ContentCopy,
 	DeleteOutline,
 	DeliveryDiningRounded,
-	Edit,
 	NoteAdd,
 	Print,
 	Refresh,
-	Replay,
-	ReplayCircleFilledRounded,
 	Splitscreen,
 	WhatsApp
 } from "@mui/icons-material"
@@ -49,9 +45,9 @@ import {
 } from "../utils/helperFunctions"
 import { useLocation } from "react-router-dom"
 import { getInitialOrderValue } from "../utils/constants"
-import { MdCancel, MdCurrencyRupee, MdDownloadDone, MdFileDownloadDone, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff, MdReplay } from "react-icons/md"
+import { MdCurrencyRupee, MdDownloadDone, MdFileDownloadDone, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff, MdReplay } from "react-icons/md"
 import { RiPercentFill } from "react-icons/ri";
-import { IoMdAddCircle, IoMdCloseCircle } from "react-icons/io";
+import { IoMdCloseCircle } from "react-icons/io";
 
 import "./orderDetails.css"
 

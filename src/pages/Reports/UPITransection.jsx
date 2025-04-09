@@ -153,7 +153,7 @@ const UPITransection = () => {
     });
    
     if (response.data.success) {
-      getData(0);
+      getData(pageInfo.pageIndex);
     }
   };
 
@@ -215,7 +215,7 @@ const UPITransection = () => {
                       borderWidth:"2px",
                       borderStyle:"solid",
                       borderColor:pageInfo.pageIndex === idx ? "#333" : "darkgray",
-					  color: "black"
+					            color: "black"
                     }}
                     disabled={idx === pageInfo.pageIndex}
                     onClick={() => setLoadingState({ active:true, pageIndex:idx })}

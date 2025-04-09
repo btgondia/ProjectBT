@@ -214,8 +214,10 @@ const UPITransection = () => {
                       fontSize:"1rem",
                       borderWidth:"2px",
                       borderStyle:"solid",
-                      borderColor:pageInfo.pageIndex === idx ? "#333" : "darkgray"
+                      borderColor:pageInfo.pageIndex === idx ? "#333" : "darkgray",
+					  color: "black"
                     }}
+                    disabled={idx === pageInfo.pageIndex}
                     onClick={() => setLoadingState({ active:true, pageIndex:idx })}
                   >{idx}</button>
                 ))

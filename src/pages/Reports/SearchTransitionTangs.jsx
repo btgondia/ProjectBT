@@ -3,15 +3,14 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import Context from "../../context/context";
-import { Update } from "@mui/icons-material";
 
 const SearchTransitionTags = () => {
   const [transactionTag, setTransitonTag] = useState("");
   const [ledgerData, setLedgerData] = useState([]);
-  const [updateTransitionTagPopup, setUpdateTransitionTagPopup] =
-    useState(false);
+  const [updateTransitionTagPopup, setUpdateTransitionTagPopup] = useState(false);
   const context = useContext(Context);
   const { setNotification } = context;
+
   const getLedgerData = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
@@ -27,6 +26,7 @@ const SearchTransitionTags = () => {
   useEffect(() => {
     getLedgerData();
   }, []);
+
   const itemList = useMemo(
     () =>
       ledgerData

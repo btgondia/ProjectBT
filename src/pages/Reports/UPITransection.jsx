@@ -40,21 +40,17 @@ const UPITransection = () => {
   const [commentPopup, setCommentPoup] = useState();
   const [type, setType] = useState("");
   const [checkVouceherPopup, setCheckVoucherPopup] = useState(false);
+  const [transactionTag, setTransitonTag] = useState("");
 
-  const [paymentModes, setPaymentModes] = useState([])
+  const [types, setPaymentModes] = useState([])
   const [receipts, setReceipts] = useState([]);
   const [pageInfo, setPageInfo] = useState({
     pageIndex: 0,
     pageSize: 100,
     totalDocuments: 0
   })
-  const [loadingState, setLoadingState] = useState({
-    pageIndex: 0,
-    active: true,
-    mode: "",
-  })
 
-  const getData = async (pageIndex, controller = new AbortController()) => {
+  const getData = async (pageIndex = pageInfo.pageIndex, mode = type, controller = new AbortController()) => {
     try {
       setLoading(true)
       const response = await axios({
@@ -62,9 +58,9 @@ const UPITransection = () => {
         url: "/receipts/list",
         signal: controller.signal,
         params: {
+          mode: mode,
           pageIndex: pageIndex,
           pageSize: pageInfo.pageSize,
-          mode: loadingState.mode,
         },
         headers: {
           "Content-Type": "application/json",
@@ -73,7 +69,7 @@ const UPITransection = () => {
      
       if (response.data.data) {
         const paymentModeIDs = response.data.paymentModeIDs
-        if (!paymentModes?.length) setPaymentModes(
+        if (!types?.length) setPaymentModes(
           [{ label: "All", value: "" }].concat(
             paymentModeIDs.map(i => ({value:i.id,label:i.name}))
           ))
@@ -94,7 +90,6 @@ const UPITransection = () => {
         }))
       }
     } finally {
-      setLoadingState({})
       setLoading(false)
     }
   };
@@ -153,16 +148,15 @@ const UPITransection = () => {
     });
    
     if (response.data.success) {
-      getData(pageInfo.pageIndex);
+      getData(pageInfo.pageIndex, type);
     }
   };
 
   useEffect(() => {
-    if (!loadingState.active) return
     const controller = new AbortController();
-    getData(loadingState.pageIndex, controller);
+    getData(0, "", controller);
     return () => controller.abort();
-  }, [loadingState]);
+  }, []);
 
   return (
     <>
@@ -184,21 +178,34 @@ const UPITransection = () => {
               paddingInline: "12px"
             }}
           >
-            <div className="inputGroup" style={{ width: "20%" }}>
-              Type
-              <Select
-                options={paymentModes}
-                onChange={(doc) => {
-                  setLoadingState({active:true,pageIndex:0,mode:doc.value})
-                  setType(doc.value)
-                }}
-                value={paymentModes?.find(i => i.value === type)}
-                openMenuOnFocus={true}
-                noOptionsMessage={"Loading..."}
-                menuPosition="fixed"
-                menuPlacement="auto"
-                placeholder="Select Type"
-              />
+            <div className="flex">
+              <div className="inputGroup" style={{width:"300px",marginRight:'20px'}}>
+                Type
+                <Select
+                  options={types}
+                  onChange={(doc) => {
+                    getData(0, doc.value)
+                    setType(doc.value)
+                  }}
+                  value={types?.find(i => i.value === type)}
+                  openMenuOnFocus={true}
+                  noOptionsMessage={"Loading..."}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select Type"
+                />
+              </div>
+              {/* <div className="inputGroup" style={{width:"400px",marginRight:'20px'}}>
+                Transition Tags
+                <input
+                  type="text"
+                  onChange={(e) => setTransitonTag(e.target.value)}
+                  value={transactionTag}
+                  placeholder="Search Transition Tags..."
+                  className="searchInput"
+                  onWheel={(e) => e.preventDefault()}
+                />
+              </div> */}
             </div>
             <div>
               <span style={{display:"inline-block", marginRight:"12px"}}><b>Pages</b></span>
@@ -218,7 +225,7 @@ const UPITransection = () => {
 					            color: "black"
                     }}
                     disabled={idx === pageInfo.pageIndex}
-                    onClick={() => setLoadingState({ active:true, pageIndex:idx })}
+                    onClick={() => getData(idx)}
                   >{idx}</button>
                 ))
               }
@@ -226,7 +233,7 @@ const UPITransection = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table
+          <TransactionsTable
             data={receipts}
             putActivityData={putActivityData}
             getOrderData={getOrderData}
@@ -249,7 +256,7 @@ const UPITransection = () => {
         />
       ) : null}
       {remarksPopup ? (
-        <NotesPopup
+        <RemarkPopup
           onSave={() => {
             setRemarksPoup(false);
             getData();
@@ -280,12 +287,10 @@ const UPITransection = () => {
             </svg>
           </div>
         </div>
-      ) : (
-        ""
-      )}
+      ) : null}
 
       {commentPopup ? (
-        <ReciptsCommentsPopup
+        <ReceiptCommentPopup
           commentPopup={commentPopup}
           onClose={() => {
             setCommentPoup(null);
@@ -295,9 +300,7 @@ const UPITransection = () => {
             getData();
           }}
         />
-      ) : (
-        ""
-      )}
+      ) : null}
       {checkVouceherPopup ? (
         <ImportStatements
           onSave={() => {
@@ -305,15 +308,14 @@ const UPITransection = () => {
           }}
           setNotification={setReceipts}
         />
-      ) : (
-        ""
-      )}
+      ) :  null}
     </>
   );
 };
 
 export default UPITransection;
-function Table({
+
+function TransactionsTable({
   data,
   putActivityData,
   getOrderData,
@@ -522,7 +524,7 @@ function Table({
     </table>
   );
 }
-function NotesPopup({ onSave, setItems, notesPopup }) {
+function RemarkPopup({ onSave, setItems, notesPopup }) {
   const [notes, setNotes] = useState([]);
   const [edit, setEdit] = useState(false);
 
@@ -621,7 +623,7 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
     </>
   );
 }
-function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
+function ReceiptCommentPopup({ commentPopup, onClose, onSave }) {
   const [data, setData] = useState({});
 
   //post request to save bank statement import

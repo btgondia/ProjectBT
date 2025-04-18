@@ -100,10 +100,10 @@ import HSNCode from "./pages/Master/HsnCode"
 export const server = ["https://api.btgondia.com", "http://localhost:9000"][
 	window.location.origin.includes("btgondia")
 		? 0 // ! DONOT CHANGE THIS (for prod env)
-		: 0 // * for dev env (Switch to 0 for using prod server and 1 for localhost)
+		: 1 // * for dev env (Switch to 0 for using prod server and 1 for localhost)
 ]
 
-export let Version = 392 // ? increment version count for each deployment rather than each count
+export let Version = 393 // ? increment version count for each deployment rather than each count
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))

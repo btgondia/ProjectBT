@@ -91,9 +91,7 @@ const SearchTransitionTags = () => {
           updateTransitionTagPopup={updateTransitionTagPopup}
           setNotification={setNotification}
         />
-      ) : (
-        ""
-      )}
+      ) : null}
     </>
   );
 };

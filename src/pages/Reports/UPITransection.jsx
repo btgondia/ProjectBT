@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, {
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -17,6 +18,7 @@ import {
 import Select from "react-select";
 import {
   compareObjects,
+  debounce,
   getFormateDate,
 } from "../../utils/helperFunctions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
@@ -42,6 +44,7 @@ const UPITransection = () => {
   const [checkVouceherPopup, setCheckVoucherPopup] = useState(false);
   const [transactionTag, setTransitonTag] = useState("");
 
+  const [counters, setCounters] = useState([])
   const [types, setPaymentModes] = useState([])
   const [receipts, setReceipts] = useState([]);
   const [pageInfo, setPageInfo] = useState({
@@ -50,8 +53,13 @@ const UPITransection = () => {
     totalDocuments: 0
   })
 
-  const getData = async (pageIndex = pageInfo.pageIndex, mode = type, controller = new AbortController()) => {
+  const getData = async (params = {}, controller = new AbortController()) => {
     try {
+      const {
+        pageIndex = pageInfo.pageIndex,
+        mode = type,
+        tagSearch = transactionTag
+      } = params
       setLoading(true)
       const response = await axios({
         method: "get",
@@ -61,6 +69,7 @@ const UPITransection = () => {
           mode: mode,
           pageIndex: pageIndex,
           pageSize: pageInfo.pageSize,
+          tagSearch
         },
         headers: {
           "Content-Type": "application/json",
@@ -88,6 +97,8 @@ const UPITransection = () => {
           pageIndex: pageIndex,
           totalDocuments: response.data.totalDocuments || prev.totalDocuments
         }))
+
+        setCounters(response.data.counterTagsList)
       }
     } finally {
       setLoading(false)
@@ -148,15 +159,23 @@ const UPITransection = () => {
     });
    
     if (response.data.success) {
-      getData(pageInfo.pageIndex, type);
+      getData();
     }
   };
 
   useEffect(() => {
     const controller = new AbortController();
-    getData(0, "", controller);
+    getData({ pageIndex: 0, mode: '' }, controller);
     return () => controller.abort();
   }, []);
+
+  const onTagsInput = useCallback(
+    debounce(async (tagSearch) => {
+      getData({ pageIndex: 0, tagSearch });
+    }, 500),
+    [],
+  )
+  
 
   return (
     <>
@@ -172,19 +191,19 @@ const UPITransection = () => {
             style={{
               overflow: "visible",
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-end",
               justifyContent: "space-between",
               width: "100%",
               paddingInline: "12px"
             }}
           >
-            <div className="flex">
+            <div className="flex" style={{alignItems:'flex-end'}}>
               <div className="inputGroup" style={{width:"300px",marginRight:'20px'}}>
                 Type
                 <Select
                   options={types}
                   onChange={(doc) => {
-                    getData(0, doc.value)
+                    getData({ pageIndex: 0, mode: doc.value })
                     setType(doc.value)
                   }}
                   value={types?.find(i => i.value === type)}
@@ -195,17 +214,18 @@ const UPITransection = () => {
                   placeholder="Select Type"
                 />
               </div>
-              {/* <div className="inputGroup" style={{width:"400px",marginRight:'20px'}}>
+              <div className="inputGroup" style={{width:"400px",marginRight:'20px'}}>
                 Transition Tags
                 <input
                   type="text"
-                  onChange={(e) => setTransitonTag(e.target.value)}
+                  onChange={(e) => {setTransitonTag(e.target.value);onTagsInput(e.target.value)}}
                   value={transactionTag}
                   placeholder="Search Transition Tags..."
                   className="searchInput"
                   onWheel={(e) => e.preventDefault()}
                 />
-              </div> */}
+              </div>
+              {counters?.length > 0 && <CountersTablePopup counters={counters} />}
             </div>
             <div>
               <span style={{display:"inline-block", marginRight:"12px"}}><b>Pages</b></span>
@@ -225,7 +245,7 @@ const UPITransection = () => {
 					            color: "black"
                     }}
                     disabled={idx === pageInfo.pageIndex}
-                    onClick={() => getData(idx)}
+                    onClick={() => getData({ pageIndex: idx })}
                   >{idx}</button>
                 ))
               }
@@ -522,6 +542,186 @@ function TransactionsTable({
           ))}
       </tbody>
     </table>
+  );
+}
+function CountersTablePopup({ counters }) {
+  const [viewState, setViewState] = useState(false)
+  const [updateTransitionTagPopup, setUpdateTransitionTagPopup] = useState()
+  const context = useContext(Context);
+  const { setNotification } = context;
+  return (
+    <>
+      <button className="theme-btn" onClick={() => setViewState(true)}>View Counters</button>
+      {viewState &&
+        <div className="overlay" style={{ zIndex: "999999" }}>
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                minWidth: "500px",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <div className="form">
+                  <div className="row">
+                    <h1>Counters</h1>
+                  </div>
+                  <div>
+                    <table
+                      className="user-table"
+                      style={{ maxWidth: "60vw", minWidth:"600px", height: "fit-content", overflowX: "scroll" }}
+                    >
+                      <thead style={{ position: "sticky", top: 0 }}>
+                        <tr>
+                          <th>S.N</th>
+                          <th colSpan={3}>Counter</th>
+                          <th colSpan={2}>Route</th>
+                          <th colSpan={2}>Group</th>
+                          <th colSpan={2}>Transition Tags</th>
+                        </tr>
+                      </thead>
+                      <tbody className="tbody">
+                        {counters?.map((item, i) => (
+                          <tr
+                            key={Math.random()}
+                            style={{ height: "30px" }}
+                            onClick={() => setUpdateTransitionTagPopup(item)}
+                          >
+                            <td>{i + 1}</td>
+                            <td colSpan={3}>{item.title || ""}</td>
+                            <td colSpan={2}>{item.route_title || ""}</td>
+                            <td colSpan={2}>{item?.ledger_group_title || ""}</td>
+                            <td colSpan={2}>{item.transaction_tags || ""}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewState(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+      {updateTransitionTagPopup ? (
+        <UpdateTransitionTagPopup
+          onSave={() => {
+            setUpdateTransitionTagPopup(false);
+            getLedgerData();
+          }}
+          updateTransitionTagPopup={updateTransitionTagPopup}
+          setNotification={setNotification}
+        />
+      ) : null}
+    </>  
+  );
+}
+function UpdateTransitionTagPopup({
+  onSave,
+  updateTransitionTagPopup,
+  setNotification,
+}) {
+  const [transaction_tags, setTransitonTag] = useState([]);
+
+  useEffect(() => {
+    setTransitonTag(updateTransitionTagPopup.transaction_tags);
+  }, [updateTransitionTagPopup.transaction_tags]);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    const response = await axios({
+      method: "post",
+      url: "/ledger/updateLedgerTransitionTags",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        transaction_tags,
+        ledger_uuid: updateTransitionTagPopup.ledger_uuid,
+        counter_uuid: updateTransitionTagPopup.counter_uuid,
+      },
+    });
+    if (response.data.success) {
+      setNotification({
+        message: "Transition Tags Updated Successfully",
+        success: true,
+      });
+
+      onSave();
+    } else {
+      setNotification({
+        message: "Failed to Update Transition Tags",
+        success: false,
+      });
+    }
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div
+            className="flex"
+            style={{ justifyContent: "flex-start", alignItems: "flex-start" }}
+          >
+            <div style={{ maxHeight: "500px", overflowY: "scroll" }}>
+              <h2>{updateTransitionTagPopup.title || ""}</h2>
+              <br />
+              <div className="flex">
+                <label htmlFor="closing_balance">Transaction Tags</label>
+                <textarea
+                  type="number"
+                  onWheel={(e) => e.target.blur()}
+                  name="sort_order"
+                  className="numberInput"
+                  value={transaction_tags?.toString()?.replace(/,/g, "\n")}
+                  style={{ height: "50px" }}
+                  onChange={(e) => setTransitonTag(e.target.value.split("\n"))}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <button className="fieldEditButton" onClick={submitHandler}>
+              Save
+            </button>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 function RemarkPopup({ onSave, setItems, notesPopup }) {

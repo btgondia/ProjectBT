@@ -708,6 +708,7 @@ TOTAL: ${amounts}
 		let data = [
 			{
 				trip_uuid: 0,
+				sort_order: 0,
 				trip_title: "Unknown",
 				orderLength: orders.filter(b => !b.trip_uuid)?.length,
 				processingLength: orders.filter(
@@ -775,7 +776,7 @@ TOTAL: ${amounts}
 				)?.length
 			})
 		}
-		return data
+		return data.sort((a,b) => (+a.sort_order || data.length) - (+b.sort_order || data.length))
 	}, [orders, tripData])
 
 	const updatePendingPaymentsVisibility = async () => {
@@ -1643,7 +1644,7 @@ TOTAL: ${amounts}
 					</div>
 
 					{isCollectionTags && (
-						<CollectionTag isItemAvilableOpen={isCollectionTags} setIsItemAvilableOpen={setCollectionTags} />
+						<CollectionTag isTripsModalOpen={isCollectionTags} setIsTripsModalOpen={setCollectionTags} />
 					)}
 				</div>
 			</div>

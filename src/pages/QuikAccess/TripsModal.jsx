@@ -12,7 +12,7 @@ import { ViewGridIcon } from "@heroicons/react/solid"
 import { CSS } from "@dnd-kit/utilities"
 import { debounce } from "../../utils/helperFunctions"
 
-export default function ItemAvailability() {
+export default function TripsModal() {
 	const [itemsIdList, setItemsIdList] = useState([])
 	const [activeId, setActiveId] = useState()
 	const [itemsData, setItemsData] = useState([])
@@ -28,12 +28,14 @@ export default function ItemAvailability() {
 	const [counterPopup, setCounterPopup] = useState(false)
 	const [loading, setLoading] = useState(false)
 	const [initialIds, setInitialIds] = useState()
+	const [isMenuOpen, setIsMenuOpen] = useState(false)
+	const [renamePopup, setRenamePopup] = useState(null)
 
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
 	}, [])
 
-	const { setIsItemAvilableOpen } = useContext(context)
+	const { setIsTripsModalOpen } = useContext(context)
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
@@ -159,7 +161,7 @@ export default function ItemAvailability() {
 					}))
 				)
 			}
-			setIsItemAvilableOpen(false)
+			setIsTripsModalOpen(false)
 		} catch (error) {
 			console.error(error)
 		}
@@ -168,14 +170,14 @@ export default function ItemAvailability() {
 
 	return (
 		<>
-			<div className="itemavilablelity">
-				<div className="itemavilabelitycontainer" style={{ position: "relative" }}>
-					<div className="itemavilablelity_header">
+			<div className="item-availability">
+				<div className="item-availability-container" style={{ position: "relative" }}>
+					<div className="item-availability_header">
 						<h2>Trips</h2>
 					</div>
 
 					<div className="availablecontainer">
-						<div className="itemavilablelitybox">
+						<div className="item-availabilitybox">
 							<input
 								className="numberInput"
 								type="text"
@@ -248,12 +250,15 @@ export default function ItemAvailability() {
 														setActiveId={setActiveId}
 														item={itemsData?.find(i => i.trip_uuid === id)}
 														setStateProps={{
+															isMenuOpen,
+															setIsMenuOpen,
 															setWarehousePopup,
 															completeFunction,
 															setStatementTrip_uuid,
 															setPopup,
 															setDetailsPopup,
-															setCounterPopup
+															setCounterPopup,
+															setRenamePopup
 														}}
 													/>
 												)}
@@ -264,7 +269,7 @@ export default function ItemAvailability() {
 							</div>
 						</div>
 					</div>
-					<button onClick={() => setIsItemAvilableOpen(false)} className="closeButton">x</button>
+					<button onClick={() => setIsTripsModalOpen(false)} className="closeButton">x</button>
 					<div>
 						<button className="savebtn" onClick={updateData} disabled={loading} style={{ pointerEvents: loading ? 'none' : 'all' }}>
 							{loading ? "In Progress...": "Done"}
@@ -282,6 +287,14 @@ export default function ItemAvailability() {
 			) : (
 				""
 			)}
+			{renamePopup ? <TripRenamePopup
+				onSave={(trip_title, trip_uuid) => {
+					setItemsData(prev => prev.map(i => i.trip_uuid === trip_uuid ? ({...i, trip_title}) : i))
+					setRenamePopup()
+				}}
+				close={() => setRenamePopup()}
+				tripData={renamePopup} />
+			: null}
 			{warehousePopup ? <WarehousePopup onSave={() => setWarehousePopup(false)} tripData={warehousePopup} /> : ""}
 			{detailsPopup ? <PopupTripOrderTable trip_uuid={detailsPopup} onSave={() => setDetailsPopup("")} /> : ""}
 			{statementTrip?.trip_uuid ? (
@@ -402,6 +415,73 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 						</form>
 					</div>
 					<button onClick={onSave} className="closeButton">
+						x
+					</button>
+				</div>
+			</div>
+		</div>
+	)
+}
+function TripRenamePopup({ onSave, close, tripData }) {
+	const [title, setTitle] = useState()
+
+	const submitHandler = async e => {
+		e.preventDefault()
+		if (!title) return close()
+		const response = await axios({
+			method: "put",
+			url: "/trips/putTrip",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			data: {
+				trip_title: title,
+				trip_uuid: tripData.trip_uuid
+			},
+		})
+		if (response.data.success) {
+			onSave(title, tripData.trip_uuid)
+		}
+	}
+
+	return (
+		<div className="overlay" style={{ zIndex: "999999" }}>
+			<div className="modal" style={{ height: "fit-content", width: "fit-content" }}>
+				<div
+					className="content"
+					style={{
+						height: "fit-content",
+						padding: "20px",
+						width: "fit-content",
+					}}>
+					<div style={{ overflowY: "scroll" }}>
+						<form className="form" onSubmit={submitHandler}>
+							<div className="row">
+								<h1>Rename Trip</h1>
+							</div>
+
+							<div className="form">
+								<div className="row">
+									<label className="selectLabel">
+										Name
+										<div className="inputGroup" style={{ width: "500px" }}>
+											<input
+												type="text"
+												className="theme-input"
+												value={title || tripData?.trip_title}
+												onChange={e => setTitle(e.target.value)}
+											/>
+										</div>
+									</label>
+								</div>
+							</div>
+
+							<button type="submit" className="submit">
+								Save changes
+							</button>
+						</form>
+					</div>
+					<button onClick={close} className="closeButton">
 						x
 					</button>
 				</div>
@@ -948,42 +1028,67 @@ const Item = forwardRef(({
 function RowMenu({
 	item,
 	setStateProps: {
+		isMenuOpen,
+		setIsMenuOpen,
 		setWarehousePopup,
 		completeFunction,
 		setStatementTrip_uuid,
 		setPopup,
 		setDetailsPopup,
-		setCounterPopup
+		setCounterPopup,
+		setRenamePopup
 	}
 }) {
-	const [visible, setVisible] = useState(false)
 	return <>
-		<div
+		<button
 			id="customer-dropdown-trigger"
 			className={"active"}
+			onClick={e => {
+				const rect = e.target.getBoundingClientRect();
+				setIsMenuOpen(prev => prev?.id === item.trip_uuid ? null : {id:item.trip_uuid,position:{
+					x: rect.left + rect.width + 8,
+					y: Math.min(rect.top, window.innerHeight / 2)
+				}})
+			}}
 			style={{
-				transform: item.dropdown ? "rotate(0deg)" : "rotate(180deg)",
 				width: "30px",
 				height: "30px",
-				backgroundColor: "#000",
-				color: "#fff",
+				marginBlock: '5px',
+				backgroundColor: isMenuOpen?.id === item.trip_uuid ? "#000" : 'white',
+				color: isMenuOpen?.id === item.trip_uuid ? "#fff" : 'black',
+				borderStyle: 'solid'
 			}}
-			onClick={() => setVisible(prev => !prev)}>
-			<ArrowDropDown />
-		</div>
-		{visible && <div
+		>
+			<ArrowDropDown style={{ transform: isMenuOpen?.id === item.trip_uuid ? "rotate(270deg)" : "rotate(360deg)" }} />
+		</button>
+		{isMenuOpen?.id === item.trip_uuid && <div
 			id="customer-details-dropdown"
 			className={"page1 flex"}
 			style={{
-				top: "-70px",
+				position:'fixed',
+				top: isMenuOpen?.position.y + "px",
+				left: isMenuOpen?.position.x + "px",
 				flexDirection: "column",
-				left: "-200px",
 				zIndex: "200",
 				width: "200px",
 				height: "300px",
 				justifyContent: "space-between",
 			}}
-			onMouseLeave={() => setVisible(prev => false)}>
+			// onMouseLeave={() => setIsMenuOpen(prev => false)}
+			>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					cursor: "pointer",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setRenamePopup(item)
+				}}>
+				Rename Trip
+			</button>
 			<button
 				className="theme-btn"
 				style={{

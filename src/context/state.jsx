@@ -7,7 +7,7 @@ const State = (props) => {
   const [calculationPopup, setcalculationPopup] = useState(null);
   const [counterNotesPopup, setCounterNotesPopup] = useState(null);
   const [cashRegisterPopup, setCashRegisterPopup] = useState(null);
-  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
+  const [isTripsModalOpen, setIsTripsModalOpen] = useState(false);
   const [openingBalanceDatePopup, setOpeningBalanceDatePopup] = useState(false);
   const [bankStatementImport, setBankStatementImport] = useState(false);
   const [view, setView] = useState(parseInt(sessionStorage.getItem("view")) || 0);
@@ -568,8 +568,8 @@ const State = (props) => {
         updateServerPdf,
         cashRegisterPopup,
         setCashRegisterPopup,
-        isItemAvilableOpen,
-        setIsItemAvilableOpen,
+        isTripsModalOpen,
+        setIsTripsModalOpen,
         promptState,
         setPromptState,
         getSpecialPrice,

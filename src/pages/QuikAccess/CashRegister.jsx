@@ -166,17 +166,17 @@ export default function CashRegister() {
 
   return (
     <>
-      <div className="itemavilablelity">
+      <div className="item-availability">
         <div
-          className="itemavilabelitycontainer"
+          className="item-availability-container"
           style={{ position: "relative" }}
         >
-          <div className="itemavilablelity_header">
+          <div className="item-availability_header">
             <h2>Cash Registrations</h2>
           </div>
 
           <div className="availablecontainer">
-            <div className="itemavilablelitybox">
+            <div className="item-availabilitybox">
               <div
                 className="flex"
                 style={{ justifyContent: "space-between", width: "50%" }}

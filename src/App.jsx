@@ -53,7 +53,7 @@ import TestCounter from "./pages/Master/TestCounter"
 import OrderForms from "./pages/Reports/OrderForms"
 import LinkedCounter from "./users/LinkedCounter"
 import MobileLayout from "./components/MobileLayout"
-import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
+import ItemAvailability from "./pages/QuikAccess/ItemAvailability"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
@@ -103,7 +103,7 @@ export const server = ["https://api.btgondia.com", "http://localhost:9000"][
 		: 1 // * for dev env (Switch to 0 for using prod server and 1 for localhost)
 ]
 
-export let Version = 394 // ? increment version count for each deployment rather than each count
+export let Version = 395 // ? increment version count for each deployment rather than each count
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
@@ -466,7 +466,7 @@ function App() {
 			) : (
 				""
 			)}
-			{isItemAvilableOpen && <ItemAvilibility />}
+			{isItemAvilableOpen && <ItemAvailability />}
 			{cashRegisterPopup && <CashRegister />}
 			{bankStatementImport && <BankStatementImport />}
 			{openingBalanceDatePopup && <OpeningBalanceDate />}

@@ -62,10 +62,10 @@ const UPITransection = () => {
       } = params
       setLoading(true)
       const response = await axios({
-        method: "get",
+        method: "post",
         url: "/receipts/list",
         signal: controller.signal,
-        params: {
+        data: {
           mode: mode,
           pageIndex: pageIndex,
           pageSize: pageInfo.pageSize,
@@ -214,7 +214,7 @@ const UPITransection = () => {
                   placeholder="Select Type"
                 />
               </div>
-              <div className="inputGroup" style={{width:"400px",marginRight:'20px'}}>
+              <div className="inputGroup" style={{width:"300px",marginRight:'20px'}}>
                 Transition Tags
                 <input
                   type="text"

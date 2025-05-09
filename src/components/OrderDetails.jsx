@@ -3181,7 +3181,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 								<table
 									className="user-table"
 									style={{
-										width: "max-content",
+										maxWidth: '80vw',
 										height: "fit-content"
 									}}
 								>

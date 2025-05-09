@@ -24,13 +24,12 @@
 
 .user-table thead {
 	background: #deffe1;
-	padding: 10px;
 	position: sticky;
 	top: 0;
 }
 
 .user-table thead th {
-	padding: 10px;
+	padding: 6px;
 	display: table-cell;
 	vertical-align: inherit;
 	font-weight: bold;
@@ -42,9 +41,9 @@
 }
 
 .user-table tbody td {
-	overflow: hidden;
-	padding: 10px;
-	text-overflow: ellipsis;
+	/* overflow: hidden; */
+	padding: 6px;
+	/* text-overflow: ellipsis; */
 }
 
 .fieldEditButton {

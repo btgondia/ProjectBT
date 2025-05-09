@@ -53,38 +53,27 @@ const OrderPrint2 = ({
 		setGstVAlues(arr)
 	}, [defaultOrder])
 
-	const itemDetails = useMemo(() => {
-		let items = item_details?.map((a) => {
-			const _data = itemData?.find((b) => b.item_uuid === a.item_uuid) || {}
-			return {
-				...a,
-				..._data,
-				dms_erp_id: a.dms_erp_id || _data.dms_erp_id,
-				dms_item_name: a.dms_item_name || _data.dms_item_name,
-			}
-		})
-		if (!items?.length) return []
-		else if (items?.length === 1) return items
-		else return items
-	}, [item_details, itemData])
-
-	const itemDetailsMemo = useMemo(() => {
-		return itemDetails?.map((item) => {
+	const reCalculatedItems = useMemo(() => {
+		const items = item_details?.map((item, index) => {
 			const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
-			let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
-			let unit_price = (+item.item_total || 0) / (+itemQty || 1)
-			let tex_amt =
-				(+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
-			let net_amt = item.item_total / (1 + item.gst_percentage / 100)
-			let desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
-			let desc_b = item?.charges_discount?.length ? item?.charges_discount[1]?.value || 0 : 0
+			const itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
+			const unit_price = (+item.item_total || 0) / (+itemQty || 1)
+			const tex_amt = (+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
-			let desc_amt_a = (+net_amt * (desc_a || 0)) / 100
-			let desc_amt_b = (+net_amt * (desc_b || 0)) / 100
-			let taxable_value = +item.item_total - desc_amt_a - desc_amt_b
-			return {
+			const net_amt = item.item_total / (1 + (+item.gst_percentage || 0) / 100)
+			const desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
+			const desc_b = item?.charges_discount?.length ? item?.charges_discount[1]?.value || 0 : 0
+
+			const desc_amt_a = (+net_amt * (desc_a || 0)) / 100
+			const desc_amt_b = (+net_amt * (desc_b || 0)) / 100
+			const taxable_value = +item.item_total - desc_amt_a - desc_amt_b
+			
+			const returnedItem = {
 				...item,
+				...itemInfo,
+				dms_erp_id: item.dms_erp_id || itemInfo.dms_erp_id,
+				dms_item_name: item.dms_item_name || itemInfo.dms_item_name,
 				item_total: item.item_total?.toFixed(2),
 				desc_amt_a: desc_amt_a?.toFixed(2),
 				desc_amt_b: desc_amt_b?.toFixed(2),
@@ -95,8 +84,12 @@ const OrderPrint2 = ({
 				itemQty,
 				taxable_value: taxable_value?.toFixed(2),
 			}
+			return returnedItem
 		})
-	}, [itemDetails, itemData])
+		if (!items?.length) return []
+		else if (items?.length === 1) return items
+		else return items
+	}, [item_details, itemData])
 
 	const totalItemDetailsMemo = useMemo(() => {
 		if (!footer) return []
@@ -105,32 +98,35 @@ const OrderPrint2 = ({
 				...a,
 				...(itemData?.find((b) => b.item_uuid === a.item_uuid) || {}),
 			}))
-			.map((item) => {
+			.map((item, index) => {
 				const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
 				let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 				let unit_price = (+item.item_total || 0) / (+itemQty || 1)
 				let tex_amt =
 					(+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
-				let net_amt = item.item_total / (1 + item.gst_percentage / 100)
+				let net_amt = +item.item_total / (1 + (+item.gst_percentage || 0) / 100)
 				let desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
 				let desc_b = item?.charges_discount?.length ? item?.charges_discount[1]?.value || 0 : 0
-
+				
 				let desc_amt_a = (+net_amt * (desc_a || 0)) / 100
 				let desc_amt_b = (+net_amt * (desc_b || 0)) / 100
 				let taxable_value = +item.item_total - desc_amt_a - desc_amt_b
-				return {
+
+				const returnedItem = {
 					...item,
 					item_total: item.item_total?.toFixed(2),
 					desc_amt_a: desc_amt_a?.toFixed(2),
 					desc_amt_b: desc_amt_b?.toFixed(2),
-					net_amt: net_amt?.toFixed(2),
+					net_amt: +net_amt?.toFixed(2),
 					tex_amt: (tex_amt * itemQty)?.toFixed(2),
 					desc_a,
 					desc_b,
 					itemQty,
 					taxable_value: taxable_value?.toFixed(2),
 				}
+
+				return returnedItem
 			})
 		let totalData = allData.reduce((acc, item) => {
 			return {
@@ -150,17 +146,19 @@ const OrderPrint2 = ({
 
 	const getFormateDate = (dateStamp) => {
 		const date = new Date(dateStamp)
-
-		const day = date.getDate()
-		const month = date.toLocaleString("en-US", { month: "short" }) // e.g., "Oct"
+	
+		const day = String(date.getDate()).padStart(2, "0")
+		const month = date.toLocaleString("en-US", { month: "short" }) // e.g., "May"
 		const year = date.getFullYear()
 		const hours = date.getHours() % 12 || 12 // Converts to 12-hour format
 		const minutes = String(date.getMinutes()).padStart(2, "0") // Ensures two digits
 		const ampm = date.getHours() >= 12 ? "pm" : "am"
-
+	
 		const formattedDate = `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
 		return formattedDate
 	}
+	
+	const soNumber = order?.dms_details?.so_code || reCalculatedItems?.find(i => i.dms_code)?.dms_code || ""
 
 	return (
 		<div
@@ -246,7 +244,11 @@ const OrderPrint2 = ({
 									<span>Invoice No:-</span> {order.dms_details?.invoice_number || ""}
 								</div>
 								<div style={{ fontSize: "2.3mm" }}>
-									<span>Date :-</span> {order?.dms_details?.date || getFormateDate(date)}
+									<span>Date :-</span> {
+										order?.dms_details?.date
+											? getFormateDate(order?.dms_details?.date)
+											: getFormateDate(date)
+									}
 								</div>
 								<div style={{ fontSize: "2.3mm" }}>
 									<span>Phone No:-</span>{" "}
@@ -268,7 +270,7 @@ const OrderPrint2 = ({
 							}}
 						>
 							<div style={{ width: "25%" }}>
-								<div style={{ fontSize: "2.3mm" }}>TO:- {counter?.dms_buyer_name}</div>
+								<div style={{ fontSize: "2.3mm", fontWeight: "700" }}>TO:- {counter?.dms_buyer_name}</div>
 								<div style={{ fontWeight: "700", fontSize: "2.3mm" }}>
 									Seller Address:- {counter?.dms_buyer_address || ""}
 								</div>
@@ -520,9 +522,9 @@ const OrderPrint2 = ({
 								</th>
 							</tr>
 
-							{itemDetailsMemo?.map((item, i) => {
+							{reCalculatedItems?.map((item, i) => {
 								return (
-									<tr style={{ borderBlock: "1px solid black" }} className="order_item">
+									<tr key={item.item_uuid} style={{ borderBlock: "1px solid black" }} className="order_item">
 										<td
 											style={{
 												padding: "0 5px",
@@ -539,7 +541,7 @@ const OrderPrint2 = ({
 												borderInline: "1px solid black",
 											}}
 										>
-											{item?.dms_code || ""}
+											{soNumber}
 										</td>
 										<td
 											style={{
@@ -559,7 +561,7 @@ const OrderPrint2 = ({
 											}}
 											colSpan={3}
 										>
-											{item?.dms_item_name}
+											{item?.dms_item_name || item?.item_title}
 										</td>
 
 										<td
@@ -601,7 +603,7 @@ const OrderPrint2 = ({
 												borderInline: "1px solid black",
 											}}
 										>
-											{((+item.net_amt || 0) / (+item.itemQty || 1)).toFixed(2)}
+											{((+item.net_amt || 0) / +(+item.itemQty || 1)).toFixed(2)}
 										</td>
 										<td
 											style={{
@@ -792,14 +794,13 @@ const OrderPrint2 = ({
 
 				{footer ? (
 					<tr>
-						<td colSpan={6} style={{ border: "1px solid black" }}>
-							<table style={{ borderSpacing: "0px", borderCollapse: "collapse" }}>
+						<td colSpan={15} style={{ border: "1px solid black" }}>
+							<table style={{ borderSpacing: "0px", borderCollapse: "collapse", width:'100%' }}>
 								<tr>
 									<td>
 										<table
 											style={{
 												textAlign: "start",
-												width: "80mm",
 												height: "25mm",
 												borderSpacing: "0px",
 												padding: "1mm",
@@ -861,77 +862,11 @@ const OrderPrint2 = ({
 											</tr>
 										</table>
 									</td>
+									<td></td>
 									<td>
 										<table
 											style={{
-												textAlign: "start",
-												width: "80mm",
-												height: "25mm",
-												borderSpacing: "0px",
-												padding: "1mm",
-											}}
-										>
-											<tr>
-												<td
-													style={{
-														fontSize: "2.3mm",
-														width: "30%",
-													}}
-												>
-													Additional Information:
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontSize: "2.3mm",
-														width: "30%",
-														fontStyle: "italic",
-													}}
-												>
-													1.
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontSize: "2.3mm",
-														width: "30%",
-														color: "transparent",
-													}}
-												>
-													1.
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontSize: "2.3mm",
-														width: "30%",
-														color: "transparent",
-													}}
-												>
-													1.
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontSize: "2.3mm",
-														width: "30%",
-														color: "transparent",
-													}}
-												>
-													1.
-												</td>
-											</tr>
-										</table>
-									</td>
-									<td>
-										<table
-											style={{
-												textAlign: "start",
-												width: "50mm",
+												width:'100%',
 												height: "25mm",
 												borderSpacing: "0px",
 												padding: "1mm",

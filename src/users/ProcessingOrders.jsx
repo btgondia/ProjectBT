@@ -901,9 +901,10 @@ const ProcessingOrders = () => {
 					<table
 						className="user-table"
 						style={{
-							width: "max-content",
-							minWidth: "100%",
-							height: "fit-content"
+							// width: "max-content",
+							// minWidth: "100%",
+							height: "fit-content",
+							width:'auto'
 						}}
 					>
 						<thead>
@@ -1249,12 +1250,12 @@ const ProcessingOrders = () => {
 											)}
 										</td>
 										{!Location.pathname.includes("checking") ? (
-											<td>
-												<DeleteOutlineIcon
-													onClick={() => {
-														setDeletePopup(item)
-													}}
-												/>
+											<td onClick={(e) => {
+												e.preventDefault()
+												e.stopPropagation()
+												setDeletePopup(item)
+											}}>
+												<DeleteOutlineIcon />
 											</td>
 										) : (
 											""

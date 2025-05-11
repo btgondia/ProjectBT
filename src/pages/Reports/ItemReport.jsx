@@ -177,8 +177,6 @@ const ItemDetails = () => {
 				MRP: a.mrp,
 				Sales: qtyView === "p" ? a.sales?.p : CovertedQty(a.sales?.p, a?.conversion),
 				"Sales Amount": a.sales.price,
-				Delivered: qtyView === "p" ? a.delivered?.p : CovertedQty(a.delivered?.p, a?.conversion),
-				"Delivered Amount": a.delivered.price
 			}
 		})
 
@@ -386,7 +384,7 @@ const ItemDetails = () => {
 
 export default ItemDetails
 function Table({ data = [], loading, tableRef, qtyView, totalValues }) {
-	const fields = ["Sales", "Delivered"]
+	const fields = ["Sales"]
 	const keys = fields.map((i) => i.toLowerCase().split(" ")[1] || i.toLowerCase())
 	const columns = ["Item Name", "MRP"]?.concat(
 		fields.reduce((arr, i) => arr.concat([i, "Amount"].filter((_i) => _i)), [])

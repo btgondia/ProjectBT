@@ -399,19 +399,25 @@ export default function AddOrder() {
     }
   };
 
-  const callBilling = async (type = {}) => {
-    if (!order.item_details.filter((a) => a.item_uuid).length) return;
+  const preBillingFlag = () => {
+    if (!order.item_details.filter((a) => a.item_uuid).length) return false;
     else if (
       order?.item_details
         .filter((a) => a.item_uuid)
         ?.some((i) => i.billing_type !== order?.order_type)
-    )
-      return setNotification({
+    ) {
+      setNotification({
         message: "Invoice and Estimate together not allowed",
         success: false,
       });
+      return false
+    }
 
-    setOrderPreSave(true);
+    return true
+  }
+  const callBilling = async (type = {}) => {
+    if (!preBillingFlag()) return
+
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
@@ -1283,7 +1289,10 @@ export default function AddOrder() {
                     ...prev,
                     item_details: prev.item_details.filter((a) => a.item_uuid),
                   }));
-                  callBilling();
+                  if (preBillingFlag()) {
+                    setOrderPreSave(true)
+                    callBilling();
+                  }
                 }}
               >
                 Bill

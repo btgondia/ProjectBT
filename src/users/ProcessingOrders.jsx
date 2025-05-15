@@ -1963,10 +1963,10 @@ function HoldPopup({
 					className="modal"
 					style={{
 						height: "fit-content",
-						width: "max-content",
-						minWidth: "206px",
+						width: "95vw",
+						maxWidth: "480px",
 						padding: "10px",
-						paddingTop: "40px"
+						paddingTop: "20px"
 					}}
 				>
 					<h1>{holdPopup}</h1>
@@ -1997,16 +1997,10 @@ function HoldPopup({
 							width: "100%"
 						}}
 					>
-						<div style={{ overflowY: "scroll", width: "100%" }}>
+						<div style={{ overflow: "auto", width: "100%" }}>
 							{items.length ? (
-								<div className="flex" style={{ flexDirection: "column", width: "max-content" }}>
-									<table
-										className="user-table"
-										style={{
-											width: "max-content",
-											height: "fit-content"
-										}}
-									>
+								<div>
+									<table className="user-table">
 										<thead>
 											<tr>
 												<th></th>
@@ -2022,9 +2016,7 @@ function HoldPopup({
 												{!window.location.pathname.includes("checking") &&
 												!window.location.pathname.includes("delivery") ? (
 													<th colSpan={2}></th>
-												) : (
-													""
-												)}
+												) : null}
 												{!window.location.pathname.includes("checking") ? <th></th> : ""}
 											</tr>
 										</thead>
@@ -2216,6 +2208,44 @@ function HoldPopup({
 													</>
 												))}
 										</tbody>
+										<tfoot style={{position:'sticky',bottom:0}}>
+											<div className="flex" style={{ justifyContent: "space-between" }}>
+												<button
+													type="button"
+													className="submit"
+													style={{ backgroundColor: "red" }}
+													onClick={() => {
+														setConfirmPopup(true)
+														setDisabled(true)
+														setTimeout(() => {
+															setDisabled(false)
+														}, 3000)
+													}}
+												>
+													Discard
+												</button>
+												{items.filter(a => a.edit).length ? (
+													<>
+														<button
+															type="button"
+															className="submit"
+															onClick={async () => {
+																await getTripOrders()
+																postOrderData()
+															}}
+														>
+															Save
+														</button>
+													</>
+												) : holdPopup === "Checking Summary" ? (
+													<>
+														<button type="button" className="submit" onClick={checkingQuantity}>
+															Save
+														</button>
+													</>
+												) : null}
+											</div>
+										</tfoot>
 									</table>
 								</div>
 							) : (
@@ -2223,45 +2253,6 @@ function HoldPopup({
 									<i>No Data Present</i>
 								</div>
 							)}
-
-							<div className="flex" style={{ justifyContent: "space-between" }}>
-								<button
-									type="button"
-									className="submit"
-									style={{ backgroundColor: "red" }}
-									onClick={() => {
-										setConfirmPopup(true)
-										setDisabled(true)
-										setTimeout(() => {
-											setDisabled(false)
-										}, 3000)
-									}}
-								>
-									Discard
-								</button>
-								{items.filter(a => a.edit).length ? (
-									<>
-										<button
-											type="button"
-											className="submit"
-											onClick={async () => {
-												await getTripOrders()
-												postOrderData()
-											}}
-										>
-											Save
-										</button>
-									</>
-								) : holdPopup === "Checking Summary" ? (
-									<>
-										<button type="button" className="submit" onClick={checkingQuantity}>
-											Save
-										</button>
-									</>
-								) : (
-									""
-								)}
-							</div>
 						</div>
 					</div>
 				</div>

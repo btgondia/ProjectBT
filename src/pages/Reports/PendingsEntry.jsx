@@ -21,6 +21,7 @@ const PendingsEntry = () => {
   const [loading, setLoading] = useState(false); 
   const [counters, setCounters] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
+  const [formatSelectPopup, setFormatSelectPopup] = useState(false)
 
   useEffect(() => {
     if (allDoneConfimation) {
@@ -104,7 +105,7 @@ const PendingsEntry = () => {
       return;
     }
   };
-  const downloadHandler = async () => {
+  const margFormatExport = async () => {
     let sheetData = [];
     
     for (let order of selectedOrders?.sort(
@@ -153,7 +154,67 @@ const PendingsEntry = () => {
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "Book" + fileExtension);
-    // setSelectedOrders([]);
+  }
+  const odooFormatExport = async () => {
+    const sheetData = [];
+    
+    for (const order of selectedOrders
+      .filter((a) => a.replacement)
+      ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
+        const date = new Date(+order.status[0]?.time);
+        const dateStr = [
+          date.getFullYear(),
+          date.getMonth() + 1,
+          date.getDay()
+        ].map(i => i.toString().padStart(2, '0')).join('-')
+        const odoo_counter_id = counters.find(i => i.counter_uuid === order.counter_uuid).odoo_counter_id
+
+        const oSheet = {
+          "number": order.invoice_number,
+          "invoice_date": dateStr,
+          "partner_id/id": odoo_counter_id
+        };
+        
+        for (let index = 0; index < order.item_details.length; index++) {
+          const orderItem = order.item_details[index];
+          const item = itemsData.find(i => i.item_uuid === orderItem.item_uuid)
+          const discount = (() => {
+            let sum = 0
+            let prod = 1
+
+            for (const i of orderItem.charges_discount || []) {
+              if (!i.title.toLowerCase().includes('discount')) continue
+              sum += i.value
+              prod *= i.value
+            }
+            
+            if (!sum) return 0
+            return +(sum - prod / 100).toFixed(2)
+          })()
+
+          const iSheet = {
+            ...(index === 0 ? oSheet : {}),
+            "invoice_line_ids/product_id/id": item.odoo_item_id,
+            "invoice_line_ids/quantity": ((+orderItem.q || 0) * +item.conversion) + (+orderItem.p || 0),
+            "invoice_line_ids/price_unit": orderItem.unit_price,
+            "invoice_line_ids/discount": discount,
+          }
+
+          sheetData.push(iSheet)
+        }
+    }
+
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "Odoo" + fileExtension);
+  }
+  const downloadHandler = async (format) => {
+    if (!formatSelectPopup) return setFormatSelectPopup(true)
+    if (format === 'marg') await margFormatExport()
+    else if (format === 'odoo') await odooFormatExport()
+    setFormatSelectPopup(true)
   };
   const downloadHandlerTwo = async () => {
     let sheetData = [];
@@ -284,6 +345,7 @@ const PendingsEntry = () => {
       if (observer.current) observer.current.disconnect();
     };
   }, [hasMore, loading]);
+
   return (
     <>
       <Sidebar />
@@ -569,19 +631,16 @@ const PendingsEntry = () => {
       )}
       {excelDownloadPopup ? (
         <ConfirmPopup
-          onSave={(type) => {
-            if (type === "invoice") {
-              downloadHandler();
-            } else {
-              downloadHandlerTwo();
-            }
-            // downloadHandler()
-          }}
+          onSave={(type) => type === "invoice" ? downloadHandler() : downloadHandlerTwo()}
           onClose={() => setExcelDownloadPopup(false)}
         />
-      ) : (
-        ""
-      )}
+      ) : null}
+      {formatSelectPopup ? (
+        <FormatConfirmPopup
+          onSave={downloadHandler}
+          onClose={() => setFormatSelectPopup(false)}
+        />
+      ) : null}
     </>
   );
 };
@@ -755,12 +814,81 @@ function ConfirmPopup({ onSave, onClose }) {
                   type="button"
                   className="submit"
                   onClick={(e) => {
-                    e.preventDefault();
-                    setItemClicked("return");
-                    onSave("return");
+                    e.preventDefault()
+                    setItemClicked("return")
+                    onSave("return")
                   }}
                 >
                   {itemClicked === "return" ? <CheckCircle /> : <Download />}
+                </button>
+              </div>
+            </form>
+          </div>
+          <button onClick={onClose} className="closeButton">
+            <Close />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FormatConfirmPopup({ onSave, onClose }) {
+  const [itemClicked, setItemClicked] = useState("");
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "400px", padding: "20px" }}
+      >
+        <h2 style={{ textAlign: "center" }}>Select Download Format</h2>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <form className="form">
+              <div
+                className="flex"
+                style={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <h3 style={{ marginTop: "15px" }}>Odoo (New format)</h3>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setItemClicked("odoo");
+                    onSave("odoo");
+                  }}
+                >
+                  {itemClicked === "odoo" ? <CheckCircle /> : <Download />}
+                </button>
+              </div>
+              <div
+                className="flex"
+                style={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <h3 style={{ marginTop: "15px" }}>Marg (Old format)</h3>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setItemClicked("marg");
+                    onSave("marg");
+                  }}
+                >
+                  {itemClicked === "marg" ? <CheckCircle /> : <Download />}
                 </button>
               </div>
             </form>

@@ -1205,6 +1205,16 @@ function NewUserForm({
                         </select>
                       </label>
                       <label className="selectLabel">
+                        Odoo Item Id
+                        <input
+                          type="text"
+                          name="odoo_item_id"
+                          className="numberInput"
+                          value={data?.odoo_item_id || ""}
+                          onChange={(e) => setdata({ ...data, odoo_item_id: e.target.value })}
+                        />
+                      </label>
+                      <label className="selectLabel">
                         Item Category
                         <select
                           name="user_type"

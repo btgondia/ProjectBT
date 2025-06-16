@@ -6,6 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { CheckCircle, Close, Download } from "@mui/icons-material";
+import Prompt from "../../components/Prompt";
 const fileExtension = ".xlsx";
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -22,7 +23,23 @@ const PendingsEntry = () => {
   const [counters, setCounters] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [formatSelectPopup, setFormatSelectPopup] = useState(false)
+  const [promptState, setPromptState] = useState({})
 
+  const showPrompt = async ({ heading, message }) => {
+		setPromptState({
+			active: true,
+			heading: heading,
+			message: message,
+			actions: [
+				{
+					label: "Okay",
+					classname: "confirm",
+					action: () => setPromptState(null)
+				},
+			]
+		})
+	}
+  
   useEffect(() => {
     if (allDoneConfimation) {
       setDoneDisabled(true);
@@ -157,7 +174,15 @@ const PendingsEntry = () => {
   }
   const odooFormatExport = async () => {
     const sheetData = [];
+    const missingData = {
+      counterIds:[],
+      itemIds:[],
+    }
     
+    if (!counters.length) {
+      alert('Counters not found')
+      return
+    }
     for (const order of selectedOrders
       .filter((a) => a.replacement)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
@@ -167,12 +192,18 @@ const PendingsEntry = () => {
           date.getMonth() + 1,
           date.getDay()
         ].map(i => i.toString().padStart(2, '0')).join('-')
-        const odoo_counter_id = counters.find(i => i.counter_uuid === order.counter_uuid).odoo_counter_id
+        const counter = counters.find(i => i.counter_uuid === order.counter_uuid)
+        
+        if (!counter) continue
+        if (
+          !counter?.odoo_counter_id &&
+          !missingData.counterIds.includes(counter?.counter_title)
+        ) missingData.counterIds.push(counter?.counter_title)
 
         const oSheet = {
           "number": order.invoice_number,
           "invoice_date": dateStr,
-          "partner_id/id": odoo_counter_id
+          "partner_id/id": counter?.odoo_counter_id
         };
         
         for (let index = 0; index < order.item_details.length; index++) {
@@ -192,6 +223,11 @@ const PendingsEntry = () => {
             return +(sum - prod / 100).toFixed(2)
           })()
 
+          if (
+            !item.odoo_item_id &&
+            !missingData.itemIds.includes(item.item_title)
+          ) missingData.itemIds.push(item.item_title)
+
           const iSheet = {
             ...(index === 0 ? oSheet : {}),
             "invoice_line_ids/product_id/id": item.odoo_item_id,
@@ -202,6 +238,33 @@ const PendingsEntry = () => {
 
           sheetData.push(iSheet)
         }
+    }
+
+    if (missingData.counterIds.length > 0 || missingData.itemIds.length > 0) {
+      showPrompt({
+        heading: `Odoo ids missing for ` + [
+          missingData.counterIds.length > 0 ? `counters (${missingData.counterIds.length})` : null,
+          missingData.itemIds.length > 0 ? `items (${missingData.itemIds.length})` : null,
+        ].filter(i => i).join(' and '),
+        message: <div style={{
+          maxHeight:'200px',
+          overflow:'auto'
+        }}>
+          {missingData.counterIds.length > 0 && <>
+            <h5>Counter titles</h5>
+            <ol>
+              {missingData.counterIds.map((i, idx) => <li key={`missing-counter-${i}`}><small>{idx+1}.</small> {i}</li>)}
+            </ol>
+          </>}
+          {missingData.itemIds.length > 0 && <>
+            <h5 style={{display:'block',marginTop:'10px'}}>Item titles</h5>
+            <ol>
+              {missingData.itemIds.map((i, idx) => <li key={`missing-item-${i}`}><small>{idx+1}.</small> {i}</li>)}
+            </ol>
+          </>}
+        </div>
+      })
+      return
     }
 
     const ws = XLSX.utils.json_to_sheet(sheetData);
@@ -641,6 +704,7 @@ const PendingsEntry = () => {
           onClose={() => setFormatSelectPopup(false)}
         />
       ) : null}
+      {promptState?.active && <Prompt {...promptState} />}
     </>
   );
 };

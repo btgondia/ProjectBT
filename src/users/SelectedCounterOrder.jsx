@@ -10,6 +10,7 @@ import axios from "axios";
 import Context from "../context/context";
 import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
+import { companyLoadRates } from "../utils/constants"
 const SelectedCounterOrder = () => {
   const {
   
@@ -35,7 +36,7 @@ const SelectedCounterOrder = () => {
   const [filterItemTitle, setFilterItemTile] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
   const [itemsCategory, setItemsCategory] = useState([]);
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState({});
   const [popupForm, setPopupForm] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [total, setTotal] = useState(0);
@@ -219,7 +220,7 @@ const SelectedCounterOrder = () => {
       .transaction("companies", "readwrite")
       .objectStore("companies");
     let company = await store.getAll();
-    setCompanies(company);
+    setCompanies(company.reduce((obj, i) => ({...obj, [i.company_uuid]:i}), {}));
     store = await db
       .transaction("item_category", "readwrite")
       .objectStore("item_category");
@@ -257,6 +258,8 @@ const SelectedCounterOrder = () => {
           item_price = a.item_price_b;
         } else if (item_rate === "c") {
           item_price = a.item_price_c;
+        } else if (item_rate === "d") {
+          item_price = a.item_price_d;
         }
 
         return {
@@ -373,18 +376,15 @@ const SelectedCounterOrder = () => {
    
   }, [order]);
 
+  const getLoadRate = (item) => {
+    const loadRate = companies[filterCompany].load_rate
+    if (loadRate === companyLoadRates[2].value) return `${+(item.item_price * +item.one_pack).toFixed(2)}/pack`
+    if (loadRate === companyLoadRates[1].value) return `${+(item.item_price * +item.conversion).toFixed(2)}/box`
+    return `${item.item_price}/unit`
+  }
+
   return (
     <>
-      {/* {number ? (
-        <MobileNumberPopup
-          counter={counter}
-          getCounter={getCounter}
-          onSave={() => setNumber(false)}
-        />
-      ) : (
-        ""
-      )} */}
-
       <nav
         className="user_nav nav_styling"
         style={
@@ -433,43 +433,36 @@ const SelectedCounterOrder = () => {
               Free
             </button>
           </>
-        ) : (
-          ""
-        )}
-        {!cartPage ? (
-          <>
-            <div className="user_searchbar flex">
-              <AiOutlineSearch className="user_search_icon" />
-              <input
-                style={{ width: "200px" }}
-                className="searchInput"
-                type="text"
-                placeholder="search"
-                value={filterItemTitle}
-                onChange={(e) => setFilterItemTile(e.target.value)}
-              />
-              <CloseIcon
-                className="user_cross_icon"
-                onClick={() => setFilterItemTile("")}
-              />
-            </div>
+        ) : <>
+          <div className="user_searchbar flex">
+            <AiOutlineSearch className="user_search_icon" />
+            <input
+              style={{ width: "200px" }}
+              className="searchInput"
+              type="text"
+              placeholder="search"
+              value={filterItemTitle}
+              onChange={(e) => setFilterItemTile(e.target.value)}
+            />
+            <CloseIcon
+              className="user_cross_icon"
+              onClick={() => setFilterItemTile("")}
+            />
+          </div>
 
-            <div>
-              <select
-                className="searchInput selectInput"
-                value={filterCompany}
-                onChange={(e) => setFilterCompany(e.target.value)}
-                style={{opacity:filterCompany?1:0}}
-              >
-                {companies?.map((a) => (
-                  <option value={a.company_uuid}>{a.company_title}</option>
-                ))}
-              </select>
-            </div>
-          </>
-        ) : (
-          ""
-        )}
+          <div>
+            <select
+              className="searchInput selectInput"
+              value={filterCompany}
+              onChange={(e) => setFilterCompany(e.target.value)}
+              style={{opacity:filterCompany?1:0}}
+            >
+              {companies && Object.values(companies)?.map((a) => (
+                <option value={a.company_uuid}>{a.company_title}</option>
+              ))}
+            </select>
+          </div>
+        </>}
       </nav>
       <div className="home">
         <div className="container" style={{ maxWidth: "500px" }}>
@@ -604,7 +597,7 @@ const SelectedCounterOrder = () => {
                                           justifyContent: "space-between",
                                         }}
                                       >
-                                        <h3
+                                        <div
                                           className={`item-price`}
                                           style={{ cursor: "pointer" }}
                                         >
@@ -617,7 +610,7 @@ const SelectedCounterOrder = () => {
                                                     "line-through",
                                                 }}
                                               >
-                                                Price: {item?.item_price}
+                                                <b>Price:</b> {item.item_price}
                                               </span>
                                               <br />
                                               <span
@@ -633,12 +626,12 @@ const SelectedCounterOrder = () => {
                                               </span>
                                             </>
                                           ) : (
-                                            <>Price: {item?.item_price}</>
+                                            <><b>Price:</b> {getLoadRate(item)}</>
                                           )}
-                                          <span style={{ marginLeft: "20px" }}>
+                                          {/* <span style={{ marginLeft: "20px" }}>
                                             Stock {getStock(item)}
-                                          </span>
-                                        </h3>
+                                          </span> */}
+                                        </div>
                                         <h3 className={`item-price`}>
                                           MRP: {item?.mrp || ""}
                                         </h3>

@@ -3,36 +3,28 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { OrderDetails } from "../../components/OrderDetails";
-import * as XLSX from "xlsx";
 import Context from "../../context/context";
-import * as FileSaver from "file-saver";
 import {
   Check,
   CommentOutlined,
   CopyAll,
   PaymentRounded,
-  UploadFile,
-  WhatsApp,
 } from "@mui/icons-material";
 import Select from "react-select";
 import {
   compareObjects,
+  debounce,
   getFormateDate,
-  truncateDecimals,
 } from "../../utils/helperFunctions";
-import context from "../../context/context";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-const fileExtension = ".xlsx";
-const fileType =
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+import { whatsAppMessageTemplates } from "../../utils/constants"
+
 function formatAMPM(date) {
   var hours = date.getHours();
   var minutes = date.getMinutes();
@@ -48,23 +40,71 @@ const UPITransection = () => {
   const [loading, setLoading] = useState(false);
   const [remarksPopup, setRemarksPoup] = useState();
   const [commentPopup, setCommentPoup] = useState();
-  const [type, setType] = useState("All");
+  const [type, setType] = useState("");
   const [checkVouceherPopup, setCheckVoucherPopup] = useState(false);
+  const [transactionTag, setTransitonTag] = useState("");
 
-  const [items, setItems] = useState([]);
-  const getActivityData = async (controller = new AbortController()) => {
-    const response = await axios({
-      method: "get",
-      url: "/receipts/getReceipt",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-   
-    if (response.data.success) setItems(response.data.result);
-    setLoading(false);
+  const [counters, setCounters] = useState([])
+  const [types, setPaymentModes] = useState([])
+  const [receipts, setReceipts] = useState([]);
+  const [pageInfo, setPageInfo] = useState({
+    pageIndex: 0,
+    pageSize: 100,
+    totalDocuments: 0
+  })
+
+  const getData = async (params = {}, controller = new AbortController()) => {
+    try {
+      const {
+        pageIndex = pageInfo.pageIndex,
+        mode = type,
+        tagSearch = transactionTag
+      } = params
+      setLoading(true)
+      const response = await axios({
+        method: "post",
+        url: "/receipts/list",
+        signal: controller.signal,
+        data: {
+          mode: mode,
+          pageIndex: pageIndex,
+          pageSize: pageInfo.pageSize,
+          tagSearch
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+     
+      if (response.data.data) {
+        const paymentModeIDs = response.data.paymentModeIDs
+        if (!types?.length) setPaymentModes(
+          [{ label: "All", value: "" }].concat(
+            paymentModeIDs.map(i => ({value:i.id,label:i.name}))
+          ))
+
+        setReceipts(
+          response.data.data.map(r =>
+            r.modes.map(m => +m.amt > 0 ?  ({
+              ...r,
+              ...m,
+              mode_title: paymentModeIDs.find(i => i.id === m.mode_uuid)?.name
+            }) : null).filter(Boolean)
+          ).flat());
+
+        setPageInfo(prev => ({
+          ...prev,
+          pageIndex: pageIndex,
+          totalDocuments: response.data.totalDocuments || prev.totalDocuments
+        }))
+
+        setCounters(response.data.counterTagsList)
+      }
+    } finally {
+      setLoading(false)
+    }
   };
+
   const getOrderData = async (order_uuid) => {
     const response = await axios({
       method: "get",
@@ -76,6 +116,7 @@ const UPITransection = () => {
    
     if (response.data.success) setPopupOrder(response.data.result);
   };
+
   const getCounter = async (counter_uuid) => {
     const response = await axios({
       method: "post",
@@ -84,13 +125,13 @@ const UPITransection = () => {
         counterList: [counter_uuid],
         jsonList: ["payment_remarks", "counter_uuid", "counter_title"],
       },
-
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.result.length) setRemarksPoup(response.data.result[0]);
   };
+
   const getCommentRecipt = async (order_uuid, counter_uuid) => {
     const response = await axios({
       method: "post",
@@ -106,6 +147,7 @@ const UPITransection = () => {
     });
     if (response.data.result) setCommentPoup(response.data.result);
   };
+
   const putActivityData = async (order_uuid, mode_uuid, invoice_number) => {
     const response = await axios({
       method: "put",
@@ -117,61 +159,31 @@ const UPITransection = () => {
     });
    
     if (response.data.success) {
-      getActivityData();
+      getData();
     }
   };
+
   useEffect(() => {
     const controller = new AbortController();
-    getActivityData(controller);
-    return () => {
-      controller.abort();
-    };
+    getData({ pageIndex: 0, mode: '' }, controller);
+    return () => controller.abort();
   }, []);
-  const downloadHandler = async () => {
-    let sheetData = items.map((a) => {
-      
-      return {
-        "Counter Title": a.counter_title,
-        Amount: a.amt,
-        "Invoice Number": a.invoice_number,
-        "Order Date":
-          new Date(a.order_date).toDateString() +
-          " - " +
-          formatAMPM(new Date(a.order_date)),
-        "Payment Date":
-          new Date(a.payment_date).toDateString() +
-          " - " +
-          formatAMPM(new Date(a.payment_date)),
 
-        User: a.user_title,
-        type: a.mode_title,
-      };
-    });
-    
+  const onTagsInput = useCallback(
+    debounce(async (tagSearch) => {
+      getData({ pageIndex: 0, tagSearch });
+    }, 500),
+    [],
+  )
+  
 
-    const ws = XLSX.utils.json_to_sheet(sheetData);
-    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(data, "TripOrders" + fileExtension);
-  };
-  const itemDetails = useMemo(() => {
-    if (type === "All") {
-      return items;
-    } else {
-      return items.filter((a) => a.mode_title === type);
-    }
-  }, [items, type]);
   return (
     <>
       <Sidebar />
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>UPI and Cheque Transaction </h2>
-          {/* <button type="button" onClick={downloadHandler}>
-            Exels
-          </button> */}
+          <h2>UPI and Cheque Transaction</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -179,42 +191,70 @@ const UPITransection = () => {
             style={{
               overflow: "visible",
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-end",
               justifyContent: "space-between",
               width: "100%",
+              paddingInline: "12px"
             }}
           >
-            <div className="inputGroup" style={{ width: "20%" }}>
-              Type
-              <Select
-                options={[
-                  { value: "All", label: "All" },
-                  { value: "UPI", label: "UPI" },
-                  { value: "Cheque", label: "Cheque" },
-                ]}
-                onChange={(doc) => setType(doc.value)}
-                value={{ value: type, label: type }}
-                openMenuOnFocus={true}
-                menuPosition="fixed"
-                menuPlacement="auto"
-                placeholder="Select Type"
-              />
+            <div className="flex" style={{alignItems:'flex-end'}}>
+              <div className="inputGroup" style={{width:"300px",marginRight:'20px'}}>
+                Type
+                <Select
+                  options={types}
+                  onChange={(doc) => {
+                    getData({ pageIndex: 0, mode: doc.value })
+                    setType(doc.value)
+                  }}
+                  value={types?.find(i => i.value === type)}
+                  openMenuOnFocus={true}
+                  noOptionsMessage={"Loading..."}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select Type"
+                />
+              </div>
+              <div className="inputGroup" style={{width:"300px",marginRight:'20px'}}>
+                Transition Tags
+                <input
+                  type="text"
+                  onChange={(e) => {setTransitonTag(e.target.value);onTagsInput(e.target.value)}}
+                  value={transactionTag}
+                  placeholder="Search Transition Tags..."
+                  className="searchInput"
+                  onWheel={(e) => e.preventDefault()}
+                />
+              </div>
+              {counters?.length > 0 && <CountersTablePopup counters={counters} />}
             </div>
-            <div className="inputGroup" style={{ width: "20%" }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setCheckVoucherPopup(true);
-                }}
-              >
-                X
-              </button>
+            <div>
+              <span style={{display:"inline-block", marginRight:"12px"}}><b>Pages</b></span>
+              {
+                Array(Math.ceil(pageInfo.totalDocuments/pageInfo.pageSize)).fill().map((_,idx) => (
+                  <button
+                    style={{
+                      width:"38px",
+                      height:"38px",
+                      borderRadius: "6px",
+                      marginRight:"6px",
+                      fontWeight:"bold",
+                      fontSize:"1rem",
+                      borderWidth:"2px",
+                      borderStyle:"solid",
+                      borderColor:pageInfo.pageIndex === idx ? "#333" : "darkgray",
+					            color: "black"
+                    }}
+                    disabled={idx === pageInfo.pageIndex}
+                    onClick={() => getData({ pageIndex: idx })}
+                  >{idx}</button>
+                ))
+              }
             </div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table
-            itemsDetails={itemDetails}
+          <TransactionsTable
+            data={receipts}
             putActivityData={putActivityData}
             getOrderData={getOrderData}
             setRemarksPoup={setRemarksPoup}
@@ -229,27 +269,23 @@ const UPITransection = () => {
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
-            getActivityData();
+            getData();
           }}
           order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />
-      ) : (
-        ""
-      )}
+      ) : null}
       {remarksPopup ? (
-        <NotesPopup
+        <RemarkPopup
           onSave={() => {
             setRemarksPoup(false);
-            getActivityData();
+            getData();
           }}
           notesPopup={remarksPopup}
-          setItems={setItems}
+          setItems={setReceipts}
           // postOrderData={() => onSubmit({ stage: 5 })}
         />
-      ) : (
-        ""
-      )}
+      ) : null}
       {loading ? (
         <div className="overlay" style={{ zIndex: 9999999 }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
@@ -271,113 +307,90 @@ const UPITransection = () => {
             </svg>
           </div>
         </div>
-      ) : (
-        ""
-      )}
+      ) : null}
 
       {commentPopup ? (
-        <ReciptsCommentsPopup
+        <ReceiptCommentPopup
           commentPopup={commentPopup}
           onClose={() => {
             setCommentPoup(null);
           }}
           onSave={() => {
             setCommentPoup(null);
-            getActivityData();
+            getData();
           }}
         />
-      ) : (
-        ""
-      )}
+      ) : null}
       {checkVouceherPopup ? (
         <ImportStatements
           onSave={() => {
             setCheckVoucherPopup(false);
           }}
-          setNotification={setItems}
+          setNotification={setReceipts}
         />
-      ) : (
-        ""
-      )}
+      ) :  null}
     </>
   );
 };
 
 export default UPITransection;
-function Table({
-  itemsDetails,
+
+function TransactionsTable({
+  data,
   putActivityData,
   getOrderData,
-  setRemarksPoup,
   loading,
   setLoading,
-  Counters,
   getCounter,
   getCommentRecipt,
 }) {
   const context = useContext(Context);
-
   const { setNotification } = context;
-  const sendMessage = async (item) => {
-    setLoading(true);
-    let response = await axios({
-      method: "post",
-      url: "/orders/sendMsg",
-      data: {
-        ...item,
-        notification_uuid: "payment-reminder-manual",
-        consolidated_payment_reminder: true,
-      },
-    });
 
-   
-    setNotification(response.data);
+  const isTimestampPlusDaysLessThanCurrent = ({ timestamp, numberOfDays = 2 }) => {
+    timestamp = new Date(timestamp).getTime();
+
+    const timestampPlusDays = timestamp + numberOfDays * 24 * 60 * 60 * 1000;
+    const currentDate = new Date().getTime();
+
+    return timestampPlusDays < currentDate;
+  };
+
+  const copyCounterReceipts = async (counter_uuid, counter_title) => {
+    setLoading(true);
+    try {
+      const response = await axios.get("/receipts/counter/" + counter_uuid);
+      if (!response.data.success || !response.data.receipts?.length) throw Error("Failed to copy message.")
+
+      const totalAmt = response.data.receipts?.reduce((sum, r) =>
+        sum + r.modes.reduce((_sum, m) => _sum + (+m.amt || 0), 0)
+      , 0)
+
+      const message = whatsAppMessageTemplates.paymentReminderManual?.replace(
+        /{details}/g,
+        response.data.receipts
+          ?.map(r => 
+            r.modes.map(m => (
+              +m.amt
+              ? `\n${getFormateDate(new Date(+r?.order_date))}       ${r.invoice_number.replace("A","N")}       Rs.${m.amt}`
+              : ""
+            ))
+          )
+          ?.flat()
+          ?.join("")
+      )
+      ?.replace(/{counter_title}/g, counter_title) + `\n*TOTAL: Rs.${totalAmt}*`
+
+      setNotification({ success: true, message: "Message Copied" });
+      navigator.clipboard.writeText(message || "");
+    } catch (error) {
+      console.error(error)
+      setNotification({ success: false, message: "Message Not Copied" }); 
+    }
     setTimeout(() => setNotification(null), 3000);
     setLoading(false);
   };
-  const copySendMessage = async (item) => {
-    setLoading(true);
-    let response = await axios({
-      method: "post",
-      url: "/orders/copySendMessage",
-      data: {
-        ...item,
-        notification_uuid: "payment-reminder-manual",
-        consolidated_payment_reminder: true,
-      },
-    });
 
-   
-    if (response.data.success) {
-      setNotification({ success: true, message: "Message Copied" });
-      setTimeout(() => setNotification(null), 3000);
-      setLoading(false);
-     
-      navigator.clipboard.writeText(
-        response.data.result.WhatsappNotification.message[0]?.text || ""
-      );
-    } else {
-      setNotification({ success: false, message: "Message Not Copied" });
-      setTimeout(() => setNotification(null), 3000);
-      setLoading(false);
-    }
-  };
-  const isTimestampPlusDaysLessThanCurrent = ({
-    timestamp,
-    numberOfDays = 2,
-  }) => {
-    // Convert timestamp to milliseconds
-    timestamp = new Date(timestamp).getTime();
-
-    // Calculate the timestamp plus the number of days in milliseconds
-    var timestampPlusDays = timestamp + numberOfDays * 24 * 60 * 60 * 1000;
-
-    // Get the current date in milliseconds
-    var currentDate = new Date().getTime();
-
-    // Compare the two dates
-    return timestampPlusDays < currentDate;
-  };
   return (
     <table
       className="user-table"
@@ -394,19 +407,16 @@ function Table({
           <th colSpan={3}>User</th>
           <th>Type</th>
           <th>Days</th>
-
           <th colSpan={5}>Action</th>
         </tr>
       </thead>
       <tbody className="tbody">
-        {itemsDetails
-          // ?.sort((a, b) => a.timestamp - b.timestamp)
+        {data
           ?.map((item, i, array) => (
             <tr
-              key={Math.random()}
+              key={item._id + item.mode_title + i}
               style={{
                 height: "30px",
-
                 color: isTimestampPlusDaysLessThanCurrent({
                   timestamp: +item.payment_date,
                   numberOfDays: item.payment_reminder_days || 2,
@@ -426,31 +436,30 @@ function Table({
               <td colSpan={2}>{item.invoice_number || ""}</td>
 
               <td colSpan={2}>
-                {new Date(item.order_date).toDateString()} -
-                {formatAMPM(new Date(item.order_date)) || ""}
+                {
+                  item.order_date ? (
+                    new Date(item.order_date).toDateString()
+                    + (formatAMPM(new Date(item.order_date)) || "")
+                  ): null
+                }
               </td>
               <td colSpan={2}>
-                {new Date(item.payment_date).toDateString()} -
-                {formatAMPM(new Date(item.payment_date)) || ""}
+                {
+                  item.order_date ? (
+                    new Date(item.payment_date).toDateString()
+                    + (formatAMPM(new Date(item.payment_date)) || "")
+                  ): null
+                }
               </td>
               <td colSpan={3}>{item.user_title || ""}</td>
               <td>{item.mode_title || ""}</td>
               <td>{item.payment_reminder_days || ""}</td>
-
+              <td></td>
               <td
                 style={{ color: "green" }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  sendMessage(item);
-                }}
-              >
-                <WhatsApp />
-              </td>
-              <td
-                style={{ color: "green" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copySendMessage(item);
+                  copyCounterReceipts(item.counter_uuid, item.counter_title);
                 }}
               >
                 <CopyAll />
@@ -535,7 +544,187 @@ function Table({
     </table>
   );
 }
-function NotesPopup({ onSave, setItems, notesPopup }) {
+function CountersTablePopup({ counters }) {
+  const [viewState, setViewState] = useState(false)
+  const [updateTransitionTagPopup, setUpdateTransitionTagPopup] = useState()
+  const context = useContext(Context);
+  const { setNotification } = context;
+  return (
+    <>
+      <button className="theme-btn" onClick={() => setViewState(true)}>View Counters</button>
+      {viewState &&
+        <div className="overlay" style={{ zIndex: "999999" }}>
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                minWidth: "500px",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <div className="form">
+                  <div className="row">
+                    <h1>Counters</h1>
+                  </div>
+                  <div>
+                    <table
+                      className="user-table"
+                      style={{ maxWidth: "60vw", minWidth:"600px", height: "fit-content", overflowX: "scroll" }}
+                    >
+                      <thead style={{ position: "sticky", top: 0 }}>
+                        <tr>
+                          <th>S.N</th>
+                          <th colSpan={3}>Counter</th>
+                          <th colSpan={2}>Route</th>
+                          <th colSpan={2}>Group</th>
+                          <th colSpan={2}>Transition Tags</th>
+                        </tr>
+                      </thead>
+                      <tbody className="tbody">
+                        {counters?.map((item, i) => (
+                          <tr
+                            key={Math.random()}
+                            style={{ height: "30px" }}
+                            onClick={() => setUpdateTransitionTagPopup(item)}
+                          >
+                            <td>{i + 1}</td>
+                            <td colSpan={3}>{item.title || ""}</td>
+                            <td colSpan={2}>{item.route_title || ""}</td>
+                            <td colSpan={2}>{item?.ledger_group_title || ""}</td>
+                            <td colSpan={2}>{item.transaction_tags || ""}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewState(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+      {updateTransitionTagPopup ? (
+        <UpdateTransitionTagPopup
+          onSave={() => {
+            setUpdateTransitionTagPopup(false);
+            getLedgerData();
+          }}
+          updateTransitionTagPopup={updateTransitionTagPopup}
+          setNotification={setNotification}
+        />
+      ) : null}
+    </>  
+  );
+}
+function UpdateTransitionTagPopup({
+  onSave,
+  updateTransitionTagPopup,
+  setNotification,
+}) {
+  const [transaction_tags, setTransitonTag] = useState([]);
+
+  useEffect(() => {
+    setTransitonTag(updateTransitionTagPopup.transaction_tags);
+  }, [updateTransitionTagPopup.transaction_tags]);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    const response = await axios({
+      method: "post",
+      url: "/ledger/updateLedgerTransitionTags",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        transaction_tags,
+        ledger_uuid: updateTransitionTagPopup.ledger_uuid,
+        counter_uuid: updateTransitionTagPopup.counter_uuid,
+      },
+    });
+    if (response.data.success) {
+      setNotification({
+        message: "Transition Tags Updated Successfully",
+        success: true,
+      });
+
+      onSave();
+    } else {
+      setNotification({
+        message: "Failed to Update Transition Tags",
+        success: false,
+      });
+    }
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div
+            className="flex"
+            style={{ justifyContent: "flex-start", alignItems: "flex-start" }}
+          >
+            <div style={{ maxHeight: "500px", overflowY: "scroll" }}>
+              <h2>{updateTransitionTagPopup.title || ""}</h2>
+              <br />
+              <div className="flex">
+                <label htmlFor="closing_balance">Transaction Tags</label>
+                <textarea
+                  type="number"
+                  onWheel={(e) => e.target.blur()}
+                  name="sort_order"
+                  className="numberInput"
+                  value={transaction_tags?.toString()?.replace(/,/g, "\n")}
+                  style={{ height: "50px" }}
+                  onChange={(e) => setTransitonTag(e.target.value.split("\n"))}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <button className="fieldEditButton" onClick={submitHandler}>
+              Save
+            </button>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function RemarkPopup({ onSave, setItems, notesPopup }) {
   const [notes, setNotes] = useState([]);
   const [edit, setEdit] = useState(false);
 
@@ -624,9 +813,7 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
                     >
                       Save
                     </button>
-                  ) : (
-                    ""
-                  )}
+                  ) : null}
                 </div>
               </form>
             </div>
@@ -636,7 +823,7 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
     </>
   );
 }
-function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
+function ReceiptCommentPopup({ commentPopup, onClose, onSave }) {
   const [data, setData] = useState({});
 
   //post request to save bank statement import

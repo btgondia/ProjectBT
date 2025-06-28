@@ -1311,7 +1311,6 @@ function NewUserForm({
 													maxLength={42}
 												/>
 											</label>
-
 											<label className="selectLabel">
 												Sort Order
 												<input
@@ -1346,7 +1345,17 @@ function NewUserForm({
 													maxLength={42}
 												/>
 											</label>
-
+											<label className="selectLabel">
+												Odoo Counter Id
+												<input
+													type="number"
+													onWheel={e => e?.preventDefault()}
+													name="odoo_counter_id"
+													className="numberInput"
+													value={data?.odoo_counter_id}
+													onChange={e => setdata({ ...data, odoo_counter_id: e.target.value })}
+												/>
+											</label>
 											<label className="selectLabel">
 												Route
 												<select
@@ -1416,6 +1425,7 @@ function NewUserForm({
 												<label className="selectLabel">
 													Remarks
 													<input
+														required
 														type="text"
 														name="route_title"
 														className="numberInput"
@@ -2580,6 +2590,7 @@ const CounterRatesAndDiscounts = ({ onSave, itemPopup }) => {
 															<option value="a">A</option>
 															<option value="b">B</option>
 															<option value="c">C</option>
+															<option value="d">D</option>
 														</select>
 													</td>
 												</tr>

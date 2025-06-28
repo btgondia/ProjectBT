@@ -16,7 +16,7 @@ const OrderPrint = ({
 	defaultOrder = { item_details: [] },
 	hsn_code = []
 }) => {
-	const isEstimate = order?.order_type === "E"
+	const isEstimate = order?.order_type === "E" || order?.invoice_number?.startsWith("E")
 	const [gstValues, setGstVAlues] = useState([])
 	const [cessValues, setCESSVAlues] = useState([])
 	const [appliedCounterCharges, setAppliedCounterCharges] = useState(null)
@@ -181,7 +181,7 @@ const OrderPrint = ({
 										</td>
 									</tr>
 									<tr>
-										<td style={{ fontWeight: "600", fontSize: "x-small" }}>Phone: 9422551074</td>
+										<td style={{ fontWeight: "600", fontSize: "x-small" }}>Call: 9403061071 / UPI: 9422551074</td>
 									</tr>
 									<tr>
 										<td style={{ fontWeight: "600", fontSize: "x-small" }}>
@@ -411,22 +411,19 @@ const OrderPrint = ({
 					let tex_amt = (+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 					let dsc_amt = (+(item.price || item.item_price || 0) - (+unit_price || 0)) * itemQty
 					let boldedItem = new Date().getTime() - item?.created_at < reminderDate * 86400000
+					const boldItemStyle = {
+						fontWeight: "900",
+						border: "1px solid #000",
+						fontSize: "x-small"
+					}
 
 					return (
 						<tr style={{ borderBottom: "1px solid #000" }} className="order_item">
 							<td style={{ fontWeight: "600", fontSize: "x-small" }}>{item?.sr || i + 1}.</td>
-							<td
-								style={
-									boldedItem
-										? {
-												fontWeight: "900",
-												border: "1px solid #000",
-												fontSize: "x-small"
-										  }
-										: { fontWeight: "600", fontSize: "x-small" }
-								}
-								colSpan={3}
-							>
+							<td style={boldedItem ? boldItemStyle: {
+								fontWeight: "600",
+								fontSize: "x-small",
+							}} colSpan={3}>
 								{itemInfo?.item_title || ""}
 							</td>
 							{!isEstimate ? (
@@ -473,8 +470,10 @@ const OrderPrint = ({
 							</td>
 							<td
 								style={{
-									fontWeight: "600",
-									fontSize: "x-small",
+									...(+item?.free > 0 ? boldItemStyle : {
+										fontWeight: "600",
+										fontSize: "x-small",
+									}),
 									textAlign: "center"
 								}}
 								colSpan={2}

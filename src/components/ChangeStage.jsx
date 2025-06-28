@@ -15,7 +15,7 @@ const ChangeStage = ({
   setIsLoading,
   setNotification,
 }) => {
-  const [data, setData] = useState({ stage: stage === 3 ? 3.5 : stage + 1 });
+  const [data, setData] = useState({ stage: stage === 3 ? 3.5 : stage === 3.5 ? 4 : stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
@@ -120,6 +120,7 @@ const ChangeStage = ({
     } catch (error) { console.error(error) }
     setIsLoading(false);
   };
+  console.log({stage:data.stage})
   return (
     <>
       <div className="overlay">

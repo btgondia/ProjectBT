@@ -790,14 +790,14 @@ const PhoneList = ({ onSave, mobile }) => {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					minWidth: "250px"
+					minWidth: "250px",
+					maxWidth: "480px"
 				}}
 			>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
 						width: "fit-content"
 					}}
 				>
@@ -825,13 +825,14 @@ const PhoneList = ({ onSave, mobile }) => {
 													<td
 														colSpan={3}
 														className="flex"
+														style={{justifyContent:"left"}}
 														onClick={() => {
 															window.location.assign("tel:" + item?.mobile)
 															onSave()
 														}}
 													>
 														<Phone style={{ marginRight: "10px" }} />
-														{item?.mobile}
+														{"Hello Singh" + " — "+ item?.mobile}
 													</td>
 												</tr>
 											))}

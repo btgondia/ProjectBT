@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react"
 import axios from "axios"
 import Select from "react-select"
-import { LuCircleDashed, LuClipboardEdit, LuFileCog } from "react-icons/lu"
+import { LuClipboardEdit } from "react-icons/lu"
 import { ImScissors } from "react-icons/im"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import { v4 as uuid } from "uuid"
@@ -12,22 +12,18 @@ import {
 	Cancel,
 	CheckCircle,
 	Comment,
-	ContentCopy,
 	DeleteOutline,
 	DeliveryDiningRounded,
-	Edit,
 	NoteAdd,
 	Print,
 	Refresh,
-	Replay,
-	ReplayCircleFilledRounded,
 	Splitscreen,
 	WhatsApp
 } from "@mui/icons-material"
 import { PiCircleDashedBold } from "react-icons/pi";
 import { TbArrowsExchange2 } from "react-icons/tb";
 
-import { FaCircleMinus, FaLink } from "react-icons/fa6";
+import { FaAngleRight, FaCircleMinus, FaLink } from "react-icons/fa6";
 
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
@@ -49,9 +45,9 @@ import {
 } from "../utils/helperFunctions"
 import { useLocation } from "react-router-dom"
 import { getInitialOrderValue } from "../utils/constants"
-import { MdCancel, MdCurrencyRupee, MdDownloadDone, MdFileDownloadDone, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff, MdReplay } from "react-icons/md"
+import { MdCurrencyRupee, MdDownloadDone, MdFileDownloadDone, MdLocalOffer, MdOutlineEdit, MdOutlineEditOff, MdReplay } from "react-icons/md"
 import { RiPercentFill } from "react-icons/ri";
-import { IoMdAddCircle, IoMdCloseCircle } from "react-icons/io";
+import { IoMdCloseCircle } from "react-icons/io";
 
 import "./orderDetails.css"
 
@@ -278,7 +274,7 @@ export function OrderDetails({
 				<>
 					On confirm, the order{" "}
 					<b>
-						{orderData?.order_type === "E" ? "E-" : null}
+						{orderData?.order_type === "E" && !isNaN(orderData?.invoice_number[0]) ? "E-" : null}
 						{orderData?.invoice_number}
 					</b>{" "}
 					will be converted to <b>{orderData?.order_type === "E" ? "invoice" : "estimate"}</b> order.
@@ -1216,6 +1212,7 @@ export function OrderDetails({
 		count: 0,
 		values: []
 	})
+	
 	const [sendCounter, setSendCounter] = useState(true)
 	const [userSelection, setUserSelection] = useState([])
 
@@ -1370,6 +1367,7 @@ export function OrderDetails({
 		if (item_rate === "a") item_price = itemData.item_price_a
 		if (item_rate === "b") item_price = itemData.item_price_b
 		if (item_rate === "c") item_price = itemData.item_price_c
+		if (item_rate === "d") item_price = itemData.item_price_d
 		let p_price =
 			+getSpecialPrice(counters, itemData, orderData?.counter_uuid)?.price ||
 			item_price ||
@@ -1403,6 +1401,53 @@ export function OrderDetails({
 		setHoldPopup(false)
 	}
 	
+	const updateItemRate = async (item_rate) => {
+		const updatedItems = orderData?.item_details?.map(i => {
+
+			const itemData = itemsData.find(a => a.item_uuid === i.item_uuid)
+			let item_price = itemData.item_price
+
+			if (item_rate === "a") item_price = itemData.item_price_a
+			else if (item_rate === "b") item_price = itemData.item_price_b
+			else if (item_rate === "c") item_price = itemData.item_price_c
+			else if (item_rate === "d") item_price = itemData.item_price_d
+			
+			const p_price =
+				+getSpecialPrice(counters, itemData, orderData?.counter_uuid)?.price ||
+				+item_price ||
+				0
+			
+			return {
+				...i,
+				...itemData,
+				price: item_price,
+				item_price,
+				p_price,
+				b_price: Math.floor((p_price * +itemData.conversion) || 0)
+			}
+		})
+
+		const billingResponse = await Billing({
+			order_edit: true,
+			order_uuid: orderData?.order_uuid,
+			invoice_number: `${orderData?.order_type ?? ""}${orderData?.invoice_number}`,
+			counter,
+			items: updatedItems,
+			replacement: orderData.replacement,
+			adjustment: orderData.adjustment,
+			shortage: orderData.shortage,
+			others: {}
+		})
+
+		const data = {
+			...orderData,
+			...billingResponse,
+			item_details: billingResponse.items
+		}
+
+		return data
+	}
+
 	return openDMSInvoicePopup ? (
 		<DMSInvoicePopup
 			order={order}
@@ -1413,7 +1458,7 @@ export function OrderDetails({
 			setNotification={setNotification}
 		/>
 	) : deliveryPopup ? (
-		<DiliveryPopup
+		<PaymentPopup
 			onSave={({ modes, outstanding, modeTotal }) => {
 				if (order?.receipt_number) {
 					onSave()
@@ -1455,9 +1500,8 @@ export function OrderDetails({
 							data-tooltip-content={`${
 								counters
 									.find(a => a.counter_uuid === orderData?.counter_uuid)
-									?.mobile?.map(a => a.mobile)
-									?.filter(a => a)
-									?.join(", ") || ""
+									?.mobile?.filter(a => a.mobile)?.map(a => [a.title?.trim?.()?.toUpperCase(), a.mobile].filter(Boolean).join(": "))
+									?.join(" | ") || ""
 							}`}
 						>
 							Order Details • {counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""}{", "}
@@ -1471,7 +1515,7 @@ export function OrderDetails({
 							<IoMdCloseCircle style={{fontSize:"2rem"}} />
 						</button>
 					</div>
-					<div style={{display:"flex", padding:'10px',gap:'10px'}}>
+					<div style={{display:"flex", padding:'10px',gap:'10px',paddingBottom: "20px"}}>
 						<div style={{display:"flex", flexDirection:"column",justifyContent:"space-between"}}>
 							<div className="action-buttons">
 								{!isCancelled ? (
@@ -1536,6 +1580,16 @@ export function OrderDetails({
 								>
 									<Splitscreen /><span>Split Order</span>
 								</button>
+								<UpdateRate 
+									updateItemRate={updateItemRate}
+									disabled={editOrder}
+									onConfirm={(data) => updateOrder({
+										sendPaymentReminder: false,
+										data,
+										completeOrder,
+										location: window.location.pathname
+									})}
+								/>
 							</div>
 						</div>
 						<div style={{flex:1}}>
@@ -1732,7 +1786,7 @@ export function OrderDetails({
 															}}
 														>
 															{editOrder ? (
-																<td style={{width:"fit-content"}}>
+																<td>
 																	{item.price_approval === "N" ? (
 																		<span
 																			onClick={() =>
@@ -3127,7 +3181,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 								<table
 									className="user-table"
 									style={{
-										width: "max-content",
+										maxWidth: '80vw',
 										height: "fit-content"
 									}}
 								>
@@ -3431,7 +3485,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 		</div>
 	)
 }
-function DiliveryPopup({
+function PaymentPopup({
 	onSave,
 	postOrderData,
 	credit_allowed,
@@ -3504,7 +3558,7 @@ function DiliveryPopup({
 	const GetReciptsModes = async () => {
 		const response = await axios({
 			method: "post",
-			url: "/receipts/getRecipt",
+			url: "/receipts/getReceipt",
 			data: {
 				order_uuid: order?.order_uuid,
 				invoice_number: order?.invoice_number
@@ -3544,6 +3598,7 @@ function DiliveryPopup({
 			})
 		}
 	}
+	
 	useEffect(() => {
 		if (deliveryPopup === "put" || deliveryPopup === "edit" || deliveryPopup === "adjustment") {
 			GetOutstanding()
@@ -3563,8 +3618,6 @@ function DiliveryPopup({
 		}
 		GetPaymentModes()
 		if (order.trip_uuid) getTripData(order.trip_uuid)
-	}, [deliveryPopup, order, reminder, type])
-	useEffect(() => {
 		if (deliveryPopup === "adjustment") {
 			updateBilling({
 				order_edit: true,
@@ -3577,7 +3630,8 @@ function DiliveryPopup({
 				adjustment_remarks: order?.adjustment_remarks || ""
 			})
 		}
-	}, [deliveryPopup])
+	}, [deliveryPopup, order, reminder, type])
+	
 	useEffect(() => {
 		if (PaymentModes?.length)
 			setModes(
@@ -3636,10 +3690,13 @@ function DiliveryPopup({
 		setWaiting(false)
 	}
 
+	const entryTotal = (modes?.reduce((sum, i) => sum + (i.amt || 0), 0) + (+outstanding?.amount || 0)) || 0
+	const remainingAmount = (order?.order_grandtotal || 0) - entryTotal
+
 	return (
 		<>
 			<div className="overlay" style={{ zIndex: 9999999999 }}>
-				<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
+				<div className="modal" style={{ height: "fit-content", width: "max-content" }} onContextMenu={e => e.preventDefault()}>
 					<div className="flex" style={{ justifyContent: "space-between" }}>
 						<h3>Payments</h3>
 						<h3>Rs. {order?.order_grandtotal}</h3>
@@ -3655,84 +3712,85 @@ function DiliveryPopup({
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
-									{PaymentModes?.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}
-										>
-											<div style={{ width: "50px" }}>{item.mode_title}</div>
-											<label className="selectLabel flex" style={{ width: "80px" }}>
-												<input
-													type="number"
-													name="route_title"
-													className="numberInput"
-													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
-													style={{ width: "80px" }}
-													disabled={order?.order_type === "E" && item?.mode_title !== "Cash"}
-													onContextMenu={e => {
-														e.preventDefault()
-														e.stopPropagation()
-														if (e.target.disabled) return
-														setModes(prev =>
-															prev?.map(a =>
-																a.mode_uuid === item.mode_uuid
-																	? {
-																			...a,
-																			amt: order.order_grandtotal || 0
-																	  }
-																	: a
-															)
-														)
-													}}
-													onChange={e =>
-														setModes(prev =>
-															prev?.map(a =>
-																a.mode_uuid === item.mode_uuid
-																	? {
-																			...a,
-																			amt: e.target.value
-																	  }
-																	: a
-															)
-														)
-													}
-													maxLength={42}
-													onWheel={e => e.preventDefault()}
-													autocomplete="off"
-												/>
-											</label>
-											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
-											modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
-												<label className="selectLabel flex" style={{ width: "200px" }}>
+									{PaymentModes?.map(item => {
+										const modeAmt = modes.find(a => a.mode_uuid === item.mode_uuid)?.amt
+										return (
+											<div
+												className="row"
+												style={{ flexDirection: "row", alignItems: "center" }}
+												key={item.mode_uuid}
+											>
+												<div style={{ width: "50px" }}>{item.mode_title}</div>
+												<label className="selectLabel flex" style={{ width: "80px" }}>
 													<input
-														type="text"
+														type="number"
 														name="route_title"
 														className="numberInput"
-														value={modes.find(a => a.mode_uuid === item.mode_uuid)?.remarks}
-														placeholder={"Cheque Number"}
-														style={{
-															width: "100%",
-															backgroundColor: "light",
-															fontSize: "12px"
-														}}
-														onChange={e =>
-															setModes(prev =>
+														value={+modeAmt || ""}
+														style={{ width: "80px" }}
+														disabled={order?.order_type === "E" && item?.mode_title !== "Cash"}
+														onContextMenu={e => {
+															e.preventDefault()
+															e.stopPropagation()
+															if (e.target.disabled || !remainingAmount) return
+															setModes(prev => 
 																prev?.map(a =>
-																	a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a
+																	a.mode_uuid === item.mode_uuid
+																		? ({ ...a, amt: remainingAmount })
+																		: a
 																)
 															)
-														}
+														}}
+														onChange={e => {
+															if (+e.target.value && ((entryTotal - (+modeAmt || 0) + (+e.target.value || 0)) > +order?.order_grandtotal)) return
+															if (e.target.value === "" || !isNaN(e.target.value))
+																setModes(prev =>
+																	prev?.map(a =>
+																		a.mode_uuid === item.mode_uuid
+																			? {
+																					...a,
+																					amt: (+e.target.value || undefined)
+																				}
+																			: a
+																	)
+																)
+														}}
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
 														autocomplete="off"
 													/>
 												</label>
-											) : (
-												""
-											)}
-										</div>
-									))}
+												{
+													item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+													modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
+														<label className="selectLabel flex" style={{ width: "200px" }}>
+															<input
+																type="text"
+																name="route_title"
+																className="numberInput"
+																value={modes.find(a => a.mode_uuid === item.mode_uuid)?.remarks}
+																placeholder={"Cheque Number"}
+																style={{
+																	width: "100%",
+																	backgroundColor: "light",
+																	fontSize: "12px"
+																}}
+																onChange={e =>
+																	setModes(prev =>
+																		prev?.map(a =>
+																			a.mode_uuid === item.mode_uuid ? ({ ...a, remarks: e.target.value }) : a
+																		)
+																	)
+																}
+																maxLength={42}
+																onWheel={e => e.preventDefault()}
+																autocomplete="off"
+															/>
+														</label>
+													) : null
+												}
+											</div>
+									)})}
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										<div style={{ width: "50px" }}>UnPaid</div>
 										<label className="selectLabel flex" style={{ width: "80px" }}>
@@ -3740,7 +3798,7 @@ function DiliveryPopup({
 												type="number"
 												name="route_title"
 												className="numberInput"
-												value={outstanding?.amount}
+												value={+outstanding?.amount || 0}
 												placeholder={""}
 												disabled={order?.order_type === "E"}
 												style={
@@ -3754,20 +3812,22 @@ function DiliveryPopup({
 														: { width: "80px" }
 												}
 												onContextMenu={e => {
-													if (e.target.disabled) return
+													if (e.target.disabled || !remainingAmount) return
 													e.preventDefault()
 													e.stopPropagation()
 													setOutstanding(prev => ({
 														...prev,
-														amount: order.order_grandtotal || 0
+														amount: remainingAmount
 													}))
 												}}
-												onChange={e =>
-													setOutstanding(prev => ({
-														...prev,
-														amount: e.target.value
-													}))
-												}
+												onChange={e => {
+													if (+e.target.value && ((entryTotal - (+outstanding?.amount || 0) + (+e.target.value || 0)) > +order?.order_grandtotal)) return
+													else if (e.target.value === "" || !isNaN(e.target.value))
+														setOutstanding(prev => ({
+															...prev,
+															amount: (+e.target.value || undefined)
+														}))
+												}}
 												maxLength={42}
 												onWheel={e => e.preventDefault()}
 												autocomplete="off"
@@ -3803,6 +3863,12 @@ function DiliveryPopup({
 											""
 										)}
 									</div>
+									<div>
+										<span>Remaining</span>
+										<span>
+											<b> ₹{+remainingAmount.toFixed(2)}</b>
+										</span>
+									</div>
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										{deliveryPopup === "put" ? (
 											""
@@ -3818,7 +3884,7 @@ function DiliveryPopup({
 										)}
 									</div>
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
-										<div style={{ width: "100px" }}>Delivered By</div>
+										<div style={{ width: "100px" }}>	Delivered By</div>
 										<label className="selectLabel flex" style={{ width: "120px" }}>
 											<select
 												className="numberInput"
@@ -3971,11 +4037,11 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 	)
 }
 function DMSInvoicePopup({ onSave, order, setNotification }) {
-	const [invoiceNumber, setInvoiceNumber] = useState(order?.dms_invoice_number)
+	const [invoiceNumber, setInvoiceNumber] = useState(order?.dms_details?.invoice_number)
 	const [edit, setEdit] = useState(false)
 	useEffect(() => {
-		setInvoiceNumber(order?.dms_invoice_number)
-	}, [order?.dms_invoice_number])
+		setInvoiceNumber(order?.dms_details?.invoice_number)
+	}, [order?.dms_details?.invoice_number])
 
 	const submitHandler = async () => {
 		const response = await axios({
@@ -4509,4 +4575,64 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
 			</div>
 		</div>
 	)
+}
+
+const UpdateRate = ({ disabled, updateItemRate, onConfirm }) => {
+	const [visible, setVisible] = useState(false)
+	const [promptState, setPromptState] = useState({})
+
+	const onRateSelect = async (rate) => {
+		const updatedOrderData = await updateItemRate(rate)
+		setPromptState({
+			active: true,
+			heading: `Update items rate to ${rate.toUpperCase()}`,
+			message: <span style={{fontSize: "20px!important" }}>
+				On confirm, all the items will be updated to use item rate <b>{rate.toUpperCase()}</b>.
+				<br />
+				<b>Order Grand Total: ₹{updatedOrderData.order_grandtotal}</b>
+			</span>,
+			actions: [
+				{
+					label: "Cancel",
+					classname: "cancel",
+					action: () => setPromptState(null)
+				},
+				{
+					label: `Confirm`,
+					classname: "confirm",
+					action: async () => {
+						try {
+							await onConfirm(updatedOrderData)
+						} catch (error) {
+							console.error(error)
+						}
+						setPromptState(null)
+						setVisible(false)
+					}
+				}
+			]
+		})
+	}
+
+	return (<div style={{position:"relative"}}>
+		<button
+			className="theme-btn"
+			disabled={disabled}
+			onClick={() => setVisible(i => !i)}
+		>
+			<MdCurrencyRupee />
+			<span>Update Rate</span>
+			<FaAngleRight size={16} />
+		</button>
+		{visible &&
+			<div id="update-rate-popover">
+				<button onClick={() => onRateSelect("")}>Default</button>
+				<button onClick={() => onRateSelect("a")}>Item Rate A</button>
+				<button onClick={() => onRateSelect("b")}>Item Rate B</button>
+				<button onClick={() => onRateSelect("c")}>Item Rate C</button>
+				<button onClick={() => onRateSelect("d")}>Item Rate D</button>
+			</div>
+		}
+		{promptState?.active && <Prompt {...promptState} />}
+	</div>)
 }

@@ -10,7 +10,6 @@ const OrderPrintWrapper = ({
 	reminderDate,
 	users,
 	items,
-
 	pendingPayments,
 	counterOrders,
 	print,
@@ -19,10 +18,28 @@ const OrderPrintWrapper = ({
 	...props
 }) => {
 	const getPrintData = order => {
-		const max_count = order.dms_invoice_number ? 9 : order?.order_type !== "E" ? 15 : 19
-		const min_count = order.dms_invoice_number ? 9 : max_count - 7
-		const sourceArray = order.dms_invoice_number
-			? order?.item_details
+		const itemsWithFreeRows = []
+
+		for (const item of order.item_details) {
+			if (+item.p || +item.b) itemsWithFreeRows.push({...item, free: 0 })
+			if (+item.free > 0) itemsWithFreeRows.push({
+				...item,
+				p: 0,
+				b: 0,
+				gst_percentage: 0,
+				css_percentage: 0,
+				price: 0,
+				item_total: 0,
+				item_price: 0,
+				unit_price: 0,
+				charges_discount: [],
+			})
+		}
+
+		const max_count = order?.dms_details?.invoice_number ? 9 : order?.order_type !== "E" ? 15 : 19
+		const min_count = order?.dms_details?.invoice_number ? 9 : max_count - 7
+		const sourceArray = order?.dms_details?.invoice_number
+			? itemsWithFreeRows
 					?.sort((a, b) => {
 						let item_a_title = items.find(c => c.item_uuid === a.item_uuid)?.dms_item_name || ""
 						let item_b_title = items.find(c => c.item_uuid === b.item_uuid)?.dms_item_name || ""
@@ -32,7 +49,7 @@ const OrderPrintWrapper = ({
 						...a,
 						sr: i + 1
 					}))
-			: order?.item_details
+			: itemsWithFreeRows
 		const arrayOfArrays = []
 
 		if (sourceArray.length > max_count) {
@@ -62,6 +79,7 @@ const OrderPrintWrapper = ({
 		}))
 		return result
 	}
+
 	function getNextChar(char) {
 		if (char < "a" || char > "z") {
 			throw new Error("Input must be a lowercase letter from a to z")
@@ -124,7 +142,7 @@ const OrderPrintWrapper = ({
 					?.map(__order => {
 						let order_hsn = hsn_code(__order?.item_details)
 						return getPrintData(__order)?.map((order, i, array) =>
-							order.dms_invoice_number ? (
+							order?.dms_details?.invoice_number ? (
 								<OrderPrint2
 									counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
 									reminderDate={reminderDate}

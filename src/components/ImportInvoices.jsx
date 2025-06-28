@@ -9,7 +9,7 @@ const IMPORT_INTERVAL_TIME = 15 //seconds
 const localErrorTypes = {
 	user: "User",
 	counter: "Counter",
-	item: "Item"
+	item: "Item",
 }
 
 const ImportInvoices = ({ file, onClose }) => {
@@ -22,40 +22,40 @@ const ImportInvoices = ({ file, onClose }) => {
 		reimported: [],
 		resolved: [],
 		count: 0,
-		total: 0
+		total: 0,
 	})
 	const [flags, setFlags] = useState({
 		loading: false,
-		posting: false
+		posting: false,
 	})
 
-	const createOrder = async (invoice, data) => {
+	const createOrder = async (dmsInvoice, data) => {
 		let order
 		const billingParams = {
 			creating_new: 1,
 			new_order: 1,
 			add_discounts: true,
-			items: {}
+			items: {},
 		}
 
 		try {
-			billingParams.counter = data.counters.find(i => i.dms_buyer_id === invoice.dms_buyer_id)
+			billingParams.counter = data.counters.find((i) => i.dms_buyer_id === dmsInvoice.buyer_id)
 
 			const errors = []
 			if (!billingParams.counter)
 				errors.push({
 					errorType: localErrorTypes.counter,
-					name: invoice.dms_buyer_name,
-					id: invoice.dms_buyer_id
+					name: dmsInvoice.buyer_name,
+					id: dmsInvoice.buyer_id,
 				})
 
-			for (const i of invoice.items_details) {
-				const item = data.items.find(j => j.dms_erp_ids.includes(i.dms_erp_id))
+			for (const i of dmsInvoice.items_details) {
+				const item = data.items.find((j) => j.dms_erp_ids.includes(i.dms_erp_id))
 				if (!item) {
 					errors.push({
 						errorType: localErrorTypes.item,
 						name: i.dms_item_name,
-						id: i.dms_erp_id
+						id: i.dms_erp_id,
 					})
 					continue
 				}
@@ -78,12 +78,12 @@ const ImportInvoices = ({ file, onClose }) => {
 
 			billingParams.items = Object.values(billingParams.items)
 
-			const user_uuid = data.users?.find(i => i.dms_erp_id === invoice.dms_erp_user)?.user_uuid
+			const user_uuid = data.users?.find((i) => i.dms_erp_id === dmsInvoice.erp_user)?.user_uuid
 			if (!user_uuid)
 				errors.push({
 					errorType: localErrorTypes.user,
-					name: invoice.dms_erp_user_name,
-					id: invoice.dms_erp_user
+					name: dmsInvoice.erp_user_name,
+					id: dmsInvoice.erp_user,
 				})
 
 			if (errors?.length > 0) return { errors, local: true }
@@ -91,34 +91,35 @@ const ImportInvoices = ({ file, onClose }) => {
 			const { items, ...billing_details } = await Billing(billingParams)
 			const initialValues = getInitialOrderValue()
 			order = {
-				...invoice,
+				...dmsInvoice,
 				...billing_details,
+				dms_details: dmsInvoice,
 				opened_by: 0,
 				priority: 0,
 				order_type: "I",
 				warehouse_uuid: initialValues.warehouse_uuid,
 				time_1: Date.now() + initialValues.time_1,
 				time_2: Date.now() + initialValues.time_2,
-				item_details: items.map(i => ({
+				item_details: items.map((i) => ({
 					...i,
 					unit_price:
 						i.item_total / (+(+i.conversion * i.b) + i.p + i.free) || i.item_price || i.price,
 					gst_percentage: i.item_gst,
 					css_percentage: i.item_css,
 					status: 0,
-					price: i.price || i.item_price || 0
+					price: i.price || i.item_price || 0,
 				})),
 				status: [
 					{
 						stage: 1,
 						time: Date.now(),
-						user_uuid: user_uuid
-					}
-				]
+						user_uuid: user_uuid,
+					},
+				],
 			}
 		} catch (error) {
 			return {
-				message: "Order billing failed (" + error?.message +  ")"
+				message: "Order billing failed (" + error?.message + ")",
 			}
 		}
 
@@ -128,8 +129,8 @@ const ImportInvoices = ({ file, onClose }) => {
 				url: "/orders/postOrder",
 				data: order,
 				headers: {
-					"Content-Type": "application/json"
-				}
+					"Content-Type": "application/json",
+				},
 			})
 
 			if (response?.data?.success)
@@ -137,12 +138,12 @@ const ImportInvoices = ({ file, onClose }) => {
 					success: true,
 					details: {
 						success: true,
-						dms_invoice_number: invoice.dms_invoice_number,
+						dms_invoice_number: dmsInvoice.invoice_number,
 						invoice_number: response.data.result?.invoice_number,
 						counter_title: billingParams.counter?.counter_title,
-						dms_buyer_name: invoice.dms_buyer_name,
-						order_uuid: response.data.result?.order_uuid
-					}
+						dms_buyer_name: dmsInvoice.buyer_name,
+						order_uuid: response.data.result?.order_uuid,
+					},
 				}
 			else return { message: "Order not created, please check the invoice details." }
 		} catch (error) {
@@ -151,12 +152,12 @@ const ImportInvoices = ({ file, onClose }) => {
 				message:
 					error.response.status === 500 || !error.response?.data?.message
 						? "Something broke, please contact support."
-						: error.response?.data?.message
+						: error.response?.data?.message,
 			}
 		}
 	}
 
-	const sleep = ms =>
+	const sleep = (ms) =>
 		new Promise((resolve, reject) => {
 			setTimeout(() => {
 				resolve()
@@ -167,27 +168,27 @@ const ImportInvoices = ({ file, onClose }) => {
 		for (let idx = 0; idx < json.length; idx++) {
 			setFlags({ posting: true })
 
-			const invoice = json[idx]
-			const result = await createOrder(invoice, data)
+			const dmsInvoice = json[idx]
+			const result = await createOrder(dmsInvoice, data)
 
 			if (result.success)
-				setResults(prev => ({
+				setResults((prev) => ({
 					...prev,
 					succeed: prev.succeed.concat([result.details]),
-					count: prev.count + 1
+					count: prev.count + 1,
 				}))
 			else
-				setResults(prev => ({
+				setResults((prev) => ({
 					...prev,
 					failed: prev.failed.concat([
 						{
-							dms_invoice_number: invoice.dms_invoice_number,
-							dms_buyer_name: invoice.dms_buyer_name,
-							...(result.local ? { invoice } : {}),
-							...result
-						}
+							dms_invoice_number: dmsInvoice.invoice_number,
+							dms_buyer_name: dmsInvoice.buyer_name,
+							...(result.local ? { invoice: dmsInvoice } : {}),
+							...result,
+						},
 					]),
-					count: prev.count + 1
+					count: prev.count + 1,
 				}))
 
 			if (result?.local) continue
@@ -202,24 +203,24 @@ const ImportInvoices = ({ file, onClose }) => {
 		setFlags({})
 	}
 
-	const initiateIntervalImport = async json => {
+	const initiateIntervalImport = async (json) => {
 		const payload = {
 			dms_counters: [],
 			dms_users: [],
 			dms_invoice_numbers: [],
-			dms_items: []
+			dms_items: [],
 		}
 
 		for (const invoice of json) {
-			payload.dms_counters.push(invoice.dms_buyer_id)
-			payload.dms_users.push(invoice.dms_erp_user)
-			payload.dms_invoice_numbers.push(invoice.dms_invoice_number)
-			payload.dms_items = payload.dms_items.concat(invoice.items_details.map(i => i.dms_erp_id))
+			payload.dms_counters.push(invoice.buyer_id)
+			payload.dms_users.push(invoice.erp_user)
+			payload.dms_invoice_numbers.push(invoice.invoice_number)
+			payload.dms_items = payload.dms_items.concat(invoice.items_details.map((i) => i.dms_erp_id))
 		}
 
 		const response = await axios.post("/invoice-import-prerequisite", payload)
 		if (!response.data?.existing_invoice_orders?.length) {
-			setResults(prev => ({ ...prev, total: prev.total + json.length, resolved: [] }))
+			setResults((prev) => ({ ...prev, total: prev.total + json.length, resolved: [] }))
 			processJson(json, response.data)
 		} else {
 			setFlags({ loading: false })
@@ -227,13 +228,13 @@ const ImportInvoices = ({ file, onClose }) => {
 				setExistingInvoicesState(null)
 
 				if (skipped?.length > 0) {
-					const tempJson = json.filter(i => !skipped?.includes(i.dms_invoice_number))
+					const tempJson = json.filter((i) => !skipped?.includes(i.invoice_number))
 
 					skipped = json
-						?.filter(i => skipped.includes(i.dms_invoice_number))
-						?.map(i => ({
-							dms_buyer_name: i.dms_buyer_name,
-							dms_invoice_number: i.dms_invoice_number
+						?.filter((i) => skipped.includes(i.invoice_number))
+						?.map((i) => ({
+							dms_buyer_name: i.buyer_name,
+							dms_invoice_number: i.invoice_number,
 						}))
 
 					json = tempJson
@@ -241,27 +242,29 @@ const ImportInvoices = ({ file, onClose }) => {
 
 				if (reimported?.length > 0)
 					reimported = json
-						?.filter(i => reimported.includes(i.dms_invoice_number))
-						?.map(i => ({
-							dms_buyer_name: i.dms_buyer_name,
-							dms_invoice_number: i.dms_invoice_number
+						?.filter((i) => reimported.includes(i.invoice_number))
+						?.map((i) => ({
+							dms_buyer_name: i.buyer_name,
+							dms_invoice_number: i.invoice_number,
 						}))
 
-				setResults(prev => ({
+				setResults((prev) => ({
 					...prev,
 					total: prev.total + json.length,
 					skipped: prev.skipped.concat(skipped),
 					reimported: prev.reimported.concat(reimported),
-					resolved: []
+					resolved: [],
 				}))
 
 				processJson(json, response.data)
 			}
 
-			const list = response.data?.existing_invoice_orders?.map(i => ({
+			const list = response.data?.existing_invoice_orders?.map((i) => ({
+				...i.dms_details,
 				...i,
-				dms_buyer_name: json.find(_i => _i.dms_invoice_number === i.dms_invoice_number)
-					?.dms_buyer_name
+				dms_invoice_number: i.dms_details.invoice_number,
+				buyer_name: json.find((_i) => _i.invoice_number === i.dms_details.invoice_number)
+					?.buyer_name,
 			}))
 
 			setExistingInvoicesState({ list: list, callback })
@@ -272,15 +275,15 @@ const ImportInvoices = ({ file, onClose }) => {
 	 * For local errors: if all the errors for a doc have been resolved,
 	 * then move the 'doc->json' to resolved status.
 	 */
-	const onMapped = id => {
-		setResults(prev => {
+	const onMapped = (id) => {
+		setResults((prev) => {
 			for (const doc of prev.failed) {
 				if (!doc.local) continue
-				doc.errors = doc.errors.map(i => (i.id === id ? { ...i, resolved: true } : i))
-				doc.resolved = !doc.errors.some(i => !i.resolved)
+				doc.errors = doc.errors.map((i) => (i.id === id ? { ...i, resolved: true } : i))
+				doc.resolved = !doc.errors.some((i) => !i.resolved)
 				if (doc.resolved) prev.resolved.push(doc.invoice)
 			}
-			prev.failed = prev.failed.filter(i => !i.resolved)
+			prev.failed = prev.failed.filter((i) => !i.resolved)
 			return prev
 		})
 	}
@@ -299,7 +302,7 @@ const ImportInvoices = ({ file, onClose }) => {
 				let json = await new Promise((res, rej) => {
 					const reader = new FileReader()
 
-					reader.onload = e => {
+					reader.onload = (e) => {
 						try {
 							const json = JSON.parse(e.target.result)
 							res(json)
@@ -309,7 +312,7 @@ const ImportInvoices = ({ file, onClose }) => {
 						}
 					}
 
-					reader.onerror = e => {
+					reader.onerror = (e) => {
 						alert("Failed to read file, please contact support.")
 						rej()
 					}
@@ -335,7 +338,7 @@ const ImportInvoices = ({ file, onClose }) => {
 							borderColor: "var(--mainColor)",
 							borderBottomColor: "transparent",
 							margin: "auto",
-							display: "block"
+							display: "block",
 						}}
 					/>
 				</div>
@@ -360,7 +363,7 @@ const ImportInvoices = ({ file, onClose }) => {
 							{existingInvoicesState !== null ? (
 								<InvoiceSelection
 									ordersData={existingInvoicesState?.list}
-									onComplete={value => existingInvoicesState?.callback(value)}
+									onComplete={(value) => existingInvoicesState?.callback(value)}
 								/>
 							) : (
 								<>
@@ -377,14 +380,14 @@ const ImportInvoices = ({ file, onClose }) => {
 											width: "100%",
 											background: "#e2e2e2",
 											borderRadius: "5px",
-											overflow: "hidden"
+											overflow: "hidden",
 										}}
 									>
 										<div
 											style={{
 												background: "var(--main)",
 												height: "100%",
-												width: (results.count / results.total) * 100 + "%"
+												width: (results.count / results.total) * 100 + "%",
 											}}
 										/>
 									</div>
@@ -400,7 +403,7 @@ const ImportInvoices = ({ file, onClose }) => {
 														borderColor: "var(--mainColor)",
 														borderBottomColor: "transparent",
 														margin: "auto",
-														display: "block"
+														display: "block",
 													}}
 												/>
 												<span>posting...</span>
@@ -442,16 +445,16 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 		if (ordersData?.length > 0) setOrders(ordersData)
 	}, [ordersData])
 
-	const handleInsertion = type => {
+	const handleInsertion = (type) => {
 		if (selection.length === orders.length)
 			return onComplete({
 				skipped: Array.from(new Set(skip?.concat(type === 1 ? selection : []))),
-				reimported: Array.from(new Set(reImport?.concat(type === 2 ? selection : [])))
+				reimported: Array.from(new Set(reImport?.concat(type === 2 ? selection : []))),
 			})
 
-		setOrders(prev => prev.filter(i => !selection.includes(i.dms_invoice_number)))
-		if (type === 1) setSkip(prev => prev.concat(selection))
-		else if (type === 2) setReImport(prev => prev.concat(selection))
+		setOrders((prev) => prev.filter((i) => !selection.includes(i.invoice_number)))
+		if (type === 1) setSkip((prev) => prev.concat(selection))
+		else if (type === 2) setReImport((prev) => prev.concat(selection))
 		setSelection([])
 	}
 
@@ -491,9 +494,9 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 									type="checkbox"
 									style={{ marginRight: "5px" }}
 									checked={selection.length === orders.length}
-									onChange={e =>
+									onChange={(e) =>
 										e.target.checked
-											? setSelection(orders.map(i => i.dms_invoice_number))
+											? setSelection(orders.map((i) => i.dms_details.invoice_number))
 											: setSelection([])
 									}
 								/>
@@ -505,30 +508,30 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 					<tbody>
 						{orders?.map((i, idx) => (
 							<tr
-								key={`${i.dms_invoice_number}:${idx}`}
+								key={`${i.dms_details.invoice_number}:${idx}`}
 								style={{ cursor: "pointer" }}
 								onClick={() =>
-									setSelection(prev =>
-										prev.includes(i.dms_invoice_number)
-											? prev.filter(s => s !== i.dms_invoice_number)
-											: prev.concat([i.dms_invoice_number])
+									setSelection((prev) =>
+										prev.includes(i.dms_details.invoice_number)
+											? prev.filter((s) => s !== i.dms_details.invoice_number)
+											: prev.concat([i.dms_details.invoice_number])
 									)
 								}
 							>
 								<td>
 									<input
 										type="checkbox"
-										checked={selection.includes(i.dms_invoice_number)}
+										checked={selection.includes(i.dms_details.invoice_number)}
 										onChange={() => null}
 										style={{ pointerEvents: "none" }}
 									/>
 								</td>
 								<td>
-									{i.dms_invoice_number} ({i.dms_buyer_name})
+									{i.dms_details.invoice_number} ({i.buyer_name})
 								</td>
 								<td>
 									<div style={{ position: "relative", display: "inline" }}>
-										{copied === i.dms_invoice_number + i.invoice_number && (
+										{copied === i.dms_details.invoice_number + i.invoice_number && (
 											<div style={{ position: "absolute", top: "100%" }}>
 												<div id="talkbubble" style={{ fontSize: "12px", left: "-2px" }}>
 													COPIED!
@@ -540,12 +543,12 @@ const InvoiceSelection = ({ ordersData, onComplete }) => {
 												width: "1.15rem",
 												height: "1.15rem",
 												marginRight: "8px",
-												opacity: ".9"
+												opacity: ".9",
 											}}
-											onClick={e => {
+											onClick={(e) => {
 												e.preventDefault()
 												e.stopPropagation()
-												setCopied(i.dms_invoice_number + i.invoice_number)
+												setCopied(i.dms_details.invoice_number + i.invoice_number)
 												navigator?.clipboard?.writeText?.(i.order_uuid)
 												setTimeout(() => setCopied(""), 3000)
 											}}
@@ -567,7 +570,7 @@ const tabs = [
 	{ label: "Re-Imported", keyName: "reimported" },
 	{ label: "Succeed", keyName: "succeed" },
 	{ label: "Failed", keyName: "failed" },
-	{ label: "Resolved", keyName: "resolved" }
+	{ label: "Resolved", keyName: "resolved" },
 ]
 
 const ResultStatusTabs = ({ result, onMapped, handleImportResolved }) => {
@@ -617,7 +620,7 @@ const ResultStatusTabs = ({ result, onMapped, handleImportResolved }) => {
 												height: "1.15rem",
 												marginLeft: "8px",
 												opacity: ".9",
-												cursor: "pointer"
+												cursor: "pointer",
 											}}
 											onClick={() => navigator?.clipboard?.writeText?.(detail.order_uuid)}
 										/>
@@ -680,7 +683,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 		try {
 			const response = await axios.patch("/items/map-item", {
 				item_uuid: selectedItem.item_uuid,
-				dms_item_code: mapItemState.id
+				dms_item_code: mapItemState.id,
 			})
 			if (response.data.success) onMapped()
 			else {
@@ -708,7 +711,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 								borderColor: "var(--mainColor)",
 								borderBottomColor: "transparent",
 								margin: "auto",
-								display: "block"
+								display: "block",
 							}}
 						/>
 					</div>
@@ -733,14 +736,14 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 							className="searchInput"
 							placeholder="Search items..."
 							value={itemSearch}
-							onChange={e => setItemSearch(e.target.value)}
+							onChange={(e) => setItemSearch(e.target.value)}
 						/>
 						<input
 							type="text"
 							className="searchInput"
 							placeholder="Search companies..."
 							value={companySearch}
-							onChange={e => setCompanySearch(e.target.value)}
+							onChange={(e) => setCompanySearch(e.target.value)}
 						/>
 					</div>
 
@@ -773,7 +776,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 											(item is searched when companySearch is empty) or
 											(company is searched when itemSearch is empty)
 									*/
-									companyWiseItems?.map(comp => {
+									companyWiseItems?.map((comp) => {
 										const isCompanySelected =
 											selectedItem && selectedItem?.company_uuid === comp.company_uuid
 										const isCompanySearched =
@@ -782,7 +785,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 
 										if (!(isCompanySelected || isCompanySearched || itemSearch.length >= 3))
 											return null
-										return comp?.items?.map(i => {
+										return comp?.items?.map((i) => {
 											const isItemSelected = selectedItem && selectedItem?.item_uuid === i.item_uuid
 											const isItemSearched =
 												itemSearch.length >= 3 &&
@@ -804,7 +807,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 														setSelectedItem({
 															...i,
 															company_uuid: comp.company_uuid,
-															company_title: comp.company_title
+															company_title: comp.company_title,
 														})
 													}
 													className={isItemSelected ? "selected" : null}
@@ -830,7 +833,7 @@ const MapItem = ({ mapItemState, companyWiseItems, onMapped, onClose }) => {
 							background: "black",
 							width: "100%",
 							marginTop: ".5rem",
-							padding: ".75rem 1rem"
+							padding: ".75rem 1rem",
 						}}
 					>
 						Map to selected item

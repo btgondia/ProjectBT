@@ -5,7 +5,7 @@ import PopupTripOrderTable from "../../components/PopupTripOrderTable"
 import TripPage from "../../components/TripPage"
 import { Add, ArrowDropDown } from "@mui/icons-material"
 import Select from "react-select"
-export default function CollectionTag({ setIsItemAvilableOpen }) {
+export default function CollectionTag({ setIsTripsModalOpen }) {
 	const [itemsData, setItemsData] = useState([])
 	const [popup, setPopup] = useState(null)
 	const [users, setUsers] = useState([])
@@ -130,14 +130,14 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 	
 	return (
 		<>
-			<div className="itemavilablelity">
-				<div className="itemavilabelitycontainer" style={{ position: "relative" }}>
-					<div className="itemavilablelity_header">
+			<div className="item-availability">
+				<div className="item-availability-container" style={{ position: "relative" }}>
+					<div className="item-availability_header">
 						<h2>Collection Tags</h2>
 					</div>
 
 					<div className="availablecontainer">
-						<div className="itemavilablelitybox">
+						<div className="item-availabilitybox">
 							<input
 								className="numberInput"
 								type="text"
@@ -363,7 +363,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 					</div>
 					<button
 						onClick={() => {
-							setIsItemAvilableOpen(false)
+							setIsTripsModalOpen(false)
 						}}
 						className="closeButton">
 						x
@@ -371,7 +371,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 
 					<div
 						onClick={() => {
-							setIsItemAvilableOpen(false)
+							setIsTripsModalOpen(false)
 						}}>
 						<button className="savebtn">Done</button>
 					</div>

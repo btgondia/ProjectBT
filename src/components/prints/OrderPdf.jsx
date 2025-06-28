@@ -51,7 +51,7 @@ const OrderPdf = () => {
         localStorage.setItem("itemsData", JSON.stringify(response.data.result));
         setItemsData(response.data.result);
 
-        if (order.dms_invoice_number) {
+        if (order.dms_details?.invoice_number) {
           setOrder((prev) => {
             let item_details = prev.item_details.sort((a, b) => {
               let item_a_title =
@@ -146,7 +146,7 @@ const OrderPdf = () => {
         Array.from(
           Array(Math.ceil(order?.item_details?.length / 12)).keys()
         )?.map((a, i) =>
-          order.dms_invoice_number ? (
+          order.dms_details?.invoice_number ? (
             <OrderPrint2
               counter={counter}
               reminderDate={reminderDate}

@@ -18,9 +18,9 @@
 		padding: 0;
 		z-index: 999999999;
 		border-radius: 1.5rem 1.5rem 0 0;
-        p,td,th,input,span {
+        /* p,td,th,input,span {
             font-size: 15px!important;
-        }
+        } */
 	}
 
 	.action-buttons {
@@ -96,7 +96,7 @@
     }
 
     .inventory_header {
-        z-index: 9999999;
+        z-index: 1;
     }
     .items_table table {
         border: none;
@@ -112,18 +112,20 @@
         height: 100%;
     }
 
-    .items_table :is(td,th) {
-        z-index: 1;
-    }
-    
     .items_table tfoot td {
         background: var(--secondary);
         border-bottom: none;
         padding: 6px;
     }
-
+    
     .items_table :is(td,th) {
+        z-index: 1;
         padding: 3px;
+        text-align: right;
+    }
+
+    .items_table td input {
+        text-align: left;
     }
         
     .table-icon {
@@ -138,5 +140,28 @@
         border-radius: 2rem;
         padding: 8px;
         aspect-ratio: 1;
+    }
+
+    #update-rate-popover {
+        position: absolute;
+        left: 100%;
+        bottom: 0;
+        background-color: white;
+        border-radius: 6px;
+        border: 1.5px solid rgba(99, 99, 99, 0.8);
+        box-shadow: 0px 2px 16px -2px rgb(71, 71, 71);
+        z-index: 1000;
+        margin-left: 5px;
+        overflow: hidden;
+        button {
+            border: none;
+            margin: 2px;
+            border-radius: 4px;
+            font-weight: 700;
+            white-space: nowrap;
+            &:hover {
+                background: rgb(217, 217, 217);
+            }
+        }
     }
 }

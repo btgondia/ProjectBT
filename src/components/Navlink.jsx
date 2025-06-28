@@ -7,7 +7,7 @@ const NavLink = ({ title, icon, menuList, draggable, setCollectionTags, setcalcu
 	const [menuVisible, setMenuVisible] = useState(false)
 	const {
 		setCashRegisterPopup,
-		setIsItemAvilableOpen,
+		setIsTripsModalOpen,
 		setSkipStages,
 		setPrintTypePopup,
 		view,
@@ -91,7 +91,7 @@ const NavLink = ({ title, icon, menuList, draggable, setCollectionTags, setcalcu
 										if (menu.name === "Cash Register") {
 											setCashRegisterPopup(true)
 										} else if (menu.name === "Trips") {
-											setIsItemAvilableOpen(prev => !prev)
+											setIsTripsModalOpen(prev => !prev)
 										} else if (menu.name === "Calculate Lines") {
 											setcalculationPopup(prev => !prev)
 										} else if (menu.name === "Collection Tags") {

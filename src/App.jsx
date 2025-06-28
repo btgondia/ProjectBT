@@ -49,13 +49,10 @@ import PendingReciptsEntry from "./pages/Reports/PendingReciptsEntry"
 import { refreshDb } from "./Apis/functions"
 import CalculateLines from "./pages/QuikAccess/CalculateLines"
 import Context from "./context/context"
-import WhatsAppNotifications from "./pages/QuikAccess/WhatsAppNotifications"
-import Campaigns from "./pages/Reports/Campaigns"
 import TestCounter from "./pages/Master/TestCounter"
 import OrderForms from "./pages/Reports/OrderForms"
 import LinkedCounter from "./users/LinkedCounter"
 import MobileLayout from "./components/MobileLayout"
-import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
@@ -98,14 +95,15 @@ import "react-tooltip/dist/react-tooltip.css"
 import PurchaseRate from "./pages/Reports/PurchaseRate"
 import GSTReturnsReport from "./pages/Reports/GSTReturnsReport"
 import HSNCode from "./pages/Master/HsnCode"
+import TripsModal from "./pages/QuikAccess/TripsModal"
 
 export const server = ["https://api.btgondia.com", "http://localhost:9000"][
 	window.location.origin.includes("btgondia")
 		? 0 // ! DONOT CHANGE THIS (for prod env)
-		: 0 // * for dev env (Switch to 0 for using prod server and 0 for localhost)
+		: 0 // * for dev env (Switch to 0 for using prod server and 1 for localhost)
 ]
 
-export let Version = 380 // ? increment version count for each deployment rather than each count
+export let Version = 405 // ? increment version count for each deployment rather than each count
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
@@ -116,7 +114,7 @@ function App() {
 		loading,
 		notification,
 		setNotification,
-		isItemAvilableOpen,
+		isTripsModalOpen,
 		cashRegisterPopup,
 		bankStatementImport,
 		view,
@@ -360,7 +358,6 @@ function App() {
 						<Route path="/admin/counterGroup" element={<CounterGroup />} />
 						<Route path="/admin/counterCharges" element={<CounterCharges />} />
 						<Route path="/admin/itemGroup" element={<ItemGroup />} />
-						<Route path="/admin/Campaigns" element={<Campaigns />} />
 						<Route path="/admin/counter" element={<Counter />} />
 						<Route path="/admin/TestCounter" element={<TestCounter />} />
 						<Route path="/admin/purchaseRate" element={<PurchaseRate />} />
@@ -377,7 +374,6 @@ function App() {
 						<Route path="/admin/expense" element={<ExpansesPage />} />
 						<Route path="/admin/warehouse" element={<Warehouse />} />
 						<Route path="/admin/companies" element={<Companies />} />
-						<Route path="/admin/WhatsAppNotifications" element={<WhatsAppNotifications />} />
 
 						<Route path="/admin/autoIncreaseQty" element={<AutoIncreaseQuantity />} />
 						<Route path="/admin/autoIncreaseItem" element={<AutoIncreaseItem />} />
@@ -470,7 +466,7 @@ function App() {
 			) : (
 				""
 			)}
-			{isItemAvilableOpen && <ItemAvilibility />}
+			{isTripsModalOpen && <TripsModal />}
 			{cashRegisterPopup && <CashRegister />}
 			{bankStatementImport && <BankStatementImport />}
 			{openingBalanceDatePopup && <OpeningBalanceDate />}

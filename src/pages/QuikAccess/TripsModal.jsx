@@ -1,13 +1,20 @@
 import axios from "axios"
-import React, { useState, useEffect, useCallback, useRef, useMemo, useContext } from "react"
+import React, { useState, useEffect, useCallback, useRef, useMemo, useContext, forwardRef } from "react"
 import { useReactToPrint } from "react-to-print"
 import PopupTripOrderTable from "../../components/PopupTripOrderTable"
 import TripPage from "../../components/TripPage"
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material"
 import Select from "react-select"
 import context from "../../context/context"
-import { useLocation } from "react-router-dom"
-export default function ItemAvilibility() {
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable"
+import { ViewGridIcon } from "@heroicons/react/solid"
+import { CSS } from "@dnd-kit/utilities"
+import { debounce } from "../../utils/helperFunctions"
+
+export default function TripsModal() {
+	const [itemsIdList, setItemsIdList] = useState([])
+	const [activeId, setActiveId] = useState()
 	const [itemsData, setItemsData] = useState([])
 	const [popup, setPopup] = useState(null)
 	const [users, setUsers] = useState([])
@@ -19,15 +26,19 @@ export default function ItemAvilibility() {
 	const [warehousePopup, setWarehousePopup] = useState(false)
 	const componentRef = useRef(null)
 	const [counterPopup, setCounterPopup] = useState(false)
+	const [loading, setLoading] = useState(false)
+	const [initialIds, setInitialIds] = useState()
+	const [isMenuOpen, setIsMenuOpen] = useState(false)
+	const [renamePopup, setRenamePopup] = useState(null)
 
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
 	}, [])
-	const { setIsItemAvilableOpen, isItemAvilableOpen } = useContext(context)
+
+	const { setIsTripsModalOpen } = useContext(context)
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		
 		removeAfterPrint: true,
 	})
 
@@ -36,11 +47,12 @@ export default function ItemAvilibility() {
 		var minutes = date.getMinutes()
 		var ampm = hours >= 12 ? "pm" : "am"
 		hours = hours % 12
-		hours = hours ? hours : 12 // the hour '0' should be '12'
+		hours = hours ? hours : 12
 		minutes = minutes < 10 ? "0" + minutes : minutes
 		var strTime = date.toDateString() + " - " + hours + ":" + minutes + " " + ampm
 		return strTime
 	}
+
 	const getUsers = async () => {
 		const response = await axios({
 			method: "get",
@@ -58,6 +70,7 @@ export default function ItemAvilibility() {
 					.sort((a, b) => a.user_title?.localeCompare(b.user_title))
 			)
 	}
+
 	const getTripData = async () => {
 		const response = await axios({
 			method: "get",
@@ -68,22 +81,17 @@ export default function ItemAvilibility() {
 			},
 		})
 		if (response.data.success) {
+			const data = response.data.result.filter(a => a.status).sort((a,b) => +a.sort_order - +b.sort_order)
+			setInitialIds(data.map(i => i.trip_uuid).join())
 			setItemsData(
-				response.data.result
-					.filter(a => a.status)
-					.map(b => ({
-						...b,
-
-						users_name:
-							b?.users?.map(a => {
-								let data = users.find(c => a === c.user_uuid)?.user_title
-								
-								return data
-							}) || [],
-					}))
+				data.map(b => ({
+					...b,
+					users_name: b?.users?.map(a => users.find(c => a === c.user_uuid)?.user_title) || [],
+				}))
 			)
 		}
 	}
+
 	const getTripDetails = async () => {
 		const response = await axios({
 			method: "get",
@@ -94,23 +102,26 @@ export default function ItemAvilibility() {
 			},
 		})
 		if (response.data.success) {
-			
 			setStatementTrip(response.data.result)
 			setStatementTrip_uuid(false)
 			setTimeout(handlePrint, 2000)
 		}
 	}
+
 	useEffect(() => {
 		if (statementTrip_uuid) {
 			getTripDetails()
 		}
 	}, [statementTrip_uuid])
+
 	useEffect(() => {
 		getTripData()
 	}, [btn, warehousePopup, users])
+
 	useEffect(() => {
 		getUsers()
 	}, [])
+
 	const completeFunction = async data => {
 		const response = await axios({
 			method: "put",
@@ -125,16 +136,48 @@ export default function ItemAvilibility() {
 		}
 	}
 
+	const onFilter = debounce((val) => {
+		const valLow = val.toLowerCase()
+		setItemsIdList(itemsData?.filter(a => (valLow?.length > 0 ? a.trip_title.toLowerCase().includes(valLow) : true) && a.trip_title).map(i => i.trip_uuid))
+	}, 500)
+
+	useEffect(() => setItemsIdList(itemsData?.sort((a, b) => +a.sort_order - b.sort_order)?.map(i => i.trip_uuid)), [itemsData])
+	const sensors = useSensors(
+		useSensor(PointerSensor),
+		useSensor(KeyboardSensor, {
+		  coordinateGetter: sortableKeyboardCoordinates,
+		})
+	);
+
+	const updateData = async () => {
+		setLoading(true)
+		try {
+			console.log(initialIds, itemsData.map(i => i.trip_uuid).join())
+			if (initialIds !== itemsData.map(i => i.trip_uuid).join()) {
+				await axios.post('/trips/update_sort_order',
+					itemsData.map(i => ({
+						trip_uuid: i.trip_uuid,
+						sort_order: i.sort_order
+					}))
+				)
+			}
+			setIsTripsModalOpen(false)
+		} catch (error) {
+			console.error(error)
+		}
+		setLoading(false)
+	}
+
 	return (
 		<>
-			<div className="itemavilablelity">
-				<div className="itemavilabelitycontainer" style={{ position: "relative" }}>
-					<div className="itemavilablelity_header">
+			<div className="item-availability">
+				<div className="item-availability-container" style={{ position: "relative" }}>
+					<div className="item-availability_header">
 						<h2>Trips</h2>
 					</div>
 
 					<div className="availablecontainer">
-						<div className="itemavilablelitybox">
+						<div className="item-availabilitybox">
 							<input
 								className="numberInput"
 								type="text"
@@ -142,6 +185,7 @@ export default function ItemAvilibility() {
 								value={itemFilter}
 								onChange={e => {
 									setItemFilter(e.target.value)
+									onFilter(e.target.value)
 								}}
 								placeholder="Items Filter"
 								style={{ width: "200px", margin: "10px 0" }}
@@ -150,6 +194,11 @@ export default function ItemAvilibility() {
 								<table className="f6 w-100 center" cellSpacing="0">
 									<thead className="lh-copy">
 										<tr className="white">
+											<th
+												className="pa3 bb b--black-20 "
+												style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
+												S/O
+											</th>
 											<th
 												className="pa3 bb b--black-20 "
 												style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}>
@@ -183,208 +232,48 @@ export default function ItemAvilibility() {
 										</tr>
 									</thead>
 									<tbody className="lh-copy">
-										{itemsData
-											.sort((a, b) => a.created_at - b.created_at)
-											.filter(
-												a =>
-													(itemFilter !== ""
-														? a.trip_title.toLowerCase().includes(itemFilter.toLowerCase())
-														: true) && a.trip_title
-											)
-											.map((item, index) => (
-												<tr
-													key={index}
-													style={{
-														borderBottom: "2px solid rgb(189, 189, 189)",
-														height: "50px",
-													}}>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
-														{new Date(item.created_at).toDateString()}
-													</td>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
-														{item.trip_title}
-													</td>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
-														{item?.users_name?.length
-															? item.users_name.map((a, i) => (i === 0 ? a : ", " + a))
-															: ""}
-													</td>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
-														{item?.warehouse_title || ""}
-													</td>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{ textAlign: "center" }}>
-														{item.orderLength}
-													</td>
-													<td
-														className="ph3 bb b--black-20 tc bg-white"
-														style={{
-															textAlign: "center",
-															position: "relative",
-														}}>
-														<div
-															id="customer-dropdown-trigger"
-															className={"active"}
-															style={{
-																transform: item.dropdown
-																	? "rotate(0deg)"
-																	: "rotate(180deg)",
-																width: "30px",
-																height: "30px",
-																backgroundColor: "#000",
-																color: "#fff",
-															}}
-															onClick={e => {
-																setItemsData(prev =>
-																	prev.map(a =>
-																		a.trip_uuid === item.trip_uuid
-																			? { ...a, dropdown: !a.dropdown }
-																			: { ...a, dropdown: false }
-																	)
-																)
-															}}>
-															<ArrowDropDown />
-														</div>
-														{item.dropdown ? (
-															<div
-																id="customer-details-dropdown"
-																className={"page1 flex"}
-																style={{
-																	top: "-70px",
-																	flexDirection: "column",
-																	left: "-200px",
-																	zIndex: "200",
-																	width: "200px",
-																	height: "300px",
-																	justifyContent: "space-between",
-																}}
-																onMouseLeave={() =>
-																	setItemsData(prev =>
-																		prev.map(a =>
-																			a.trip_uuid === item.trip_uuid
-																				? { ...a, dropdown: false }
-																				: a
-																		)
-																	)
-																}>
-																<button
-																	className="theme-btn"
-																	style={{
-																		display: "inline",
-																		cursor: "pointer",
-																		width: "100%",
-																	}}
-																	type="button"
-																	onClick={() => {
-																		setWarehousePopup(item)
-																	}}>
-																	Warehouse
-																</button>
-																<button
-																	className="theme-btn"
-																	style={{
-																		display: "inline",
-																		cursor: item?.orderLength
-																			? "not-allowed"
-																			: "pointer",
-																		width: "100%",
-																	}}
-																	type="button"
-																	onClick={() => {
-																		completeFunction({
-																			...item,
-																			status: 0,
-																		})
-																	}}
-																	disabled={item?.orderLength}>
-																	Complete
-																</button>
-
-																<button
-																	className="theme-btn"
-																	style={{
-																		display: "inline",
-																		cursor: "pointer",
-																		width: "100%",
-																	}}
-																	type="button"
-																	onClick={() => {
-																		setStatementTrip_uuid(item.trip_uuid)
-																	}}>
-																	Statement
-																</button>
-
-																<button
-																	className="theme-btn"
-																	style={{
-																		display: "inline",
-																		width: "100%",
-																	}}
-																	type="button"
-																	onClick={() => {
-																		setPopup(item)
-																	}}>
-																	Users
-																</button>
-
-																<button
-																	className="theme-btn"
-																	style={{
-																		display: "inline",
-																		width: "100%",
-																	}}
-																	type="button"
-																	onClick={() => {
-																		setDetailsPopup(item.trip_uuid)
-																	}}>
-																	Details
-																</button>
-																<button
-																	className="theme-btn"
-																	style={{
-																		display: "inline",
-																		width: "100%",
-																	}}
-																	type="button"
-																	onClick={() => {
-																		setCounterPopup(item.trip_uuid)
-																	}}>
-																	Counters
-																</button>
-															</div>
-														) : (
-															""
-														)}
-													</td>
-												</tr>
-											))}
+										<DndContext
+											sensors={sensors}
+											collisionDetection={closestCenter}
+											onDragStart={handleDragStart}
+											onDragEnd={handleDragEnd}
+										>
+											<SortableContext
+												items={itemsIdList}
+												strategy={rectSortingStrategy}
+											>
+												{itemsIdList?.map((id, i) =>
+													<SortableItem
+														key={id}
+														id={id}
+														activeId={activeId}
+														setActiveId={setActiveId}
+														item={itemsData?.find(i => i.trip_uuid === id)}
+														setStateProps={{
+															isMenuOpen,
+															setIsMenuOpen,
+															setWarehousePopup,
+															completeFunction,
+															setStatementTrip_uuid,
+															setPopup,
+															setDetailsPopup,
+															setCounterPopup,
+															setRenamePopup
+														}}
+													/>
+												)}
+											</SortableContext>
+										</DndContext>
 									</tbody>
 								</table>
 							</div>
 						</div>
 					</div>
-					<button
-						onClick={() => {
-							setIsItemAvilableOpen(false)
-						}}
-						className="closeButton">
-						x
-					</button>
-
-					<div
-						onClick={() => {
-							setIsItemAvilableOpen(false)
-						}}>
-						<button className="savebtn">Done</button>
+					<button onClick={() => setIsTripsModalOpen(false)} className="closeButton">x</button>
+					<div>
+						<button className="savebtn" onClick={updateData} disabled={loading} style={{ pointerEvents: loading ? 'none' : 'all' }}>
+							{loading ? "In Progress...": "Done"}
+						</button>
 					</div>
 				</div>
 			</div>
@@ -398,6 +287,14 @@ export default function ItemAvilibility() {
 			) : (
 				""
 			)}
+			{renamePopup ? <TripRenamePopup
+				onSave={(trip_title, trip_uuid) => {
+					setItemsData(prev => prev.map(i => i.trip_uuid === trip_uuid ? ({...i, trip_title}) : i))
+					setRenamePopup()
+				}}
+				close={() => setRenamePopup()}
+				tripData={renamePopup} />
+			: null}
 			{warehousePopup ? <WarehousePopup onSave={() => setWarehousePopup(false)} tripData={warehousePopup} /> : ""}
 			{detailsPopup ? <PopupTripOrderTable trip_uuid={detailsPopup} onSave={() => setDetailsPopup("")} /> : ""}
 			{statementTrip?.trip_uuid ? (
@@ -435,6 +332,24 @@ export default function ItemAvilibility() {
 			{counterPopup ? <CounterTable onSave={() => setCounterPopup(false)} trip_uuid={counterPopup} /> : ""}
 		</>
 	)
+	function handleDragStart(event) {
+		const { active } = event;
+		setActiveId(active?.id);
+	}
+	function handleDragEnd(event) {
+		const { active, over } = event;
+		if (active?.id !== over?.id) {
+			const oldIndex = itemsIdList?.indexOf(active.id);
+			const newIndex = itemsIdList?.indexOf(over.id);
+
+			const updatedIds = arrayMove(itemsIdList, oldIndex, newIndex);
+			setItemsData(prev => updatedIds?.map((id, i) => {
+				const doc = prev?.find(trip => trip.trip_uuid === id)
+				return { ...doc, sort_order: i + 1 }
+			}).sort((a,b) => a.sort_order - b.sort_order))
+		}
+		setActiveId(null);
+	}
 }
 function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 	const [data, setdata] = useState([])
@@ -500,6 +415,73 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 						</form>
 					</div>
 					<button onClick={onSave} className="closeButton">
+						x
+					</button>
+				</div>
+			</div>
+		</div>
+	)
+}
+function TripRenamePopup({ onSave, close, tripData }) {
+	const [title, setTitle] = useState()
+
+	const submitHandler = async e => {
+		e.preventDefault()
+		if (!title) return close()
+		const response = await axios({
+			method: "put",
+			url: "/trips/putTrip",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			data: {
+				trip_title: title,
+				trip_uuid: tripData.trip_uuid
+			},
+		})
+		if (response.data.success) {
+			onSave(title, tripData.trip_uuid)
+		}
+	}
+
+	return (
+		<div className="overlay" style={{ zIndex: "999999" }}>
+			<div className="modal" style={{ height: "fit-content", width: "fit-content" }}>
+				<div
+					className="content"
+					style={{
+						height: "fit-content",
+						padding: "20px",
+						width: "fit-content",
+					}}>
+					<div style={{ overflowY: "scroll" }}>
+						<form className="form" onSubmit={submitHandler}>
+							<div className="row">
+								<h1>Rename Trip</h1>
+							</div>
+
+							<div className="form">
+								<div className="row">
+									<label className="selectLabel">
+										Name
+										<div className="inputGroup" style={{ width: "500px" }}>
+											<input
+												type="text"
+												className="theme-input"
+												value={title || tripData?.trip_title}
+												onChange={e => setTitle(e.target.value)}
+											/>
+										</div>
+									</label>
+								</div>
+							</div>
+
+							<button type="submit" className="submit">
+								Save changes
+							</button>
+						</form>
+					</div>
+					<button onClick={close} className="closeButton">
 						x
 					</button>
 				</div>
@@ -978,4 +960,217 @@ function CounterTable({ trip_uuid, onSave }) {
 			</div>
 		</div>
 	)
+}
+const SortableItem = (props) => {
+	const { attributes, listeners, setNodeRef, transform, transition, } = useSortable({ id: props?.id });
+	const style = { transform: CSS?.Transform?.toString(transform), transition };
+	return (<Item {...props} ref={setNodeRef} style={style} {...attributes} {...listeners} />);
+};
+const Item = forwardRef(({
+	activeId,
+	style,
+	item,
+	...props
+}, ref) => {
+  
+	if (!item) return null
+	return (
+		<tr
+			key={item.trip_uuid}
+			ref={ref}
+			style={activeId === item.trip_uuid ? {
+				background: 'lightgray',
+				...style
+			} : style}
+		>
+			<td>
+				<ViewGridIcon {...props} style={{ width: '16px', height: '16px', opacity: '0.7', marginLeft: '10px',marginRight:'5px' }} />
+				{item?.sort_order}
+			</td>
+			<td
+				className="ph3 bb b--black-20 tc bg-white"
+				style={{ textAlign: "center" }}>
+				{new Date(item.created_at).toDateString()}
+			</td>
+			<td
+				className="ph3 bb b--black-20 tc bg-white"
+				style={{ textAlign: "center" }}>
+				{item.trip_title}
+			</td>
+			<td
+				className="ph3 bb b--black-20 tc bg-white"
+				style={{ textAlign: "center" }}>
+				{item?.users_name?.length
+					? item.users_name.map((a, i) => (i === 0 ? a : ", " + a))
+					: ""}
+			</td>
+			<td
+				className="ph3 bb b--black-20 tc bg-white"
+				style={{ textAlign: "center" }}>
+				{item?.warehouse_title || ""}
+			</td>
+			<td
+				className="ph3 bb b--black-20 tc bg-white"
+				style={{ textAlign: "center" }}>
+				{item.orderLength}
+			</td>
+			<td
+				className="ph3 bb b--black-20 tc bg-white"
+				style={{
+					textAlign: "center",
+					position: "relative",
+				}}>
+				<RowMenu item={item} {...props} />
+			</td>
+		</tr>
+	)
+});
+function RowMenu({
+	item,
+	setStateProps: {
+		isMenuOpen,
+		setIsMenuOpen,
+		setWarehousePopup,
+		completeFunction,
+		setStatementTrip_uuid,
+		setPopup,
+		setDetailsPopup,
+		setCounterPopup,
+		setRenamePopup
+	}
+}) {
+	return <>
+		<button
+			id="customer-dropdown-trigger"
+			className={"active"}
+			onClick={e => {
+				const rect = e.target.getBoundingClientRect();
+				setIsMenuOpen(prev => prev?.id === item.trip_uuid ? null : {id:item.trip_uuid,position:{
+					x: rect.left + rect.width + 8,
+					y: Math.min(rect.top, window.innerHeight / 2)
+				}})
+			}}
+			style={{
+				width: "30px",
+				height: "30px",
+				marginBlock: '5px',
+				backgroundColor: isMenuOpen?.id === item.trip_uuid ? "#000" : 'white',
+				color: isMenuOpen?.id === item.trip_uuid ? "#fff" : 'black',
+				borderStyle: 'solid'
+			}}
+		>
+			<ArrowDropDown style={{ transform: isMenuOpen?.id === item.trip_uuid ? "rotate(270deg)" : "rotate(360deg)" }} />
+		</button>
+		{isMenuOpen?.id === item.trip_uuid && <div
+			id="customer-details-dropdown"
+			className={"page1 flex"}
+			style={{
+				position:'fixed',
+				top: isMenuOpen?.position.y + "px",
+				left: isMenuOpen?.position.x + "px",
+				flexDirection: "column",
+				zIndex: "200",
+				width: "200px",
+				height: "300px",
+				justifyContent: "space-between",
+			}}
+			// onMouseLeave={() => setIsMenuOpen(prev => false)}
+			>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					cursor: "pointer",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setRenamePopup(item)
+				}}>
+				Rename Trip
+			</button>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					cursor: "pointer",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setWarehousePopup(item)
+				}}>
+				Warehouse
+			</button>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					cursor: item?.orderLength
+						? "not-allowed"
+						: "pointer",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					completeFunction({
+						...item,
+						status: 0,
+					})
+				}}
+				disabled={item?.orderLength}>
+				Complete
+			</button>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					cursor: "pointer",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setStatementTrip_uuid(item.trip_uuid)
+				}}>
+				Statement
+			</button>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setPopup(item)
+				}}>
+				Users
+			</button>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setDetailsPopup(item.trip_uuid)
+				}}>
+				Details
+			</button>
+			<button
+				className="theme-btn"
+				style={{
+					display: "inline",
+					width: "100%",
+				}}
+				type="button"
+				onClick={() => {
+					setCounterPopup(item.trip_uuid)
+				}}>
+				Counters
+			</button>
+		</div>
+		}
+	</>
 }

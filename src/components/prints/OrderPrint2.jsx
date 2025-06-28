@@ -1,4 +1,3 @@
-import QrCode from "react-qr-code"
 import React, { useEffect, useMemo, useState } from "react"
 
 const OrderPrint2 = ({
@@ -10,13 +9,10 @@ const OrderPrint2 = ({
 	user = {},
 	itemData = [],
 	item_details = [],
-	reminderDate,
 	footer = false,
-	route = [],
 	defaultOrder = { item_details: [] },
-	hsn_code = [],
 	total_page = 0,
-	current_page = 0
+	current_page = 0,
 }) => {
 	const [gstValues, setGstVAlues] = useState([])
 	useEffect(() => {
@@ -29,17 +25,17 @@ const OrderPrint2 = ({
 				item.item_total / (1 + ((item?.gst_percentage || 0) + (item?.css_percentage || 0)) / 100)
 			itemsData.push({
 				...item,
-				final_Amount: final_Amount
+				final_Amount: final_Amount,
 			})
 		}
 
-		const gst_value = Array.from(new Set(itemsData.map(a => +a.gst_percentage)))
+		const gst_value = Array.from(new Set(itemsData.map((a) => +a.gst_percentage)))
 
 		for (let a of gst_value) {
-			const data = itemsData.filter(b => +b.gst_percentage === a)
+			const data = itemsData.filter((b) => +b.gst_percentage === a)
 			const amt =
 				data.length > 1
-					? data.map(b => +b?.final_Amount).reduce((a, b) => a + b, 0)
+					? data.map((b) => +b?.final_Amount).reduce((a, b) => a + b, 0)
 					: data.length
 					? +data[0].final_Amount
 					: 0
@@ -50,44 +46,34 @@ const OrderPrint2 = ({
 				arr.push({
 					value: a,
 					tex_amt: amt.toFixed(2),
-					amount: value.toFixed(2)
+					amount: value.toFixed(2),
 				})
 		}
 
 		setGstVAlues(arr)
 	}, [defaultOrder])
-	const itemDetails = useMemo(() => {
-		let items = item_details?.map(a => {
-			const _data = itemData?.find(b => b.item_uuid === a.item_uuid) || {}
-			return {
-				...a,
-				..._data,
-				dms_erp_id: a.dms_erp_id || _data.dms_erp_id,
-				dms_item_name: a.dms_item_name || _data.dms_item_name
-			}
-		})
-		if (!items?.length) return []
-		else if (items?.length === 1) return items
-		else return items
-	}, [item_details, itemData])
 
-	const itemDetailsMemo = useMemo(() => {
-		return itemDetails?.map(item => {
-			const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
-			let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
-			let unit_price = (+item.item_total || 0) / (+itemQty || 1)
-			let tex_amt =
-				(+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
+	const reCalculatedItems = useMemo(() => {
+		const items = item_details?.map((item, index) => {
+			const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
 
-			let net_amt = item.item_total / (1 + item.gst_percentage / 100)
-			let desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
-			let desc_b = item?.charges_discount?.length ? item?.charges_discount[1]?.value || 0 : 0
+			const itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
+			const unit_price = (+item.item_total || 0) / (+itemQty || 1)
+			const tex_amt = (+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
-			let desc_amt_a = (+net_amt * (desc_a || 0)) / 100
-			let desc_amt_b = (+net_amt * (desc_b || 0)) / 100
-			let taxable_value = +item.item_total - desc_amt_a - desc_amt_b
-			return {
+			const net_amt = item.item_total / (1 + (+item.gst_percentage || 0) / 100)
+			const desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
+			const desc_b = item?.charges_discount?.length ? item?.charges_discount[1]?.value || 0 : 0
+
+			const desc_amt_a = (+net_amt * (desc_a || 0)) / 100
+			const desc_amt_b = (+net_amt * (desc_b || 0)) / 100
+			const taxable_value = +item.item_total - desc_amt_a - desc_amt_b
+			
+			const returnedItem = {
 				...item,
+				...itemInfo,
+				dms_erp_id: item.dms_erp_id || itemInfo.dms_erp_id,
+				dms_item_name: item.dms_item_name || itemInfo.dms_item_name,
 				item_total: item.item_total?.toFixed(2),
 				desc_amt_a: desc_amt_a?.toFixed(2),
 				desc_amt_b: desc_amt_b?.toFixed(2),
@@ -96,44 +82,51 @@ const OrderPrint2 = ({
 				desc_a,
 				desc_b,
 				itemQty,
-				taxable_value: taxable_value?.toFixed(2)
+				taxable_value: taxable_value?.toFixed(2),
 			}
+			return returnedItem
 		})
-	}, [itemDetails, itemData])
+		if (!items?.length) return []
+		else if (items?.length === 1) return items
+		else return items
+	}, [item_details, itemData])
 
 	const totalItemDetailsMemo = useMemo(() => {
 		if (!footer) return []
 		let allData = allOrderItems
-			?.map(a => ({
+			?.map((a) => ({
 				...a,
-				...(itemData?.find(b => b.item_uuid === a.item_uuid) || {})
+				...(itemData?.find((b) => b.item_uuid === a.item_uuid) || {}),
 			}))
-			.map(item => {
-				const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
+			.map((item, index) => {
+				const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
 				let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 				let unit_price = (+item.item_total || 0) / (+itemQty || 1)
 				let tex_amt =
 					(+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 
-				let net_amt = item.item_total / (1 + item.gst_percentage / 100)
+				let net_amt = +item.item_total / (1 + (+item.gst_percentage || 0) / 100)
 				let desc_a = item?.charges_discount?.length ? item?.charges_discount[0]?.value || 0 : 0
 				let desc_b = item?.charges_discount?.length ? item?.charges_discount[1]?.value || 0 : 0
-
+				
 				let desc_amt_a = (+net_amt * (desc_a || 0)) / 100
 				let desc_amt_b = (+net_amt * (desc_b || 0)) / 100
 				let taxable_value = +item.item_total - desc_amt_a - desc_amt_b
-				return {
+
+				const returnedItem = {
 					...item,
 					item_total: item.item_total?.toFixed(2),
 					desc_amt_a: desc_amt_a?.toFixed(2),
 					desc_amt_b: desc_amt_b?.toFixed(2),
-					net_amt: net_amt?.toFixed(2),
+					net_amt: +net_amt?.toFixed(2),
 					tex_amt: (tex_amt * itemQty)?.toFixed(2),
 					desc_a,
 					desc_b,
 					itemQty,
-					taxable_value: taxable_value?.toFixed(2)
+					taxable_value: taxable_value?.toFixed(2),
 				}
+
+				return returnedItem
 			})
 		let totalData = allData.reduce((acc, item) => {
 			return {
@@ -144,26 +137,29 @@ const OrderPrint2 = ({
 				tex_amt: (+acc.tex_amt || 0) + (+item.tex_amt || 0),
 				taxable_value: ((+acc.taxable_value || 0) + (+item.taxable_value || 0) || 0)?.toFixed(2),
 				itemQty: (+acc.itemQty || 0) + (+item.itemQty || 0),
-				mrp: (+acc.mrp || 0) + (+item.mrp || 0)
+				mrp: (+acc.mrp || 0) + (+item.mrp || 0),
 			}
 		}, {})
 
 		return totalData
 	}, [footer, allOrderItems, itemData])
 
-	const getFormateDate = dateStamp => {
+	const getFormateDate = (dateStamp) => {
 		const date = new Date(dateStamp)
-
-		const day = date.getDate()
-		const month = date.toLocaleString("en-US", { month: "short" }) // e.g., "Oct"
+	
+		const day = String(date.getDate()).padStart(2, "0")
+		const month = date.toLocaleString("en-US", { month: "short" }) // e.g., "May"
 		const year = date.getFullYear()
 		const hours = date.getHours() % 12 || 12 // Converts to 12-hour format
 		const minutes = String(date.getMinutes()).padStart(2, "0") // Ensures two digits
 		const ampm = date.getHours() >= 12 ? "pm" : "am"
-
+	
 		const formattedDate = `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`
 		return formattedDate
 	}
+	
+	const soNumber = order?.dms_details?.so_code || reCalculatedItems?.find(i => i.dms_code)?.dms_code || ""
+
 	return (
 		<div
 			id={renderID}
@@ -174,7 +170,7 @@ const OrderPrint2 = ({
 				pageBreakAfter: "always",
 				display: "flex",
 				flexDirection: "column",
-				justifyContent: "start"
+				justifyContent: "start",
 			}}
 		>
 			<style>
@@ -189,440 +185,193 @@ const OrderPrint2 = ({
           }
         `}
 			</style>
-			<table style={{ width: "100%", borderSpacing: "0px" }}>
-				<tr style={{ height: "25mm" }}>
-					<td style={{ fontSize: "8px" }}>
-						{current_page}/{total_page}
-					</td>
-					<th style={{ textAlign: "start", fontSize: "small" }}>Tax Invoice</th>
-				</tr>
-				<tr style={{ height: "6mm" }}>
-					<th style={{ textAlign: "start", fontSize: "small" }}>Seller Copy</th>
-				</tr>
-
+			<table style={{ width: "100%", borderSpacing: "0px", borderCollapse: "collapse" }}>
 				<tr>
-					<td style={{ width: "100%" }} colSpan={5}>
-						<table style={{ width: "100%", borderSpacing: "0px" }}>
-							<tr style={{ width: "100%" }}>
-								<td>
-									<table
-										style={{
-											border: "1px solid black",
-											width: "100%",
-											borderSpacing: "0px",
-											height: "14mm",
-											padding: "1mm",
-											borderBottom: "none"
-										}}
-									>
-										<tr>
-											<td
-												style={{
-													fontWeight: "700",
-													fontSize: "2.3mm",
-													width: ""
-												}}
-											>
-												FROM:- BHARAT TRADERS
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm",
-													width: "30%"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													GST No:-
-												</span>{" "}
-												27ABIPR1186M1Z2
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm",
-													width: "40%"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Invoice No:-
-												</span>{" "}
-												{order.dms_invoice_number || ""}
-											</td>
-										</tr>
-										<tr>
-											<td
-												style={{
-													fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												Seller Address:- BEHIND SALES TAX OFFICE,
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													PAN No:-
-												</span>{" "}
-												ABIPR11B6M
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Date :-
-												</span>{" "}
-												{getFormateDate(date)}
-											</td>
-										</tr>
-										<tr>
-											<td
-												style={{
-													fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												SHASTRI WARD GONDIA
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Phone No:-
-												</span>{" "}
-												9403061071
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Phone No:-
-												</span>{" "}
-											</td>
-										</tr>
-										<tr>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700",
-														fontSize: "2.3mm"
-													}}
-												>
-													Fssai Number:-{" "}
-												</span>
-												11517058000427
-											</td>
-											<td></td>
-											<td></td>
-										</tr>
-									</table>
-								</td>
-							</tr>
-							<tr>
-								<td>
-									<table
-										style={{
-											border: "1px solid black",
-											width: "100%",
-											borderSpacing: "0px",
-											height: "17mm",
-											padding: "1mm"
-										}}
-									>
-										<tr>
-											<td
-												style={{
-													fontWeight: "700",
-													fontSize: "2.3mm",
-													width: "30%"
-												}}
-											>
-												To:- {counter?.dms_buyer_name}
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700",
-														width: "40%"
-													}}
-												>
-													GST No:-
-												</span>{" "}
-												{counter?.gst_no}
-											</td>
-
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm",
-													width: "30%"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Buyer Erp Id:-
-												</span>{" "}
-												{counter?.dms_buyer_id || ""}
-											</td>
-										</tr>
-										<tr>
-											<td
-												style={{
-													fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												Seller Address:- {counter?.dms_buyer_address || ""}
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													PAN No:-
-												</span>{" "}
-											</td>
-
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Salesman Name:-
-												</span>{" "}
-												{user?.user_title}
-											</td>
-										</tr>
-										<tr>
-											<td
-												style={{
-													fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												Fssai Number:-
-											</td>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Phone No:-
-												</span>{" "}
-												{counter?.mobile?.length ? counter.mobile[0].mobile : ""}
-											</td>
-
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Beat Name:-
-												</span>{" "}
-												{counter?.dms_beat_name || ""}
-											</td>
-										</tr>
-										<tr>
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											></td>
-											<td></td>
-
-											<td
-												style={{
-													// fontWeight: "700",
-													fontSize: "2.3mm"
-												}}
-											>
-												<span
-													style={{
-														fontWeight: "700"
-													}}
-												>
-													Employee Contact No:-
-												</span>
-												{user?.user_mobile || ""}
-											</td>
-										</tr>
-									</table>
-								</td>
-							</tr>
-						</table>
-					</td>
-					<td>
-						<table
+					<th style={{ fontSize: "small" }}>
+						<div
 							style={{
-								border: "1px solid black",
-								textAlign: "left",
-								borderSpacing: "0px",
-								marginLeft: "3mm",
-								width: "28mm",
-
-								padding: "1mm"
+								width: "50%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
 							}}
 						>
-							<tr>
-								<th
-									style={{
-										fontWeight: "700",
-										fontSize: "2.3mm"
-									}}
-								>
-									Company QR Code:
-								</th>
-							</tr>
-							<tr>
-								<th style={{ height: "3mm" }}></th>
-							</tr>
-							<tr>
-								<td>
-									<QrCode
-										value={"https://www.haldirams.com/"}
-										bgColor="#ffffff"
-										fgColor="#000000"
-										style={{
-											width: "22.3mm",
-											height: "22.3mm",
-											paddingLeft: "1mm"
-										}}
-										level="H"
-									/>
-								</td>
-							</tr>
-						</table>
+							<span style={{ fontSize: "10px" }}>
+								{current_page}/{total_page}
+							</span>
+							<span>Tax Invoice</span>
+						</div>
+					</th>
+				</tr>
+				<tr>
+					<th style={{ padding: "8px 0", textAlign: "start", fontSize: "small" }}>Seller Copy</th>
+				</tr>
+
+				<tr>
+					<td style={{ width: "100%", border: "1px solid black" }} colSpan={6}>
+						<div
+							style={{
+								width: "100%",
+								// height: "14mm",
+								padding: "1.5mm 2mm",
+								borderBottom: "none",
+								display: "flex",
+							}}
+						>
+							<div style={{ flex: 1 }}>
+								<div style={{ fontWeight: "700", fontSize: "2.3mm" }}>FROM:- BHARAT TRADERS</div>
+								<div style={{ fontWeight: "700", fontSize: "2.3mm" }}>
+									Seller Address:- BEHIND SALES TAX OFFICE, SHASTRI WARD GONDIA
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700", fontSize: "2.3mm" }}>Fssai Number:- </span>
+									11517058000427
+								</div>
+							</div>
+							<div style={{ flex: 1 }}>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>GST No:-</span>27ABIPR1186M1Z2
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>PAN No:-</span> ABIPR11B6M
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>Phone No:-</span> 9403061071
+								</div>
+							</div>
+							<div style={{ flex: 1 }}>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span>Invoice No:-</span> {order.dms_details?.invoice_number || ""}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span>Date :-</span> {
+										order?.dms_details?.date
+											? getFormateDate(order?.dms_details?.date)
+											: getFormateDate(date)
+									}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span>Phone No:-</span>{" "}
+								</div>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td style={{ width: "100%", border: "1px solid black" }} colSpan={6}>
+						<div
+							style={{
+								width: "100%",
+								borderSpacing: "0px",
+								height: "17mm",
+								padding: "1.5mm 2mm",
+								borderBottom: "none",
+								display: "flex",
+							}}
+						>
+							<div style={{ width: "25%" }}>
+								<div style={{ fontSize: "2.3mm", fontWeight: "700" }}>TO:- {counter?.dms_buyer_name}</div>
+								<div style={{ fontWeight: "700", fontSize: "2.3mm" }}>
+									Seller Address:- {counter?.dms_buyer_address || ""}
+								</div>
+								<div style={{ fontWeight: "700", fontSize: "2.3mm" }}>Fssai Number:-</div>
+							</div>
+							<div style={{ flex: 1 }}>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>GST No:-</span> {counter?.gst_no}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>PAN No:-</span>{" "}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>Phone No:-</span>{" "}
+									{counter?.mobile?.length ? counter.mobile[0].mobile : ""}
+								</div>
+							</div>
+							<div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span>Buyer Erp Id:-</span> {counter?.dms_buyer_id || ""}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span>Salesman Name:-</span> {user?.user_title}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span>Beat Name:-</span> {counter?.dms_beat_name || ""}
+								</div>
+								<div style={{ fontSize: "2.3mm" }}>
+									<span style={{ fontWeight: "700" }}>Employee Contact No:-</span>
+									{user?.user_mobile || ""}
+								</div>
+							</div>
+						</div>
 					</td>
 				</tr>
 
 				<tr>
-					<td colSpan={6}>
+					<td colSpan={6} style={{ border: "1px solid black" }}>
 						<table
 							style={{
 								borderCollapse: "collapse",
 								width: "100%",
 								margin: 0,
-								borderSpacing: "0px"
+								borderSpacing: "0px",
 							}}
 						>
 							<tr
 								style={{
-									border: "1px solid black",
-									borderTop: "none",
+									borderBottom: "1px solid black",
 									width: "100%",
-									backgroundColor: "#e0e0e0"
+									backgroundColor: "#e0e0e0",
 								}}
 							>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderRight: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "3%"
+										width: "3%",
 									}}
 								>
 									S No.
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "10%"
+										width: "10%",
+									}}
+								>
+									SO No.
+								</th>
+								<th
+									style={{
+										fontWeight: "400",
+										fontSize: "2.3mm",
+										borderInline: "1px solid black",
+										textAlign: "center",
+										padding: "0 1px",
+										borderTop: "none",
+										width: "10%",
 									}}
 								>
 									Item ERP id
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "30%"
+										width: "30%",
 									}}
 									colSpan={3}
 								>
@@ -630,158 +379,157 @@ const OrderPrint2 = ({
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "3%"
+										width: "3%",
 									}}
 								>
 									MRP (₹)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "7%"
+										width: "7%",
 									}}
 								>
 									Free Qty
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Invoice/Delivery Qty
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Price/Piece
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Net Amt. (₹)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "7%"
+										width: "7%",
 									}}
 								>
 									Secondary Dis. ₹(%)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "10%"
+										width: "10%",
 									}}
 								>
 									Cash Dis. ₹(%)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Taxable Value (₹)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									GST (%)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderInline: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									GST Amt. (₹)
 								</th>
 								<th
 									style={{
-										fontWeight: "700",
+										fontWeight: "400",
 										fontSize: "2.3mm",
-										border: "1px solid black",
+										borderLeft: "1px solid black",
 										textAlign: "center",
 										padding: "0 1px",
 										borderTop: "none",
-										width: "5%"
+										width: "5%",
 									}}
 								>
 									Total Value (₹)
 								</th>
 							</tr>
 
-							{itemDetailsMemo?.map((item, i) => {
+							{reCalculatedItems?.map((item, i) => {
 								return (
-									<tr style={{ border: "1px solid black" }} className="order_item">
+									<tr key={item.item_uuid} style={{ borderBlock: "1px solid black" }} className="order_item">
 										<td
 											style={{
 												padding: "0 5px",
-												fontWeight: "700",
 												fontSize: "2.3mm",
-												textAlign: "right"
+												textAlign: "right",
 											}}
 										>
 											{item?.sr || i + 1}
@@ -790,8 +538,16 @@ const OrderPrint2 = ({
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
-												textAlign: "center",
-												border: "1px solid black"
+												borderInline: "1px solid black",
+											}}
+										>
+											{soNumber}
+										</td>
+										<td
+											style={{
+												padding: "0 5px",
+												fontSize: "2.3mm",
+												borderInline: "1px solid black",
 											}}
 										>
 											{item?.dms_erp_id}
@@ -799,14 +555,13 @@ const OrderPrint2 = ({
 										<td
 											style={{
 												padding: "5px",
-												fontWeight: "700",
-												border: "1px solid #000",
+												borderInline: "1px solid #000",
 												fontSize: "2.3mm",
-												width: "100mm"
+												width: "100mm",
 											}}
 											colSpan={3}
 										>
-											{item?.dms_item_name}
+											{item?.dms_item_name || item?.item_title}
 										</td>
 
 										<td
@@ -814,7 +569,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
 											{+(+item?.mrp || 0)?.toFixed(2)}
@@ -825,7 +580,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
 											0 Cs, {item.free} Pcs
@@ -835,8 +590,7 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black",
-												fontWeight: "700"
+												borderInline: "1px solid black",
 											}}
 										>
 											{item.itemQty}
@@ -846,27 +600,27 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
-											{+((+item.net_amt || 0) / (+item.itemQty || 1)).toFixed(2)}
+											{((+item.net_amt || 0) / +(+item.itemQty || 1)).toFixed(2)}
 										</td>
 										<td
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
-											{+(+item.net_amt)?.toFixed(2)}
+											{(+item.net_amt)?.toFixed(2)}
 										</td>
 										<td
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
 											{+(+item.desc_amt_a)?.toFixed(2)} ({+(+item.desc_a)?.toFixed(2)})
@@ -876,202 +630,188 @@ const OrderPrint2 = ({
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
-											{+(+item.desc_amt_b)?.toFixed(2)} ({+(+item.desc_b)?.toFixed(2)})
+											{(+item.desc_amt_b)?.toFixed(2)} ({+(+item.desc_b)?.toFixed(2)})
 										</td>
 										<td
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
-											{+(+item.taxable_value)?.toFixed(2)}
+											{(+item.taxable_value)?.toFixed(2)}
 										</td>
 										<td
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
-											{+(+item.gst_percentage || 0).toFixed(2)}
+											{(+item.gst_percentage || 0).toFixed(2)}
 										</td>
 										<td
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black"
+												borderInline: "1px solid black",
 											}}
 										>
-											{+(+item.tex_amt)?.toFixed(2)}
+											{(+item.tex_amt)?.toFixed(2)}
 										</td>
 										<td
 											style={{
 												padding: "0 5px",
 												fontSize: "2.3mm",
 												textAlign: "right",
-												border: "1px solid black",
-												fontWeight: "700"
+												borderLeft: "1px solid black",
 											}}
 										>
-											{+(+item.item_total || 0)?.toFixed(2)}
+											{(+item.item_total || 0)?.toFixed(2)}
 										</td>
 									</tr>
 								)
 							})}
 
 							{footer ? (
-								<>
-									<tr style={{ border: "1px solid black" }}>
-										<th
-											style={{
-												fontWeight: "700",
-												fontSize: "2.3mm",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											Total
-										</th>
-										<td style={{ border: "1px solid black" }}></td>
-										<td colSpan={3} style={{ border: "1px solid black" }}></td>
-										<td
-											style={{
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{+(+totalItemDetailsMemo?.mrp || 0)?.toFixed(2)}
-										</td>
-										<td
-											style={{
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											0 Cs {totalItemDetailsMemo?.free || 0} Pcs
-										</td>
-										<td
-											style={{
-												fontWeight: "700",
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{totalItemDetailsMemo?.itemQty || 0}
-										</td>
-										<td style={{ border: "1px solid black" }}></td>
-										<td
-											style={{
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{(+totalItemDetailsMemo?.net_amt || 0).toFixed(2)}
-										</td>
-										<td
-											style={{
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{+(+totalItemDetailsMemo?.desc_amt_a || 0)?.toFixed(2)}
-										</td>
-										<td
-											style={{
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{+(+totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
-										</td>
-										<td
-											style={{
-												fontWeight: "700",
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{+(+totalItemDetailsMemo?.taxable_value || 0)?.toFixed(2)}
-										</td>
+								<tr>
+									<th
+										style={{
+											fontWeight: "400",
+											fontSize: "2.3mm",
+											borderRight: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										Total
+									</th>
+									<td style={{ borderInline: "1px solid black" }}></td>
+									<td colSpan={4} style={{ borderInline: "1px solid black" }}></td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{+(+totalItemDetailsMemo?.mrp || 0)?.toFixed(2)}
+									</td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										0 Cs {totalItemDetailsMemo?.free || 0} Pcs
+									</td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{totalItemDetailsMemo?.itemQty || 0}
+									</td>
+									<td style={{ borderInline: "1px solid black" }}></td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{(+totalItemDetailsMemo?.net_amt || 0).toFixed(2)}
+									</td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{(+totalItemDetailsMemo?.desc_amt_a || 0)?.toFixed(2)}
+									</td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{(+totalItemDetailsMemo?.desc_amt_b || 0).toFixed(2)}
+									</td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{+(+totalItemDetailsMemo?.taxable_value || 0)?.toFixed(2)}
+									</td>
 
-										<td style={{ border: "1px solid black" }}></td>
-										<td
-											style={{
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{+(+totalItemDetailsMemo?.tex_amt || 0).toFixed(2)}
-										</td>
-										<td
-											style={{
-												fontWeight: "700",
-												fontSize: "2.3mm",
-												textAlign: "right",
-												border: "1px solid black",
-												padding: "0 5px"
-											}}
-										>
-											{+(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
-										</td>
-									</tr>
-								</>
-							) : (
-								""
-							)}
+									<td style={{ borderInline: "1px solid black" }}></td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{(+totalItemDetailsMemo?.tex_amt || 0).toFixed(2)}
+									</td>
+									<td
+										style={{
+											fontSize: "2.3mm",
+											textAlign: "right",
+											borderInline: "1px solid black",
+											padding: "0 5px",
+										}}
+									>
+										{(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
+									</td>
+								</tr>
+							) : null}
 						</table>
 					</td>
 				</tr>
 
 				{footer ? (
 					<tr>
-						<td colSpan={6}>
-							<table
-								style={{
-									borderSpacing: "0px"
-								}}
-							>
+						<td colSpan={15} style={{ border: "1px solid black" }}>
+							<table style={{ borderSpacing: "0px", borderCollapse: "collapse", width:'100%' }}>
 								<tr>
 									<td>
 										<table
 											style={{
-												border: "1px solid black",
 												textAlign: "start",
-												width: "80mm",
 												height: "25mm",
 												borderSpacing: "0px",
 												padding: "1mm",
-												borderTop: "none"
+												borderTop: "none",
 											}}
 										>
 											<tr>
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													CGST - {gstValues.length ? gstValues[0].amount / 2 : 0.0} , SGST -{" "}
@@ -1083,7 +823,7 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													CREDIT NOTE Remarks: --
@@ -1093,7 +833,7 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
 													DEBIT NOTE Remarks: --
@@ -1103,16 +843,10 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
-													<span
-														style={{
-															fontWeight: "700"
-														}}
-													>
-														Amount in words:
-													</span>
+													<span>Amount in words:</span>
 													{numberToWords(+order?.order_grandtotal || 0)}
 												</td>
 											</tr>
@@ -1120,122 +854,33 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														width: "30%"
+														width: "30%",
 													}}
 												>
-													<span
-														style={{
-															fontWeight: "700"
-														}}
-													>
-														Remarks:
-													</span>
+													<span>Remarks:</span>
 												</td>
 											</tr>
 										</table>
 									</td>
+									<td></td>
 									<td>
 										<table
 											style={{
-												border: "1px solid black",
-												textAlign: "start",
-												width: "80mm",
+												width:'100%',
 												height: "25mm",
 												borderSpacing: "0px",
 												padding: "1mm",
-												borderLeft: "none",
-												borderRight: "none",
-												borderTop: "none"
-											}}
-										>
-											<tr>
-												<td
-													style={{
-														fontWeight: "700",
-														fontSize: "2.3mm",
-														width: "30%"
-													}}
-												>
-													Additional Information:
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontWeight: "700",
-														fontSize: "2.3mm",
-														width: "30%",
-														fontStyle: "italic"
-													}}
-												>
-													1.
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontWeight: "700",
-														fontSize: "2.3mm",
-														width: "30%",
-														color: "transparent"
-													}}
-												>
-													1.
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontWeight: "700",
-														fontSize: "2.3mm",
-														width: "30%",
-														color: "transparent"
-													}}
-												>
-													1.
-												</td>
-											</tr>
-											<tr>
-												<td
-													style={{
-														fontWeight: "700",
-														fontSize: "2.3mm",
-														width: "30%",
-														color: "transparent"
-													}}
-												>
-													1.
-												</td>
-											</tr>
-										</table>
-									</td>
-									<td>
-										<table
-											style={{
-												border: "1px solid black",
-												textAlign: "start",
-												width: "50mm",
-												height: "25mm",
-												borderSpacing: "0px",
-												padding: "1mm",
-												borderTop: "none"
+												borderTop: "none",
 											}}
 										>
 											<tr>
 												<td
 													style={{
 														fontSize: "2.3mm",
-														textAlign: "right"
+														textAlign: "right",
 													}}
 												>
-													<span
-														style={{
-															fontWeight: "700"
-														}}
-													>
-														CREDIT NOTE Adjustment:
-													</span>{" "}
-													+ 0
+													<span>CREDIT NOTE Adjustment:</span> + 0
 												</td>
 											</tr>
 											<tr>
@@ -1243,13 +888,12 @@ const OrderPrint2 = ({
 													style={{
 														fontSize: "2.3mm",
 
-														textAlign: "right"
+														textAlign: "right",
 													}}
 												>
 													<span
 														style={{
-															fontWeight: "700",
-															textAlign: "right"
+															textAlign: "right",
 														}}
 													>
 														DEBIT NOTE Adjustment:
@@ -1261,17 +905,10 @@ const OrderPrint2 = ({
 												<td
 													style={{
 														fontSize: "2.3mm",
-														textAlign: "right"
+														textAlign: "right",
 													}}
 												>
-													<span
-														style={{
-															fontWeight: "700"
-														}}
-													>
-														Round Off:
-													</span>{" "}
-													₹{" "}
+													<span>Round Off:</span> ₹{" "}
 													{(
 														order.order_grandtotal - totalItemDetailsMemo?.item_total || 0
 													)?.toFixed(2)}
@@ -1282,11 +919,9 @@ const OrderPrint2 = ({
 													style={{
 														fontSize: "10px",
 														textAlign: "right",
-
-														fontWeight: "700"
 													}}
 												>
-													Total Value: ₹ {+(+order?.order_grandtotal || 0)?.toFixed(2)}
+													Total Value: ₹ {(+order?.order_grandtotal || 0)?.toFixed(2)}
 												</td>
 												<td></td>
 											</tr>
@@ -1296,9 +931,7 @@ const OrderPrint2 = ({
 							</table>
 						</td>
 					</tr>
-				) : (
-					<></>
-				)}
+				) : null}
 			</table>
 		</div>
 	)
@@ -1326,7 +959,7 @@ function numberToWords(num) {
 		"sixteen",
 		"seventeen",
 		"eighteen",
-		"nineteen"
+		"nineteen",
 	]
 	const tens = [
 		"",
@@ -1338,7 +971,7 @@ function numberToWords(num) {
 		"sixty",
 		"seventy",
 		"eighty",
-		"ninety"
+		"ninety",
 	]
 	const thousands = ["", "thousand", "million", "billion"]
 

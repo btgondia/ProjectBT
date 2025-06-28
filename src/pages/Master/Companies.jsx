@@ -12,6 +12,8 @@ import { useState } from "react"
 import Prompt from "../../components/Prompt"
 import axios from "axios"
 import { v4 } from "uuid"
+import { FaChevronDown } from "react-icons/fa6"
+import { companyLoadRates } from "../../utils/constants"
 
 const Companies = () => {
 	const [promptState, setPromptState] = useState()
@@ -20,22 +22,20 @@ const Companies = () => {
 	const [formState, setFormState] = useState()
 
 	const fetchCompanies = async () => {
-		const cachedData = localStorage.getItem('companiesData');
+		const cachedData = localStorage.getItem("companiesData")
 		try {
-		  if (cachedData) {
-			setCompanies(JSON.parse(cachedData));
-		  } else {
-			const response = await axios.get("/companies/getCompanies");
-			if (response?.data?.result?.[0]) {
-			  localStorage.setItem('companiesData', JSON.stringify(response.data.result));
-			  setCompanies(response.data.result);
+			if (cachedData) {
+				setCompanies(JSON.parse(cachedData))
+			} else {
+				const response = await axios.get("/companies/getCompanies")
+				if (response?.data?.result?.[0]) {
+					localStorage.setItem("companiesData", JSON.stringify(response.data.result))
+					setCompanies(response.data.result)
+				}
 			}
-		  }
-		} catch (error) {
-		 
-		}
-	  };
-	const createCompany = async company => {
+		} catch (error) {}
+	}
+	const createCompany = async (company) => {
 		try {
 			company.company_uuid = v4()
 			const response = await axios({
@@ -44,14 +44,12 @@ const Companies = () => {
 				data: company,
 				headers: { "Content-Type": "application/json" },
 			})
-			
-			setCompanies(state => state.concat([company]))
-		} catch (error) {
-			
-		}
+
+			setCompanies((state) => state.concat([company]))
+		} catch (error) {}
 	}
 
-	const updateCompany = async company => {
+	const updateCompany = async (company) => {
 		try {
 			const response = await axios({
 				method: "put",
@@ -59,16 +57,14 @@ const Companies = () => {
 				data: company,
 				headers: { "Content-Type": "application/json" },
 			})
-			
-			setCompanies(state =>
-				state?.map(i => (i.company_uuid !== company?.company_uuid ? i : { ...i, ...company }))
+
+			setCompanies((state) =>
+				state?.map((i) => (i.company_uuid !== company?.company_uuid ? i : { ...i, ...company }))
 			)
-		} catch (error) {
-			
-		}
+		} catch (error) {}
 	}
 
-	const deleteCompany = async company => {
+	const deleteCompany = async (company) => {
 		setPromptState(null)
 		try {
 			const response = await axios({
@@ -77,18 +73,16 @@ const Companies = () => {
 				data: { company_uuid: company?.company_uuid },
 				headers: { "Content-Type": "application/json" },
 			})
-			
-			setCompanies(state => state?.filter(i => i.company_uuid !== company?.company_uuid))
-		} catch (error) {
-			
-		}
+
+			setCompanies((state) => state?.filter((i) => i.company_uuid !== company?.company_uuid))
+		} catch (error) {}
 	}
 
 	useEffect(() => {
 		fetchCompanies()
 	}, [])
 
-	const showAlert = company => {
+	const showAlert = (company) => {
 		setPromptState({
 			message: `Company '${company?.company_title}' will be removed permanently. Continue?`,
 			actions: [
@@ -102,10 +96,13 @@ const Companies = () => {
 		updateCompany({ company_uuid, status: +!+status })
 	}
 
-	const filterCompanies = data => {
+	const filterCompanies = (data) => {
 		let _data
 		if (!searchState) _data = data
-		else _data = data?.filter(i => i?.company_title?.toLowerCase()?.includes(searchState?.toLowerCase()))
+		else
+			_data = data?.filter((i) =>
+				i?.company_title?.toLowerCase()?.includes(searchState?.toLowerCase())
+			)
 		return _data?.sort((a, b) => +a?.sort_order - +b?.sort_order)
 	}
 
@@ -125,7 +122,7 @@ const Companies = () => {
 						<input
 							type="text"
 							value={searchState}
-							onChange={e => setSearchState(e.target.value)}
+							onChange={(e) => setSearchState(e.target.value)}
 							placeholder="Search companies"
 						/>
 						<button onClick={() => setSearchState("")}>
@@ -134,7 +131,8 @@ const Companies = () => {
 					</div>
 					<button
 						className="theme-btn round"
-						onClick={() => setFormState({ active: true, onSubmit: createCompany })}>
+						onClick={() => setFormState({ active: true, onSubmit: createCompany })}
+					>
 						<HiOutlinePlus style={{ fontSize: "1rem" }} />
 						Create
 					</button>
@@ -150,7 +148,7 @@ const Companies = () => {
 							</tr>
 						</thead>
 						<tbody>
-							{filterCompanies(companies)?.map(company => (
+							{filterCompanies(companies)?.map((company) => (
 								<tr key={company?.company_uuid}>
 									<td>{company?.sort_order}</td>
 									<td>{company?.company_title}</td>
@@ -173,7 +171,8 @@ const Companies = () => {
 														onSubmit: updateCompany,
 														data: company,
 													})
-												}>
+												}
+											>
 												<MdOutlineEdit />
 											</button>
 											<button className="theme-icon-btn">
@@ -193,17 +192,21 @@ const Companies = () => {
 
 			{promptState && <Prompt {...promptState} />}
 			{formState?.active && (
-				<CompanyForm {...formState} close={() => setFormState(i => ({ ...i, active: false }))} />
+				<CompanyForm {...formState} close={() => setFormState((i) => ({ ...i, active: false }))} />
 			)}
 		</>
 	)
 }
 
-const CompanyForm = ({ close, onSubmit, data = { sort_order: 1, company_title: "", status: 0 } }) => {
+const CompanyForm = ({
+	close,
+	onSubmit,
+	data = { sort_order: 1, company_title: "", status: 0 },
+}) => {
 	const [company, setCompany] = useState(data)
-	const onChange = e => setCompany(i => ({ ...i, [e.target.id]: e.target.value }))
-	const switchStatus = () => setCompany(i => ({ ...i, status: +!+i?.status }))
-	const submit = e => {
+	const onChange = (e) => setCompany((i) => ({ ...i, [e.target.id]: e.target.value }))
+	const switchStatus = () => setCompany((i) => ({ ...i, status: +!+i?.status }))
+	const submit = (e) => {
 		e.preventDefault()
 		onSubmit(company)
 		close()
@@ -225,15 +228,22 @@ const CompanyForm = ({ close, onSubmit, data = { sort_order: 1, company_title: "
 								className="theme-icon-btn"
 								onClick={() =>
 									company?.sort_order > 1 &&
-									setCompany(i => ({ ...i, sort_order: +i.sort_order - 1 }))
-								}>
+									setCompany((i) => ({ ...i, sort_order: +i.sort_order - 1 }))
+								}
+							>
 								<FiChevronLeft />
 							</button>
-							<input type="number" id="sort_order" value={company?.sort_order} onChange={onChange} />
+							<input
+								type="number"
+								id="sort_order"
+								value={company?.sort_order}
+								onChange={onChange}
+							/>
 							<button
 								type="button"
 								className="theme-icon-btn"
-								onClick={() => setCompany(i => ({ ...i, sort_order: +i.sort_order + 1 }))}>
+								onClick={() => setCompany((i) => ({ ...i, sort_order: +i.sort_order + 1 }))}
+							>
 								<FiChevronRight />
 							</button>
 						</div>
@@ -245,7 +255,7 @@ const CompanyForm = ({ close, onSubmit, data = { sort_order: 1, company_title: "
 							className="form-input"
 							id="company_title"
 							value={company?.company_title}
-							onChange={e => setCompany(i => ({ ...i, company_title: e.target.value }))}
+							onChange={(e) => setCompany((i) => ({ ...i, company_title: e.target.value }))}
 						/>
 					</div>
 
@@ -255,6 +265,26 @@ const CompanyForm = ({ close, onSubmit, data = { sort_order: 1, company_title: "
 							<span onClick={switchStatus}>
 								{company?.status ? <BsToggle2On style={{ color: "#44cd4a" }} /> : <BsToggle2Off />}
 							</span>
+						</div>
+					</div>
+
+					<div>
+						<label htmlFor="status">Load Rate (Billing)</label>
+						<div style={{ position: "relative" }}>
+							<select
+								name="load_rate"
+								className="form-input"
+								value={company?.load_rate}
+								onChange={(e) => setCompany((i) => ({ ...i, load_rate: e.target.value }))}
+								style={{ width: "100%", appearance: "none" }}
+							>
+								{companyLoadRates.map(({ value, label }) => (
+									<option value={value}>{label}</option>
+								))}
+							</select>
+							<FaChevronDown
+								style={{ position: "absolute", right: "20px", top: "50%", translate: "0 -50%" }}
+							/>
 						</div>
 					</div>
 					<button type="submit" className="theme-btn round">

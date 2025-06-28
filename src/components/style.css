@@ -833,7 +833,7 @@ div.unsync-count-container {
 }
 
 .card-color-sheet#sheet2 {
-	background-color: #d30000;
+	background-color: rgb(231, 0, 0);
 }
 
 .card > .seatTimer {
@@ -2454,9 +2454,9 @@ tr:nth-child(4) {
 	width: 100%;
 }
 
-.itemavilabelitycontainer .react-datepicker-wrapper,
-.itemavilabelitycontainer .react-datepicker__input-container,
-.itemavilabelitycontainer .react-datepicker__input-container input {
+.item-availability-container .react-datepicker-wrapper,
+.item-availability-container .react-datepicker__input-container,
+.item-availability-container .react-datepicker__input-container input {
 	display: block;
 	text-align: center;
 	width: 100%;
@@ -2476,7 +2476,7 @@ tr:nth-child(4) {
 	border: 1px solid #44cd4a;
 }
 
-.itemavilabelitycontainer .react-datepicker-popper {
+.item-availability-container .react-datepicker-popper {
 	z-index: 10000 !important;
 }
 
@@ -2518,7 +2518,7 @@ tr:nth-child(4) {
 	position: relative !important;
 }
 
-.itemavilablelity {
+.item-availability {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -2528,10 +2528,10 @@ tr:nth-child(4) {
 	width: 100vw;
 	height: 100vh;
 	background-color: rgba(0, 0, 0, 0.301);
-	z-index: 9999999;
+	z-index: 999999;
 }
 
-.itemavilabelitycontainer {
+.item-availability-container {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -2567,7 +2567,7 @@ tr:nth-child(4) {
 	box-shadow: rgb(0 0 0 / 70%) 0px 10px 20px, rgb(0 0 0 / 23%) 0px 6px 6px;
 }
 
-.itemavilablelity_header {
+.item-availability_header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -2579,7 +2579,7 @@ tr:nth-child(4) {
 	border-top-right-radius: 1.5rem;
 }
 
-.itemavilablelity_header > h2 {
+.item-availability_header > h2 {
 	flex: 1;
 	text-align: center;
 	letter-spacing: 1.5px;
@@ -2611,7 +2611,7 @@ tr:nth-child(4) {
 	padding: 0 1.5rem;
 }
 
-.itemavilablelitybox {
+.item-availabilitybox {
 	display: flex;
 	align-items: center;
 	overflow: hidden;
@@ -2734,11 +2734,11 @@ button.counter-save-btn {
 }
 
 @media only screen and (max-width: 1000px) {
-	.itemavilablelity {
+	.item-availability {
 		height: 100vh;
 	}
 
-	.itemavilabelitycontainer {
+	.item-availability-container {
 		height: inherit;
 	}
 
@@ -2748,7 +2748,7 @@ button.counter-save-btn {
 		align-items: center;
 	}
 
-	.itemavilablelitybox {
+	.item-availabilitybox {
 		height: inherit;
 	}
 }

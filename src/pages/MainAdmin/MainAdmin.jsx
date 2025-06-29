@@ -70,7 +70,7 @@ const MainAdmin = () => {
 	const [tasks, setTasks] = useState([])
 	const [reminderDate, setReminderDate] = useState()
 	const [selectedtasks, setSelectedTasks] = useState(false)
-	const location = useLocation()
+        const location = useLocation()
 	const [notesState, setNotesState] = useState()
 	const [isCooldown, setIsCooldown] = useState(false)
 
@@ -1051,27 +1051,30 @@ TOTAL: ${amounts}
 											<button type="button" className="simple_Logout_button" onClick={paymentSummaryInvokeHandler}>
 												Pending Payments Summary
 											</button>
-											<button
-												type="button"
-												className="simple_Logout_button"
-												onClick={paymentSummaryInvokeHandlerCopy}
-											>
-												Copy Pending Payments Summary
-											</button>
-										</>
-									) : (
-										""
-									)}
-								</>
-							)}
-							<button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
-								{!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
-									? "Hide Pending Payments"
-									: "Show Pending Payments"}
-							</button>
-						</div>
-					)}
-					<div className="content-container" id="content-file-container">
+                                                        <button
+                                                        type="button"
+                                                        className="simple_Logout_button"
+                                                        onClick={paymentSummaryInvokeHandlerCopy}
+                                                        >
+                                                        Copy Pending Payments Summary
+                                                        </button>
+                                                        </>
+                                                ) : (
+                                                        ""
+                                                )}
+                                        </>
+                                                        )}
+                                                        <button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
+                                                                {!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
+                                                                        ? "Hide Pending Payments"
+                                                                        : "Show Pending Payments"}
+                                                       </button>
+                                                       {selectedOrder?.length ? (
+                                                               <button className="simple_Logout_button">Order Assembly</button>
+                                                       ) : null}
+                                                </div>
+                                        )}
+                                        <div className="content-container" id="content-file-container">
 						{noOrder ? (
 							<div className="noOrder">No Order</div>
 						) : location.pathname.includes("admin") ? (

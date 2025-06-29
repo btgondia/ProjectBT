@@ -28,11 +28,12 @@
 		"uuid": "^8.3.2",
 		"xlsx": "^0.18.5"
 	},
-	"scripts": {
-		"start": "vite",
-		"build": "vite build",
-		"serve": "vite preview"
-	},
+        "scripts": {
+                "start": "vite",
+                "build": "vite build",
+                "serve": "vite preview",
+                "test": "vitest run"
+        },
 	"eslintConfig": {
 		"extends": [
 			"react-app",
@@ -52,8 +53,9 @@
 		]
 	},
 	"packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610",
-	"devDependencies": {
-		"@vitejs/plugin-react": "^4.3.4",
-		"vite": "^6.0.11"
-	}
+        "devDependencies": {
+                "@vitejs/plugin-react": "^4.3.4",
+                "vite": "^6.0.11",
+                "vitest": "^3.2.4"
+        }
 }

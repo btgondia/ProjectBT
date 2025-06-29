@@ -10,7 +10,11 @@ const OrderAssembly = () => (
       <div id="heading">
         <h2>Order Assembly</h2>
       </div>
-      <div style={{ padding: "20px", textAlign: "center" }}>Coming Soon...</div>
+      <div
+        style={{ padding: "20px", textAlign: "center", fontSize: "4em" }}
+      >
+        Coming Soon...
+      </div>
     </div>
   </>
 );

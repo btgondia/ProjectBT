@@ -1071,6 +1071,7 @@ TOTAL: ${amounts}
                                                                         : "Show Pending Payments"}
                                                         </button>
                                                         {selectOrder && selectedOrder?.length ? (
+                                                                {/* Navigate to order assembly page */}
                                                                 <button
                                                                         className="simple_Logout_button"
                                                                         onClick={() => navigate("/admin/orderAssembly")}

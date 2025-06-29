@@ -18,7 +18,7 @@ const OrderAssembly = () => {
             {orders.map((order) => (
               <div
                 key={order.order_uuid || order.invoice_number}
-                className="px-3 py-1 bg-white rounded shadow hover:bg-gray-100 text-sm"
+                className="px-3 py-1 text-sm text-gray-700 bg-white border rounded-md shadow-sm hover:bg-gray-50 transition"
               >
                 {order.counter_title}
               </div>

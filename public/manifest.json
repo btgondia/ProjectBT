@@ -1,0 +1,9 @@
+{
+  "short_name": "BT",
+  "name": "Bharat Traders",
+  
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#44cd4a",
+  "background_color": "#000"
+}

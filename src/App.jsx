@@ -12,6 +12,7 @@ import ItemsPage from "./pages/Master/Items"
 import axios from "axios"
 import AutoIncreaseQuantity from "./pages/others/AutoIncreaseQuantity"
 import AutoIncreaseItem from "./pages/others/AutoIncreaseItem"
+import OrderAssembly from "./pages/MainAdmin/OrderAssembly"
 import Main from "./users/Main"
 import LoginPage from "./users/LoginPage"
 import Processing from "./users/Processing"
@@ -390,8 +391,9 @@ function App() {
 						<Route path="/admin/editVoucher/:accounting_voucher_uuid" element={<AddVoucher />} />
 
 						<Route path="/admin/AddOutStanding" element={<AddOutStanding />} />
-						<Route path="/admin/addStock" element={<AddStock />} />
-						<Route path="/admin/adjustStock" element={<AdjustStock />} />
+                                                <Route path="/admin/addStock" element={<AddStock />} />
+                                                <Route path="/admin/orderAssembly" element={<OrderAssembly />} />
+                                                <Route path="/admin/adjustStock" element={<AdjustStock />} />
 						<Route path="/admin/userActivity" element={<UserActivity />} />
 						<Route path="/admin/unknownEntry" element={<UknownVouchers />} />
 						<Route path="/admin/SearchTransitionTags" element={<SearchTransitionTags />} />

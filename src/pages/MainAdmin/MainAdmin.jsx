@@ -18,7 +18,7 @@ import MessagePopup from "../../components/MessagePopup"
 import TaskPopupMenu from "../../components/TaskPopupMenu"
 import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup"
 import CollectionTag from "../QuikAccess/CollectionTag"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import context from "../../context/context"
 import { IoCloseCircle } from "react-icons/io5"
 import OrderPrintWrapper from "../../components/OrderPrintWrapper"
@@ -71,7 +71,6 @@ const MainAdmin = () => {
 	const [reminderDate, setReminderDate] = useState()
 	const [selectedtasks, setSelectedTasks] = useState(false)
 	const location = useLocation()
-	const navigate = useNavigate()
 	const [notesState, setNotesState] = useState()
 	const [isCooldown, setIsCooldown] = useState(false)
 

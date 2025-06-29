@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
 	margin: 0;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
@@ -18,10 +22,14 @@ code {
 	display: none;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-	/* --main: #32bd33; */
-	/* --secondary: #eaf8ea */
-	--main: #4ac959;
-	--secondary: #deffe1;
-	--secondary-light: #deffe1;
+        /* --main: #32bd33; */
+        /* --secondary: #eaf8ea */
+        --main: #4ac959;
+        --secondary: #deffe1;
+        --secondary-light: #deffe1;
 }

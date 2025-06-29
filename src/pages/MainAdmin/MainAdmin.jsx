@@ -1073,7 +1073,7 @@ TOTAL: ${amounts}
                                                         {selectOrder && selectedOrder?.length ? (
                                                                 <button
                                                                         className="simple_Logout_button"
-                                                                        onClick={() => navigate("/admin/orderAssembly")}
+                                                                        onClick={() => navigate("/admin/orderAssembly", { state: { orders: selectedOrder } })}
                                                                 >
                                                                         Order Assembly
                                                                 </button>

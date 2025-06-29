@@ -10,6 +10,11 @@ A front-end project using Vite and React.
 npm install
 ```
 
+Tailwind CSS and related build tools are included as dev dependencies. If you
+see an error about `tailwindcss` when running the dev server, ensure that you
+have installed these packages by running `npm install` in the project root
+after pulling the repository.
+
 ### Run the development server
 
 ```bash

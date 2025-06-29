@@ -22,10 +22,6 @@ code {
 	display: none;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
         /* --main: #32bd33; */
         /* --secondary: #eaf8ea */

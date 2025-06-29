@@ -1347,14 +1347,14 @@ function NewUserForm({
 											</label>
 											<label className="selectLabel">
 												Odoo Counter Id
-												<input
-													type="number"
-													onWheel={e => e?.preventDefault()}
-													name="odoo_counter_id"
-													className="numberInput"
-													value={data?.odoo_counter_id}
-													onChange={e => setdata({ ...data, odoo_counter_id: e.target.value })}
-												/>
+                                                                              <input
+                                                                              type="text"
+                                                                              onWheel={e => e?.preventDefault()}
+                                                                              name="odoo_counter_id"
+                                                                              className="numberInput"
+                                                                              value={data?.odoo_counter_id}
+                                                                              onChange={e => setdata({ ...data, odoo_counter_id: e.target.value })}
+                                                                              />
 											</label>
 											<label className="selectLabel">
 												Route

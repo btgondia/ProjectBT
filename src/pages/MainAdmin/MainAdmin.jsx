@@ -1071,7 +1071,16 @@ TOTAL: ${amounts}
                                                                         : "Show Pending Payments"}
                                                         </button>
                                                         {selectOrder && selectedOrder?.length ? (
-                                                                <button className="simple_Logout_button">Order Assembly</button>
+                                                                <button
+                                                                        className="simple_Logout_button"
+                                                                        onClick={() =>
+                                                                                navigate("/admin/orderAssembly", {
+                                                                                        state: { orders: selectedOrder }
+                                                                                })
+                                                                        }
+                                                                >
+                                                                        Order Assembly
+                                                                </button>
                                                         ) : null}
                                                 </div>
                                         )}

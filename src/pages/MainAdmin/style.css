@@ -113,5 +113,24 @@
 }
 
 .whatsapp-notification-vars button {
-	margin: 0 3px;
+        margin: 0 3px;
+}
+
+.order-assembly-container {
+        position: relative;
+}
+
+.order-assembly-boxes {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        gap: 10px;
+}
+
+.order-assembly-box {
+        background: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: 600;
 }

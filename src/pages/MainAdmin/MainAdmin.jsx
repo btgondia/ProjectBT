@@ -1070,7 +1070,9 @@ TOTAL: ${amounts}
                                                                         : "Show Pending Payments"}
                                                        </button>
                                                        {selectOrder && selectedOrder?.length ? (
-                                                               <button type="button" className="simple_Logout_button">Order Assembly</button>
+                                                               <button className="simple_Logout_button" type="button">
+                                                                       Order Assembly
+                                                               </button>
                                                        ) : null}
                                                 </div>
                                         )}

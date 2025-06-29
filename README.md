@@ -24,7 +24,9 @@ npm run build
 
 ### Run tests
 
-Tests are run using [Vitest](https://vitest.dev/). A placeholder test is included in `src/__tests__/placeholder.test.js` as a basic example.
+This project uses [Vitest](https://vitest.dev/) for unit testing. A sample test
+exists at `src/__tests__/placeholder.test.js` to demonstrate the setup.
+Run all tests with:
 
 ```bash
 npm test

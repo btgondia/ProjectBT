@@ -1058,7 +1058,8 @@ TOTAL: ${amounts}
                                                         >
                                                         Copy Pending Payments Summary
                                                         </button>
-                                                        <button className="simple_Logout_button">
+                                                        {/* TODO: enable navigation when Order Assembly page is ready */}
+                                                        <button className="simple_Logout_button" disabled>
                                                                 Order Assembly
                                                         </button>
                                                         </>

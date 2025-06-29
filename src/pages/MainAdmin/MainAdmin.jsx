@@ -1058,24 +1058,23 @@ TOTAL: ${amounts}
                                                         >
                                                         Copy Pending Payments Summary
                                                         </button>
-                                                        {/* TODO: enable navigation when Order Assembly page is ready */}
-                                                        <button className="simple_Logout_button" disabled>
-                                                                Order Assembly
-                                                        </button>
                                                         </>
                                                 ) : (
                                                         ""
                                                 )}
                                         </>
-							)}
+                                                        )}
                                                         <button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
                                                                 {!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
                                                                         ? "Hide Pending Payments"
                                                                         : "Show Pending Payments"}
-                                                        </button>
+                                                       </button>
+                                                       {selectedOrder?.length ? (
+                                                               <button className="simple_Logout_button">Order Assembly</button>
+                                                       ) : null}
                                                 </div>
                                         )}
-					<div className="content-container" id="content-file-container">
+                                        <div className="content-container" id="content-file-container">
 						{noOrder ? (
 							<div className="noOrder">No Order</div>
 						) : location.pathname.includes("admin") ? (

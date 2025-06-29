@@ -1084,7 +1084,7 @@ TOTAL: ${amounts}
                         Order Assembly
                       </button>
                     ) : null}
-                                                </div>
+                    </div>
                                         )}
                                         <div className="content-container" id="content-file-container">
 						{noOrder ? (

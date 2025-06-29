@@ -1000,78 +1000,93 @@ TOTAL: ${amounts}
 							>
 								{!stageList.length ? "Order Status Filter" : "Cancel Status Filter"}
 							</button>
-							{!selectOrder ? (
-								<>
-									<button
-										className="simple_Logout_button"
-										onClick={() => {
-											setPopupForm(true)
-											setDropDown(false)
-										}}
-									>
-										Add Trip
-									</button>
-									{holdOrders ? (
-										<button
-											// style={{ padding: "10px" }}
-											className="simple_Logout_button"
-											type="button"
-											onClick={() => {
-												setHoldOrders(false)
-												setOrdersData([])
-											}}
-										>
-											Show Running Orders
-										</button>
-									) : (
-										<></>
-									)}
-								</>
-							) : (
-								<>
-									{selectedOrder?.length ? (
-										<>
-											<button
-												className="simple_Logout_button"
-												type="button"
-												onClick={() => {
-													setSumaryPopup(true)
-													setDropDown(false)
-												}}
-											>
-												Item Summary
-											</button>
-											<button
-												className="simple_Logout_button"
-												type="button"
-												onClick={() => setConfirmMarkPaymentPendingDialogue(true)}
-											>
-												Mark As Pending Payment
-											</button>
-											<button type="button" className="simple_Logout_button" onClick={paymentSummaryInvokeHandler}>
-												Pending Payments Summary
-											</button>
-											<button
-												type="button"
-												className="simple_Logout_button"
-												onClick={paymentSummaryInvokeHandlerCopy}
-											>
-												Copy Pending Payments Summary
-											</button>
-										</>
-									) : (
-										""
-									)}
-								</>
-							)}
-							<button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
-								{!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
-									? "Hide Pending Payments"
-									: "Show Pending Payments"}
-							</button>
-						</div>
-					)}
-					<div className="content-container" id="content-file-container">
+                    {!selectOrder ? (
+                      <>
+                        <button
+                          className="simple_Logout_button"
+                          onClick={() => {
+                            setPopupForm(true);
+                            setDropDown(false);
+                          }}
+                        >
+                          Add Trip
+                        </button>
+                        {holdOrders ? (
+                          <button
+                            style={{ padding: "10px" }}
+                            className="simple_Logout_button"
+                            type="button"
+                            onClick={() => {
+                              setHoldOrders(false);
+                              setOrdersData([]);
+                            }}
+                          >
+                            Show Running Orders
+                          </button>
+                        ) : (
+                          <></>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {selectedOrder?.length ? (
+                          <>
+                            <button
+                              className="simple_Logout_button"
+                              type="button"
+                              onClick={() => {
+                                setSumaryPopup(true);
+                                setDropDown(false);
+                              }}
+                            >
+                              Item Summary
+                            </button>
+                            <button
+                              className="simple_Logout_button"
+                              type="button"
+                              onClick={() =>
+                                setConfirmMarkPaymentPendingDialogue(true)
+                              }
+                            >
+                              Mark As Pending Payment
+                            </button>
+                            <button
+                              type="button"
+                              className="simple_Logout_button"
+                              onClick={paymentSummaryInvokeHandler}
+                            >
+                              Pending Payments Summary
+                            </button>
+                            <button
+                              type="button"
+                              className="simple_Logout_button"
+                              onClick={paymentSummaryInvokeHandlerCopy}
+                            >
+                              Copy Pending Payments Summary
+                            </button>
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </>
+                    )}
+                    <button
+                      className="simple_Logout_button"
+                      onClick={updatePendingPaymentsVisibility}
+                    >
+                      {!users?.find(_i => _i?.user_uuid === user_uuid)
+                        ?.hide_pending_payments
+                        ? "Hide Pending Payments"
+                        : "Show Pending Payments"}
+                    </button>
+                    {selectOrder && selectedOrder?.length ? (
+                      <button className="simple_Logout_button" type="button">
+                        Order Assembly
+                      </button>
+                    ) : null}
+                                                </div>
+                                        )}
+                                        <div className="content-container" id="content-file-container">
 						{noOrder ? (
 							<div className="noOrder">No Order</div>
 						) : location.pathname.includes("admin") ? (

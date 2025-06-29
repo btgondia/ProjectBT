@@ -70,10 +70,10 @@ const MainAdmin = () => {
 	const [tasks, setTasks] = useState([])
 	const [reminderDate, setReminderDate] = useState()
 	const [selectedtasks, setSelectedTasks] = useState(false)
-        const location = useLocation()
-        const navigate = useNavigate()
-        const [notesState, setNotesState] = useState()
-        const [isCooldown, setIsCooldown] = useState(false)
+	const location = useLocation()
+	const navigate = useNavigate()
+	const [notesState, setNotesState] = useState()
+	const [isCooldown, setIsCooldown] = useState(false)
 
 	const {
 		updateServerPdf,

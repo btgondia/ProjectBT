@@ -32,7 +32,7 @@
 		"start": "vite",
 		"build": "vite build",
 		"serve": "vite preview",
-		"test": "vitest"
+                "test": "vitest run"
 	},
 	"eslintConfig": {
 		"extends": [

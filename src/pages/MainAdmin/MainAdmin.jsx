@@ -1064,13 +1064,16 @@ TOTAL: ${amounts}
 									)}
 								</>
 							)}
-							<button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
-								{!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
-									? "Hide Pending Payments"
-									: "Show Pending Payments"}
-							</button>
-						</div>
-					)}
+                                                        <button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
+                                                                {!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
+                                                                        ? "Hide Pending Payments"
+                                                                        : "Show Pending Payments"}
+                                                        </button>
+                                                        {selectOrder && selectedOrder?.length ? (
+                                                                <button className="simple_Logout_button">Order Assembly</button>
+                                                        ) : null}
+                                                </div>
+                                        )}
 					<div className="content-container" id="content-file-container">
 						{noOrder ? (
 							<div className="noOrder">No Order</div>

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 const VerticalTabs = () => {
   const Navigate = useNavigate();
   const page = window.location.pathname;
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+  const hasTripView = user?.permissions?.includes('trip_view');
 
   return (
     <div
@@ -15,7 +17,7 @@ const VerticalTabs = () => {
       >{'ROUTE'.split('').map((character => <h2 key={Math.random()}>{character}</h2>))}
       </div>
       <div
-        onClick={() => Navigate('/trip')}
+        onClick={() => hasTripView && Navigate('/trip')}
         className={`tabs ${page.includes('/trip') ? 'active' : ''}`}
       >{'TRIP'.split('').map((character => <h2 key={Math.random()}>{character}</h2>))}
       </div>

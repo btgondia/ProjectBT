@@ -27,7 +27,11 @@ const LoginPage = ({ setUserType }) => {
 				}
 			})
 			if (response.data.success) {
-				let data = response.data.result
+                                let data = response.data.result
+                                localStorage.setItem(
+                                        "user",
+                                        JSON.stringify(data)
+                                )
 				if (data.selected_warehouse) localStorage.setItem("selected_warehouse", data.selected_warehouse)
 				localStorage.setItem("user_uuid", data.user_uuid)
 				localStorage.setItem("user_title", data.user_title)
@@ -36,11 +40,16 @@ const LoginPage = ({ setUserType }) => {
 				localStorage.setItem("warehouse", data.warehouse?.length ? JSON.stringify(data.warehouse[0]) : "")
 
 				sessionStorage.setItem("userType", response.data.result.user_type)
-				if (+data.user_type === 0) {
-					setUserType(response.data.result.user_type || false)
-					Navigate("/trip")
-					return
-				}
+                                const hasTripView = data?.permissions?.includes("trip_view")
+                                if (+data.user_type === 0) {
+                                        setUserType(response.data.result.user_type || false)
+                                        if (hasTripView) {
+                                                Navigate("/trip")
+                                        } else {
+                                                Navigate("/accounting_dashboard")
+                                        }
+                                        return
+                                }
 				const result = await axios({
 					method: "get",
 					url: "/users/getDetails",

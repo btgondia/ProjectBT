@@ -25,6 +25,8 @@ const Header = ({headerActions}) => {
   const [logoutPopup, setLogoutPopup] = useState("");
   const Context = useContext(context);
   const { view } = Context;
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const hasTripView = user?.permissions?.includes("trip_view");
   
   return (
     <>
@@ -38,7 +40,7 @@ const Header = ({headerActions}) => {
           {headerActions}
           <GreenSwitch
             onClick={(e) => {
-              if (view) Navigate("/trip");
+              if (view && hasTripView) Navigate("/trip");
               else Navigate("/accounting_dashboard");
             }}
             checked={Boolean(view)}
@@ -48,7 +50,7 @@ const Header = ({headerActions}) => {
           <div
             className="header_right_link"
             onClick={() => {
-              if (!view) Navigate("/trip");
+              if (!view && hasTripView) Navigate("/trip");
               else Navigate("/accounting_dashboard");
             }}
           >

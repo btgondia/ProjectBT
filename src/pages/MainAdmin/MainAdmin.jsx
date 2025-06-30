@@ -18,7 +18,7 @@ import MessagePopup from "../../components/MessagePopup"
 import TaskPopupMenu from "../../components/TaskPopupMenu"
 import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup"
 import CollectionTag from "../QuikAccess/CollectionTag"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, Navigate } from "react-router-dom"
 import context from "../../context/context"
 import { IoCloseCircle } from "react-icons/io5"
 import OrderPrintWrapper from "../../components/OrderPrintWrapper"
@@ -30,7 +30,7 @@ import PrintTypePopup from "../../components/PrintTypePopup"
 import { GrRefresh } from "react-icons/gr"
 
 const MainAdmin = () => {
-	const [isCollectionTags, setCollectionTags] = useState(false)
+        const [isCollectionTags, setCollectionTags] = useState(false)
 	const [popupForm, setPopupForm] = useState(false)
 	const [noOrder, setNoOrder] = useState(false)
 	const [paymentModes, setPaymentModes] = useState([])
@@ -72,8 +72,12 @@ const MainAdmin = () => {
 	const [selectedtasks, setSelectedTasks] = useState(false)
         const location = useLocation()
         const navigate = useNavigate()
-	const [notesState, setNotesState] = useState()
-	const [isCooldown, setIsCooldown] = useState(false)
+        const [notesState, setNotesState] = useState()
+        const [isCooldown, setIsCooldown] = useState(false)
+        const user = JSON.parse(localStorage.getItem("user")) || {}
+        if (!user?.permissions?.includes("trip_view")) {
+                return <Navigate to="/" />
+        }
 
 	const {
 		updateServerPdf,

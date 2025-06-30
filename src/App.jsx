@@ -430,8 +430,9 @@ function App() {
 						<Route path="*" element={<Navigate replace to={"/login"} />} />
 						<Route path="/login" element={<LoginPage setUserType={setUserType} />} />
 					</>
-				)}
-			</Routes>
+                                )}
+                                <Route path="*" element={<Navigate to="/" />} />
+                        </Routes>
 			{calculationPopup ? (
 				<CalculateLines />
 			) : loading || pageLoading ? (

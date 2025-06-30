@@ -144,8 +144,9 @@ const OrderPrint = ({
 				justifyContent: "space-between"
 			}}
 		>
-			<table style={{ width: "100%" }}>
-				<tr>
+                        <table style={{ width: "100%" }}>
+                                <tbody>
+                                <tr>
 					<td
 						colSpan={32}
 						style={{
@@ -245,8 +246,9 @@ const OrderPrint = ({
 										</tr>
 									) : (
 										""
-									)}
-								</table>
+                                )}
+                                </tbody>
+                        </table>
 							</td>
 						</>
 					) : (
@@ -404,7 +406,7 @@ const OrderPrint = ({
 					</th>
 				</tr>
 
-				{itemDetails?.map((item, i) => {
+                                {itemDetails?.map((item, i) => {
 					const itemInfo = itemData.find(a => a.item_uuid === item.item_uuid)
 					let itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 					let unit_price = (+item.item_total || 0) / (+itemQty || 1)
@@ -417,8 +419,8 @@ const OrderPrint = ({
 						fontSize: "x-small"
 					}
 
-					return (
-						<tr style={{ borderBottom: "1px solid #000" }} className="order_item">
+                                        return (
+                                                <tr key={item.item_uuid || i} style={{ borderBottom: "1px solid #000" }} className="order_item">
 							<td style={{ fontWeight: "600", fontSize: "x-small" }}>{item?.sr || i + 1}.</td>
 							<td style={boldedItem ? boldItemStyle: {
 								fontWeight: "600",

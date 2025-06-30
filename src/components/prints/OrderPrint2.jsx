@@ -53,9 +53,11 @@ const OrderPrint2 = ({
 		setGstVAlues(arr)
 	}, [defaultOrder])
 
-	const reCalculatedItems = useMemo(() => {
-		const items = item_details?.map((item, index) => {
-			const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid)
+       const reCalculatedItems = useMemo(() => {
+               const items = (item_details || [])
+                       .filter((it) => it && typeof it === "object")
+                       .map((item, index) => {
+                               const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid) || {}
 
 			const itemQty = (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0)
 			const unit_price = (+item.item_total || 0) / (+itemQty || 1)
@@ -72,8 +74,8 @@ const OrderPrint2 = ({
 			const returnedItem = {
 				...item,
 				...itemInfo,
-				dms_erp_id: item.dms_erp_id || itemInfo.dms_erp_id,
-				dms_item_name: item.dms_item_name || itemInfo.dms_item_name,
+                                dms_erp_id: item.dms_erp_id || itemInfo.dms_erp_id || "-",
+                                dms_item_name: item.dms_item_name || itemInfo.dms_item_name || "-",
 				item_total: item.item_total?.toFixed(2),
 				desc_amt_a: desc_amt_a?.toFixed(2),
 				desc_amt_b: desc_amt_b?.toFixed(2),
@@ -84,17 +86,19 @@ const OrderPrint2 = ({
 				itemQty,
 				taxable_value: taxable_value?.toFixed(2),
 			}
-			return returnedItem
-		})
-		if (!items?.length) return []
+                       return returnedItem
+               })
+               .filter(Boolean)
+               if (!items?.length) return []
 		else if (items?.length === 1) return items
 		else return items
 	}, [item_details, itemData])
 
 	const totalItemDetailsMemo = useMemo(() => {
 		if (!footer) return []
-		let allData = allOrderItems
-			?.map((a) => ({
+               let allData = (allOrderItems || [])
+                       .filter((it) => it && typeof it === "object")
+                       .map((a) => ({
 				...a,
 				...(itemData?.find((b) => b.item_uuid === a.item_uuid) || {}),
 			}))
@@ -185,8 +189,9 @@ const OrderPrint2 = ({
           }
         `}
 			</style>
-			<table style={{ width: "100%", borderSpacing: "0px", borderCollapse: "collapse" }}>
-				<tr>
+                        <table style={{ width: "100%", borderSpacing: "0px", borderCollapse: "collapse" }}>
+                                <tbody>
+                                <tr>
 					<th style={{ fontSize: "small" }}>
 						<div
 							style={{
@@ -522,9 +527,9 @@ const OrderPrint2 = ({
 								</th>
 							</tr>
 
-							{reCalculatedItems?.map((item, i) => {
-								return (
-									<tr key={item.item_uuid} style={{ borderBlock: "1px solid black" }} className="order_item">
+                                                        {reCalculatedItems?.map((item, i) => {
+                                                                return (
+                                                                        <tr key={item.item_uuid || i} style={{ borderBlock: "1px solid black" }} className="order_item">
 										<td
 											style={{
 												padding: "0 5px",
@@ -550,7 +555,7 @@ const OrderPrint2 = ({
 												borderInline: "1px solid black",
 											}}
 										>
-											{item?.dms_erp_id}
+                                                                               {item?.dms_erp_id || "-"}
 										</td>
 										<td
 											style={{
@@ -787,8 +792,9 @@ const OrderPrint2 = ({
 										{(+totalItemDetailsMemo?.item_total || 0).toFixed(2)}
 									</td>
 								</tr>
-							) : null}
-						</table>
+                                ) : null}
+                                </tbody>
+                        </table>
 					</td>
 				</tr>
 

@@ -49,16 +49,17 @@ const ImportInvoices = ({ file, onClose }) => {
 					id: dmsInvoice.buyer_id,
 				})
 
-			for (const i of dmsInvoice.items_details) {
-				const item = data.items.find((j) => j.dms_erp_ids.includes(i.dms_erp_id))
-				if (!item) {
-					errors.push({
-						errorType: localErrorTypes.item,
-						name: i.dms_item_name,
-						id: i.dms_erp_id,
-					})
-					continue
-				}
+                        for (const i of dmsInvoice.items_details || []) {
+                                if (!i?.dms_erp_id) continue
+                                const item = data.items.find((j) => j.dms_erp_ids?.includes(i.dms_erp_id))
+                                if (!item) {
+                                        errors.push({
+                                                errorType: localErrorTypes.item,
+                                                name: i.dms_item_name,
+                                                id: i.dms_erp_id,
+                                        })
+                                        continue
+                                }
 
 				const b = parseInt(+item?.conversion ? i.p / +item.conversion : 0)
 				const p = parseInt(+item?.conversion ? i.p % +item.conversion : i.p)
@@ -214,8 +215,12 @@ const ImportInvoices = ({ file, onClose }) => {
 		for (const invoice of json) {
 			payload.dms_counters.push(invoice.buyer_id)
 			payload.dms_users.push(invoice.erp_user)
-			payload.dms_invoice_numbers.push(invoice.invoice_number)
-			payload.dms_items = payload.dms_items.concat(invoice.items_details.map((i) => i.dms_erp_id))
+                        payload.dms_invoice_numbers.push(invoice.invoice_number)
+                        payload.dms_items = payload.dms_items.concat(
+                                (invoice.items_details || [])
+                                        .map((i) => i?.dms_erp_id)
+                                        .filter(Boolean)
+                        )
 		}
 
 		const response = await axios.post("/invoice-import-prerequisite", payload)
